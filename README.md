@@ -6,14 +6,15 @@
 
 ## 当前阶段
 
-产品、技术方案与第一波 UI 原型已对齐；下一步可按技设做工程脚手架（Docker + Spring Boot + 自模板裁剪小程序）。
+产品、技术方案与第一波 UI（含交互 §2.8）已对齐；开发以产品文档 + `docs/prototypes` 为准。下一步可做工程脚手架。
 
 ## 文档
 
 - 产品设计：[docs/plans/2026-10-07-product-design.md](docs/plans/2026-10-07-product-design.md)
 - 技术方案：[docs/plans/2026-10-07-technical-design.md](docs/plans/2026-10-07-technical-design.md)
 - UI 原型说明：[docs/plans/2026-10-07-ui-prototype.md](docs/plans/2026-10-07-ui-prototype.md)
-- 可点击原型：[docs/prototypes/index.html](docs/prototypes/index.html)（浏览器直接打开）
+- 设计系统：[design-system/communityfreshmarket/MASTER.md](design-system/communityfreshmarket/MASTER.md)
+- 可点击 UI 稿：[docs/prototypes/index.html](docs/prototypes/index.html)（浏览器直接打开）
 - 原始想法碎片：`mini.docx`
 
 ## 技术方向

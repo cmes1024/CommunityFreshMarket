@@ -64,7 +64,10 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 | `user` | `openid` 唯一、昵称/头像可选 |
 | `store_member` | `user_id + store_id + role`（`OWNER` / `STAFF`）；第一版能力相同 |
 | `category` | `store_id`、名称、排序、启用 |
-| `product` | 分类、名、图 URL、单位（`PIECE` / `JIN`）、价格分、`in_stock`、上下架；`stock_qty` 可空预留第二波 |
+| `product` | `category_id`、名、图 URL、单位枚举（`PIECE` 件/份 · `JIN` 斤）、价格分、`in_stock`、上下架；`stock_qty` 可空预留第二波 |
+
+**单位**：服务端枚举 + 接口下发或前后端共用常量；**禁止**商品表自由字符串单位。  
+**分类**：仅通过 `category` 表维护；商品编辑下拉与顾客类目均查本店启用分类。
 | `user_address` | 手机、小区、楼栋、室号等；下单时快照进订单 |
 | `pickup_slot` | 自提可约时段 + 启用 |
 | `cart_item` | `user_id + store_id + product_id + qty`（落库，换机不丢） |
@@ -111,9 +114,13 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 **顾客**（登录即可）：分类/商品浏览、商品篮、地址簿、提交预约、我的订单、取消未完成单、订单详情；再来一单（服务端按历史明细生成加购，跳过无效商品）；售罄订阅到货提醒；待自提单「我到店了」。客服走微信原生能力，无自建会话 API。
 
-**商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；分类/商品 CRUD、有货售罄、上下架（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式；订单台展示到店标记。成员邀请第一波可用刷库冷启动，邀请码可后补。
+**商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；**分类 CRUD**；商品 CRUD、有货售罄、上下架（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式；订单台「马上处理」排序/筛选与到店标记。成员邀请第一波可用刷库冷启动，邀请码可后补。
+
+**元数据**：`GET /api/v1/meta/units` → `[{ code: "JIN", label: "斤" }, …]`（或前端常量与后端校验集一致）。
 
 备注快捷短语：前端常量即可（可后续改店铺配置），拼进 `order.remark` 提交。
+
+**与 UI 对齐**：列表加购、篮角标、提交成功反馈、订单横向状态、订单台分区等见产品 §2.8 与 `docs/plans/2026-10-07-ui-prototype.md`，接口需支撑同一套流程。
 
 ### 3.4 权限
 
@@ -234,3 +241,4 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 |------|------|
 | 2026-10-07 | 初稿：架构、表、API、小程序底座、状态机与部署对齐 |
 | 2026-10-07 | 对齐顾客增补：再来一单、到货提醒表、我到店了字段 |
+| 2026-10-07 | 单位枚举 / 分类 CRUD / UI§2.8 对齐说明 |
