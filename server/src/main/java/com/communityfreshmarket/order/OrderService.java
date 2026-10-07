@@ -17,6 +17,7 @@ import com.communityfreshmarket.domain.UserAddress;
 import com.communityfreshmarket.mapper.OrderItemMapper;
 import com.communityfreshmarket.mapper.OrderMapper;
 import com.communityfreshmarket.mapper.ProductMapper;
+import com.communityfreshmarket.notify.OrderNotifyService;
 import com.communityfreshmarket.order.dto.CancelOrderRequest;
 import com.communityfreshmarket.order.dto.MerchantOrderBoardResponse;
 import com.communityfreshmarket.order.dto.OrderItemResponse;
@@ -48,6 +49,7 @@ public class OrderService {
   private final PickupSlotService pickupSlotService;
   private final ProductMapper productMapper;
   private final ObjectMapper objectMapper;
+  private final OrderNotifyService orderNotifyService;
 
   public OrderService(
       OrderMapper orderMapper,
@@ -56,7 +58,8 @@ public class OrderService {
       AddressService addressService,
       PickupSlotService pickupSlotService,
       ProductMapper productMapper,
-      ObjectMapper objectMapper) {
+      ObjectMapper objectMapper,
+      OrderNotifyService orderNotifyService) {
     this.orderMapper = orderMapper;
     this.orderItemMapper = orderItemMapper;
     this.cartService = cartService;
@@ -64,6 +67,7 @@ public class OrderService {
     this.pickupSlotService = pickupSlotService;
     this.productMapper = productMapper;
     this.objectMapper = objectMapper;
+    this.orderNotifyService = orderNotifyService;
   }
 
   @Transactional
@@ -146,7 +150,7 @@ public class OrderService {
     cartService.removeProducts(purchasedIds);
     log.info("order created id={} storeId={} userId={} totalFen={}",
         order.getId(), storeId, userId, total);
-    // 订阅消息下一阶段接入
+    orderNotifyService.notifyNewOrder(order);
     return toResponse(order);
   }
 
@@ -190,6 +194,7 @@ public class OrderService {
     order.setUpdatedAt(now);
     orderMapper.updateById(order);
     log.info("customer arrived orderId={}", id);
+    orderNotifyService.notifyCustomerArrived(order);
     return toResponse(order);
   }
 
@@ -296,6 +301,10 @@ public class OrderService {
       throw new BizException(ErrorCodes.BAD_REQUEST, "订单状态已变化，请刷新后重试");
     }
     log.info("order cancelled id={} by={}", order.getId(), by);
+    Order fresh = orderMapper.selectById(order.getId());
+    if (fresh != null) {
+      orderNotifyService.notifyCancel(fresh, by);
+    }
   }
 
   private boolean isUrgent(Order order) {

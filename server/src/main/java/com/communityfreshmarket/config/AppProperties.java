@@ -14,7 +14,19 @@ public class AppProperties {
   private String bootstrapOwnerOpenid = "";
   private String uploadDir = "/app/uploads";
   private String uploadPublicBase = "/uploads";
+  /** 到货提醒：售罄订阅后，改回有货发给顾客 */
   private String subscribeRestockTemplateId = "";
+  /** 新预约：顾客下单后发给本店成员 */
+  private String subscribeNewOrderTemplateId = "";
+  /** 取消：顾客取消→店员，店员取消→顾客 */
+  private String subscribeCancelTemplateId = "";
+  /** 顾客到店：待自提报到后发给本店成员 */
+  private String subscribeArrivedTemplateId = "";
+  /**
+   * 邀请普通链接前缀（不含 code）。扫码打开小程序时由公众平台配置。
+   * 例：https://your.domain/cfm/join → 实际链接 https://your.domain/cfm/join?code=AB12CD
+   */
+  private String inviteLinkBase = "";
 
   public long getDefaultStoreId() {
     return defaultStoreId;
@@ -86,5 +98,37 @@ public class AppProperties {
 
   public void setSubscribeRestockTemplateId(String subscribeRestockTemplateId) {
     this.subscribeRestockTemplateId = subscribeRestockTemplateId;
+  }
+
+  public String getSubscribeNewOrderTemplateId() {
+    return subscribeNewOrderTemplateId;
+  }
+
+  public void setSubscribeNewOrderTemplateId(String subscribeNewOrderTemplateId) {
+    this.subscribeNewOrderTemplateId = subscribeNewOrderTemplateId;
+  }
+
+  public String getSubscribeCancelTemplateId() {
+    return subscribeCancelTemplateId;
+  }
+
+  public void setSubscribeCancelTemplateId(String subscribeCancelTemplateId) {
+    this.subscribeCancelTemplateId = subscribeCancelTemplateId;
+  }
+
+  public String getSubscribeArrivedTemplateId() {
+    return subscribeArrivedTemplateId;
+  }
+
+  public void setSubscribeArrivedTemplateId(String subscribeArrivedTemplateId) {
+    this.subscribeArrivedTemplateId = subscribeArrivedTemplateId;
+  }
+
+  public String getInviteLinkBase() {
+    return inviteLinkBase;
+  }
+
+  public void setInviteLinkBase(String inviteLinkBase) {
+    this.inviteLinkBase = inviteLinkBase;
   }
 }

@@ -77,6 +77,7 @@ const copy = {
     goods: "商品",
     submit: "提交预约",
     submittedToast: "预约已提交",
+    subscribeHint: "点提交时会弹出消息订阅，允许后店员取消等变更可通知你",
   },
 
   profile: {
@@ -94,6 +95,15 @@ const copy = {
     merchantEntrySub: "仅店铺成员可见",
   },
 
+  joinStore: {
+    heading: "加入门店",
+    desc: "扫码已带入邀请码时可直接确认；也可手改后加入。本页无其它入口。",
+    placeholder: "请输入邀请码",
+    confirm: "加入门店",
+    ok: "已加入，进入工作台",
+    needCode: "请输入邀请码",
+  },
+
   settings: {
     storeSec: "店铺资料",
     storeHint: "店名显示在顾客端导航左上角",
@@ -102,7 +112,7 @@ const copy = {
     noteLabel: "购买须知",
     namePlaceholder: "店名",
     phonePlaceholder: "联系电话",
-    notePlaceholder: "如配送范围、当面收款；留空则商详不展示",
+    notePlaceholder: "可多行：配送范围、当面收款等；留空则商详不展示",
     saveStore: "保存设置",
     homeSec: "顾客首页",
     homeHint: "左上角固定店名；头图主标题另配，留空则不显示以免重复",
@@ -140,6 +150,10 @@ const copy = {
   },
 
   merchant: {
+    notifyBar:
+      "一次性订阅：点一次大约只能再收一条推送，用完需再点开启；未授权或额度用尽时请看订单台红点",
+    notifyEnable: "开启订单通知",
+    notifyDone: "已申请（约可再收一条）",
     urgentTitle: "马上处理",
     othersTitle: "其他进行中",
     urgentEmpty: "暂无待处理订单",
@@ -184,7 +198,14 @@ const copy = {
     goCats: "管理分类",
     save: "保存",
     inviteStaff: "邀请店员",
-    inviteHint: "第一波通过冷启动配置；邀请能力后补",
+    inviteTitle: "邀请店员",
+    inviteDesc: "对方用微信扫下方二维码，打开「加入门店」页（链接已带邀请码）",
+    inviteRotate: "更换邀请码",
+    inviteRotated: "已更换",
+    inviteLoadFail: "加载邀请失败",
+    inviteQrFail: "二维码不可用：请先配置 INVITE_LINK_BASE",
+    inviteCodeHint: "邀请码",
+    inviteUrlHint: "链接",
     backCustomer: "回顾客端",
     backCustomerSub: "继续逛店下单",
     roleHint: "店主 / 店员能力相同（预留角色）",
@@ -204,6 +225,7 @@ const copy = {
     orders: "我的订单",
     orderDetail: "订单详情",
     profile: "我的",
+    joinStore: "加入门店",
     merchantOrders: "订单台",
     merchantProducts: "商品",
     merchantProductEdit: "编辑商品",

@@ -125,6 +125,8 @@
   color: var(--color-muted, #5b7c78);
   font-size: 24rpx;
   line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .actions {

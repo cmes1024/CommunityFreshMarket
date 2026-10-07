@@ -1,10 +1,12 @@
 const api = require("../../../utils/api");
+const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const {
   advanceLabel,
   itemsLine,
   fulfillLine,
 } = require("../../../utils/orderStatus");
+const { requestSubscribe } = require("../../../utils/subscribe");
 
 function mapOrder(o) {
   const arrived = !!o.customerArrivedAt;
@@ -28,6 +30,15 @@ Page({
   },
   async onShow() {
     await this.reload();
+  },
+  /** 须用户点击触发；onShow 弹订阅框不可靠，未授权则服务端无法推新单 */
+  async enableNotify() {
+    await requestSubscribe([
+      "newOrderTemplateId",
+      "cancelTemplateId",
+      "arrivedTemplateId",
+    ]);
+    wx.showToast({ title: copy.merchant.notifyDone, icon: "none" });
   },
   async reload() {
     const board = await api.merchantOrders();

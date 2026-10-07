@@ -1,0 +1,17 @@
+<Header pageName="{{copy.titles.joinStore}}" back="{{true}}" />
+<view class="page-body no-tab join-page">
+  <view class="card">
+    <view class="title">{{copy.joinStore.heading}}</view>
+    <view class="muted desc">{{copy.joinStore.desc}}</view>
+    <input
+      class="code-input"
+      placeholder="{{copy.joinStore.placeholder}}"
+      value="{{inviteCode}}"
+      bindinput="onCode"
+      maxlength="16"
+    />
+    <button class="btn btn-cta" loading="{{joining}}" disabled="{{joining}}" bind:tap="submit">
+      {{copy.joinStore.confirm}}
+    </button>
+  </view>
+</view>

@@ -1,0 +1,29 @@
+.join-page {
+  padding-top: 24rpx;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+.desc {
+  margin-bottom: 28rpx;
+  line-height: 1.45;
+}
+
+.code-input {
+  width: 100%;
+  min-height: 96rpx;
+  padding: 0 28rpx;
+  margin-bottom: 28rpx;
+  box-sizing: border-box;
+  background: var(--color-background);
+  border: 2rpx solid var(--color-line);
+  border-radius: var(--radius);
+  font-size: 34rpx;
+  font-weight: 600;
+  letter-spacing: 6rpx;
+  text-align: center;
+}

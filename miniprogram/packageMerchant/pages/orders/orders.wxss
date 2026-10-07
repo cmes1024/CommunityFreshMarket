@@ -4,6 +4,43 @@
   box-sizing: border-box;
 }
 
+.notify-bar {
+  margin: 16rpx 24rpx 0;
+  padding: 20rpx 24rpx;
+  background: var(--color-surface);
+  border: 1rpx solid var(--color-line);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.notify-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 22rpx;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.notify-btn {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 22rpx;
+  min-height: 64rpx;
+  line-height: 64rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-cta);
+  border-radius: var(--radius-pill);
+  border: none;
+}
+
+.notify-btn::after {
+  border: none;
+}
+
 .m-priority {
   padding: 24rpx 0 8rpx;
   background: linear-gradient(180deg, #fff7ed 0%, var(--color-background) 100%);

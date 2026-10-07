@@ -60,11 +60,11 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 
 | 表 | 要点 |
 |----|------|
-| `store` | 店名、联系方式、状态、首页头图、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）；单店时一条记录 |
+| `store` | 店名、联系方式、`contact_note` 购买须知（可多行）、状态、`invite_code`（店员邀请，可轮换）、首页头图、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）；单店时一条记录 |
 | `user` | `openid` 唯一、昵称/头像可选 |
 | `store_member` | `user_id + store_id + role`（`OWNER` / `STAFF`）；第一版能力相同 |
 | `category` | `store_id`、名称、排序、启用 |
-| `product` | `category_id`、名、`image_url`（封面=第一张）、`image_urls`（JSON 数组，最多 3 条 URL）、单位枚举（`PIECE`/`PORTION`/`JIN`）、可选 `spec_note`（规格说明，短文案）、价格分、`in_stock`、上下架、`home_recommended`（首页推荐，默认否）；`stock_qty` 可空预留第二波 |
+| `product` | `category_id`、名、`image_url`（封面=第一张）、`image_urls`（JSON 数组，最多 3 条 URL）、单位枚举（`PIECE`/`PORTION`/`JIN`）、可选 `spec_note`（规格说明，短文案）、价格分、`in_stock`、上下架、`home_recommended`（首页推荐，默认否）；`stock_qty`、`min_qty`（起购）、`max_qty`（限购）可空预留第二波 |
 
 **单位**：服务端枚举 + 接口下发或前后端共用常量；**禁止**商品表自由字符串单位。  
 **规格说明**：`spec_note` 可空，最长 64；用于「约 10 枚」等内容，不替代单位枚举。  
@@ -115,7 +115,20 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 **顾客**（登录即可）：分类/商品浏览、商品篮、地址簿、提交预约、我的订单、取消未完成单、订单详情；再来一单（服务端按历史明细生成加购，跳过无效商品）；售罄订阅到货提醒；待自提单「我到店了」。客服走微信原生能力，无自建会话 API。
 
-**商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；**分类 CRUD**；商品 CRUD、有货售罄、上下架、首页推荐开关（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式与**首页展示**（头图 `hero_image_url`、营业文案 `home_kicker`、主标题 `home_title`、副标题 `home_subtitle`、列数 `home_product_cols`、点商品 `product_detail_mode`）；订单台「马上处理」排序/筛选与到店标记。成员邀请第一波可用刷库冷启动，邀请码可后补。
+**商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；**分类 CRUD**；商品 CRUD、有货售罄、上下架、首页推荐开关（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式与**首页展示**；订单台「马上处理」；**邀请店员** `GET /merchant/invite`（返回 `code` + `inviteUrl` + 普通链接二维码 PNG；链接=`{INVITE_LINK_BASE}?code=`；本地 ZXing 生成，**非**微信太阳码）。公众平台配置「扫普通链接二维码打开小程序」：落地页 `packageCustomer/pages/join-store/join-store`，参数名 `code`。加入页无常规入口、禁分享；`POST /invites/accept`。冷启动 `BOOTSTRAP_OWNER_OPENID` 仍保留。
+
+**订阅消息**（模板 ID 详见 `deploy/.env.example` 与 `miniprogram/utils/config.js`；未配置只记日志）：
+
+硬约束：微信**不能**向未授权用户推送；授权须**用户点击**触发（勿依赖 `onShow`）。普通**一次性订阅**≈授权一次可发一条，发出后须再点「开启订单通知」；长期订阅须公众平台类目许可，本项目第一波不依赖。未授权/额度用尽时以**订单台红点**为主通道。
+
+| 环境变量 | 小程序 config 键 | 谁点哪里授权 | 何时发送 | 发给谁 |
+|----------|------------------|--------------|----------|--------|
+| `WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID` | `restockTemplateId` | 顾客「到货提醒我」 | 改回有货 | 该顾客 |
+| `WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID` | `newOrderTemplateId` | 店员订单台「开启订单通知」 | 顾客提交预约 | **已授权**的本店成员 |
+| `WX_SUBSCRIBE_CANCEL_TEMPLATE_ID` | `cancelTemplateId` | 顾客「提交预约」/取消；店员取消前 | 订单取消 | 对端（且须已授权） |
+| `WX_SUBSCRIBE_ARRIVED_TEMPLATE_ID` | `arrivedTemplateId` | 「我到店了」或店员「开启订单通知」 | 顾客报到 | **已授权**店员 |
+
+发送体：`thing1` 摘要、`thing2` 提示。
 
 **顾客商品列表**：`GET /api/v1/products` 可选 `categoryId`、`homeRecommended=true`（首页推荐区）；始终仅返回已上架。
 
@@ -218,7 +231,7 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 ## 6. 第一波明确不做（工程侧）
 
-在线支付、Redis、OSS 必选、真实库存扣减、图像选品、积分/券/收银/快速定位、店员细权限、PC 端、小程序账密、云函数主业务。
+在线支付、Redis、OSS 必选、真实库存扣减、商品起购/限购、图像选品、积分/券/收银/快速定位、店员细权限、PC 端、小程序账密、云函数主业务。
 
 ---
 

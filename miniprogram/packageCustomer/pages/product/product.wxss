@@ -54,7 +54,13 @@
   background: #fffbeb;
 }
 .h4 { font-weight: 600; margin-bottom: 8rpx; font-size: 28rpx; }
-.p { color: var(--color-muted); font-size: 24rpx; line-height: 1.55; }
+.p {
+  color: var(--color-muted);
+  font-size: 24rpx;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .actions {
   position: fixed;
   left: 0;

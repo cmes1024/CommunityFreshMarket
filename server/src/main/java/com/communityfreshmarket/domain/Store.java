@@ -20,6 +20,10 @@ public class Store {
   private Integer homeProductCols;
   private String productDetailMode;
   private String status;
+  /** 店员邀请码；不对外公开店铺摘要接口 */
+  private String inviteCode;
+  /** 与 inviteCode 对应的小程序码 PNG base64 缓存 */
+  private String inviteQrcodeBase64;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
@@ -109,6 +113,22 @@ public class Store {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  public String getInviteCode() {
+    return inviteCode;
+  }
+
+  public void setInviteCode(String inviteCode) {
+    this.inviteCode = inviteCode;
+  }
+
+  public String getInviteQrcodeBase64() {
+    return inviteQrcodeBase64;
+  }
+
+  public void setInviteQrcodeBase64(String inviteQrcodeBase64) {
+    this.inviteQrcodeBase64 = inviteQrcodeBase64;
   }
 
   public LocalDateTime getCreatedAt() {

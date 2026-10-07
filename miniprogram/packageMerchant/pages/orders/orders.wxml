@@ -1,5 +1,9 @@
 <Header pageName="{{copy.titles.merchantOrders}}" back="{{false}}" toCustomer="{{true}}" />
 <view class="orders-page">
+  <view class="notify-bar">
+    <view class="notify-text">{{copy.merchant.notifyBar}}</view>
+    <button class="notify-btn" bind:tap="enableNotify">{{copy.merchant.notifyEnable}}</button>
+  </view>
   <view class="m-priority">
     <view class="m-priority-title">
       {{copy.merchant.urgentTitle}}

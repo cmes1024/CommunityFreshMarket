@@ -64,4 +64,15 @@ curl -s http://127.0.0.1:8088/api/v1/merchant/products \
 - `POST /api/v1/upload/image`（multipart file）
 - `POST /api/v1/products/{id}/restock-watch`
 
-环境变量说明见 `.env.example`。生产务必更换 `JWT_SECRET`、数据库密码，并配置真实微信密钥与订阅模板 ID。
+环境变量说明见 `.env.example`（含四类订阅消息模板；以及邀请店员 `INVITE_LINK_BASE`）。
+
+**邀请店员 · 公众平台配置（扫普通链接二维码打开小程序）**
+
+| 项 | 值 |
+|----|-----|
+| 链接前缀 | 与 `INVITE_LINK_BASE` 一致，例 `https://your.example.com/cfm/join` |
+| 完整示例 | `https://your.example.com/cfm/join?code=AB12CD` |
+| 小程序页面 | `packageCustomer/pages/join-store/join-store` |
+| 参数名 | `code`（邀请码） |
+
+生产务必更换 `JWT_SECRET`、数据库密码，并配置真实微信密钥与订阅模板 ID；小程序 `utils/config.js` 须与 `.env` 中模板 ID 一致。

@@ -17,7 +17,7 @@
   width: 112rpx;
   height: 112rpx;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-cta);
   color: #f0fdfa;
   display: flex;
   align-items: center;
@@ -236,7 +236,7 @@
   margin: 32rpx 24rpx 0;
   padding: 32rpx;
   border-radius: var(--radius);
-  background: var(--color-primary);
+  background: var(--color-cta);
   color: #fff;
 }
 
@@ -250,4 +250,26 @@
   font-size: 22rpx;
   font-weight: 300;
   opacity: 0.85;
+}
+
+.join-sheet {
+  padding: 12rpx 32rpx calc(32rpx + env(safe-area-inset-bottom));
+  background: var(--color-surface);
+  border-radius: 24rpx 24rpx 0 0;
+}
+
+.join-input {
+  margin: 16rpx 0 24rpx;
+  min-height: 88rpx;
+  padding: 0 24rpx;
+  background: var(--color-background);
+  border: 2rpx solid var(--color-line);
+  border-radius: var(--radius);
+  font-size: 30rpx;
+  letter-spacing: 4rpx;
+  box-sizing: border-box;
+}
+
+.join-btn {
+  width: 100%;
 }

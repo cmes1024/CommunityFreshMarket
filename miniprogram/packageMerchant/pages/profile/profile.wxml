@@ -19,4 +19,38 @@
     <view class="me-sub">{{copy.merchant.backCustomerSub}}</view>
   </view>
 </view>
+
+<page-container
+  show="{{inviteShow}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto;"
+  bind:clickoverlay="closeInvite"
+  bind:afterleave="closeInvite"
+>
+  <view class="invite-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.merchant.inviteTitle}}</view>
+      <view class="sheet-close" bind:tap="closeInvite">关闭</view>
+    </view>
+    <view class="invite-desc">{{copy.merchant.inviteDesc}}</view>
+    <image
+      wx:if="{{inviteQrSrc}}"
+      class="invite-qr"
+      src="{{inviteQrSrc}}"
+      mode="aspectFit"
+      show-menu-by-longpress="{{false}}"
+    />
+    <view wx:else class="invite-qr-empty muted">{{copy.merchant.inviteQrFail}}</view>
+    <view class="invite-code-line" wx:if="{{inviteCode}}">
+      {{copy.merchant.inviteCodeHint}} {{inviteCode}}
+    </view>
+    <view class="invite-url-line" wx:if="{{inviteUrl}}">{{inviteUrl}}</view>
+    <button class="btn btn-ghost invite-rotate" bind:tap="rotateInvite">{{copy.merchant.inviteRotate}}</button>
+  </view>
+</page-container>
+
 <TabBar current="profile" mode="merchant" />

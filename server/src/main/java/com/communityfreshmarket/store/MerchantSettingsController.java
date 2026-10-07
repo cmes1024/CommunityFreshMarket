@@ -5,6 +5,7 @@ import com.communityfreshmarket.common.ApiResponse;
 import com.communityfreshmarket.order.PickupSlotService;
 import com.communityfreshmarket.order.dto.PickupSlotResponse;
 import com.communityfreshmarket.order.dto.PickupSlotSaveRequest;
+import com.communityfreshmarket.store.dto.InviteCodeResponse;
 import com.communityfreshmarket.store.dto.StoreUpdateRequest;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -23,11 +24,25 @@ public class MerchantSettingsController {
 
   private final StoreSettingsService storeSettingsService;
   private final PickupSlotService pickupSlotService;
+  private final StoreInviteService storeInviteService;
 
   public MerchantSettingsController(
-      StoreSettingsService storeSettingsService, PickupSlotService pickupSlotService) {
+      StoreSettingsService storeSettingsService,
+      PickupSlotService pickupSlotService,
+      StoreInviteService storeInviteService) {
     this.storeSettingsService = storeSettingsService;
     this.pickupSlotService = pickupSlotService;
+    this.storeInviteService = storeInviteService;
+  }
+
+  @GetMapping("/invite")
+  public ApiResponse<InviteCodeResponse> invite() {
+    return ApiResponse.ok(storeInviteService.currentOrCreate());
+  }
+
+  @PostMapping("/invite/rotate")
+  public ApiResponse<InviteCodeResponse> rotateInvite() {
+    return ApiResponse.ok(storeInviteService.rotate());
   }
 
   @PutMapping("/store")

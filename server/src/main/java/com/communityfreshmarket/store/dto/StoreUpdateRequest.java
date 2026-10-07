@@ -12,7 +12,7 @@ public class StoreUpdateRequest {
   @Size(max = 32)
   private String contactPhone;
 
-  @Size(max = 255)
+  @Size(max = 1000)
   private String contactNote;
 
   /** 传空字符串可清除首页头图 */

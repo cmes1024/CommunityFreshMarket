@@ -63,5 +63,8 @@ module.exports = {
   merchantPickupSlotCreate: (body) => post("/api/v1/merchant/pickup-slots", body),
   merchantPickupSlotUpdate: (id, body) => put(`/api/v1/merchant/pickup-slots/${id}`, body),
   merchantPickupSlotDelete: (id) => del(`/api/v1/merchant/pickup-slots/${id}`),
+  merchantInvite: () => get("/api/v1/merchant/invite"),
+  merchantInviteRotate: () => post("/api/v1/merchant/invite/rotate"),
+  acceptInvite: (code) => post("/api/v1/invites/accept", { code }),
 };
 

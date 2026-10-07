@@ -8,6 +8,7 @@ const {
   fulfillLine,
   contactLine,
 } = require("../../../utils/orderStatus");
+const { requestSubscribe } = require("../../../utils/subscribe");
 
 Page({
   data: {
@@ -51,6 +52,7 @@ Page({
   },
   async cancel() {
     try {
+      await requestSubscribe(["cancelTemplateId"]);
       await api.merchantCancelOrder(this.id, "商家取消");
       await this.refresh();
     } catch (e) {}

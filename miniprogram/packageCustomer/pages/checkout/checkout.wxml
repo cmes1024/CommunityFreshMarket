@@ -30,5 +30,6 @@
     <view class="row space-between"><text>{{copy.checkout.goods}}</text><text class="price">¥{{totalYuan}}</text></view>
     <view class="muted">{{copy.pay.offlineHint}}</view>
   </view>
+  <view class="muted subscribe-hint">{{copy.checkout.subscribeHint}}</view>
   <button class="btn btn-cta" loading="{{submitting}}" disabled="{{submitting}}" bind:tap="submit">{{copy.checkout.submit}}</button>
 </view>

@@ -103,10 +103,11 @@ Component({
       if (tmplId) {
         try {
           await new Promise((resolve) => {
-            wx.requestSubscribeMessage({
-              tmplIds: [tmplId],
-              complete: resolve,
-            });
+          wx.requestSubscribeMessage({
+            tmplIds: [tmplId],
+            complete: resolve,
+            fail: resolve,
+          });
           });
         } catch (e) {}
       }

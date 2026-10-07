@@ -47,3 +47,8 @@
   padding: 20rpx;
   box-sizing: border-box;
 }
+.subscribe-hint {
+  margin: 8rpx 0 16rpx;
+  font-size: 22rpx;
+  line-height: 1.4;
+}

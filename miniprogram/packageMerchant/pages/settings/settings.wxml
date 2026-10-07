@@ -28,14 +28,17 @@
           type="number"
         />
       </view>
-      <view class="cell last">
+      <view class="cell cell-note last">
         <view class="cell-label">{{copy.settings.noteLabel}}</view>
-        <input
-          class="cell-input"
+        <textarea
+          class="cell-textarea"
           placeholder="{{copy.settings.notePlaceholder}}"
           value="{{store.contactNote}}"
           bindinput="onStore"
           data-k="contactNote"
+          maxlength="1000"
+          auto-height="{{true}}"
+          show-confirm-bar="{{false}}"
         />
       </view>
     </view>

@@ -14,7 +14,8 @@
         "pages/address-edit/address-edit",
         "pages/orders/orders",
         "pages/order-detail/order-detail",
-        "pages/profile/profile"
+        "pages/profile/profile",
+        "pages/join-store/join-store"
       ]
     },
     {

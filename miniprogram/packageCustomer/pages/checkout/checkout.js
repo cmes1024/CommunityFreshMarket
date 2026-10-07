@@ -2,6 +2,7 @@ const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const { syncCartCount } = require("../../../utils/cartSync");
+const { requestSubscribe } = require("../../../utils/subscribe");
 
 const PHRASES = ["放门口", "少葱", "称重点", "不要电话"];
 
@@ -69,6 +70,7 @@ Page({
     }
     this.setData({ submitting: true });
     try {
+      await requestSubscribe(["cancelTemplateId"]);
       const order = await api.submitOrder(body);
       await syncCartCount();
       wx.showToast({ title: copy.checkout.submittedToast, icon: "none" });

@@ -2,6 +2,7 @@ const api = require("../../../utils/api");
 const { fenToYuan } = require("../../../utils/money");
 const { label, steps } = require("../../../utils/orderStatus");
 const { syncCartCount } = require("../../../utils/cartSync");
+const { requestSubscribe } = require("../../../utils/subscribe");
 
 Page({
   data: { order: {}, stepList: [] },
@@ -23,10 +24,12 @@ Page({
     });
   },
   async cancel() {
+    await requestSubscribe(["cancelTemplateId"]);
     await api.cancelOrder(this.id, "顾客取消");
     await this.refresh();
   },
   async arrive() {
+    await requestSubscribe(["arrivedTemplateId"]);
     await api.arriveOrder(this.id);
     await this.refresh();
   },
