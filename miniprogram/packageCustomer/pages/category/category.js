@@ -58,7 +58,7 @@ Page({
     const id = e.currentTarget.dataset.id;
     const qty = e.detail.value;
     const cart = await api.cartSetQty(id, qty);
-    await syncCartCount();
+    await syncCartCount(cart);
     const idx = this.data.products.findIndex((p) => p.id === id);
     this.setData({
       [`products[${idx}].qty`]: qty,

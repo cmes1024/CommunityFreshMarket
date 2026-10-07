@@ -30,15 +30,24 @@ function uploadImage(filePath) {
   });
 }
 
-function chooseAndUpload() {
+function chooseAndUpload(count = 1) {
+  const n = Math.max(1, Math.min(9, Number(count) || 1));
   return new Promise((resolve, reject) => {
     wx.chooseMedia({
-      count: 1,
+      count: n,
       mediaType: ["image"],
       success: async (res) => {
         try {
-          const path = res.tempFiles[0].tempFilePath;
-          resolve(await uploadImage(path));
+          const files = res.tempFiles || [];
+          if (n === 1) {
+            resolve(await uploadImage(files[0].tempFilePath));
+            return;
+          }
+          const urls = [];
+          for (const f of files) {
+            urls.push(await uploadImage(f.tempFilePath));
+          }
+          resolve(urls);
         } catch (e) {
           reject(e);
         }

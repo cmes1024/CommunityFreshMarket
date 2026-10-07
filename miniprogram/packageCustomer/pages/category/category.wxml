@@ -1,4 +1,4 @@
-<Header pageName="{{copy.titles.category}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<Header pageName="{{copy.titles.category}}" back="{{false}}" />
 <view class="cat-page">
   <scroll-view scroll-y class="side">
     <view

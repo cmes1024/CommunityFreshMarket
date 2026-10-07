@@ -64,10 +64,11 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 | `user` | `openid` 唯一、昵称/头像可选 |
 | `store_member` | `user_id + store_id + role`（`OWNER` / `STAFF`）；第一版能力相同 |
 | `category` | `store_id`、名称、排序、启用 |
-| `product` | `category_id`、名、图 URL、单位枚举（`PIECE`/`PORTION`/`JIN`）、可选 `spec_note`（规格说明，短文案）、价格分、`in_stock`、上下架；`stock_qty` 可空预留第二波 |
+| `product` | `category_id`、名、`image_url`（封面=第一张）、`image_urls`（JSON 数组，最多 3 条 URL）、单位枚举（`PIECE`/`PORTION`/`JIN`）、可选 `spec_note`（规格说明，短文案）、价格分、`in_stock`、上下架、`home_recommended`（首页推荐，默认否）；`stock_qty` 可空预留第二波 |
 
 **单位**：服务端枚举 + 接口下发或前后端共用常量；**禁止**商品表自由字符串单位。  
 **规格说明**：`spec_note` 可空，最长 64；用于「约 10 枚」等内容，不替代单位枚举。  
+**商品图**：`image_urls` 存完整列表（≤3）；保存时同步 `image_url = image_urls[0]`（空则两字段皆空）。读接口同时返回 `imageUrl` + `imageUrls`；仅有旧 `image_url` 时兼容为单元素 `imageUrls`。列表/篮/分类缩略图只用 `imageUrl`；详情半屏与整页用 `imageUrls` 轮播。  
 **分类**：仅通过 `category` 表维护；商品编辑下拉与顾客类目均查本店启用分类。
 | `user_address` | 手机、小区、楼栋、室号等；下单时快照进订单 |
 | `pickup_slot` | 自提可约时段 + 启用 |
@@ -114,7 +115,9 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 **顾客**（登录即可）：分类/商品浏览、商品篮、地址簿、提交预约、我的订单、取消未完成单、订单详情；再来一单（服务端按历史明细生成加购，跳过无效商品）；售罄订阅到货提醒；待自提单「我到店了」。客服走微信原生能力，无自建会话 API。
 
-**商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；**分类 CRUD**；商品 CRUD、有货售罄、上下架（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式与**首页展示**（头图 `hero_image_url`、营业文案 `home_kicker`、主标题 `home_title`、副标题 `home_subtitle`、列数 `home_product_cols`、点商品 `product_detail_mode`）；订单台「马上处理」排序/筛选与到店标记。成员邀请第一波可用刷库冷启动，邀请码可后补。
+**商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；**分类 CRUD**；商品 CRUD、有货售罄、上下架、首页推荐开关（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式与**首页展示**（头图 `hero_image_url`、营业文案 `home_kicker`、主标题 `home_title`、副标题 `home_subtitle`、列数 `home_product_cols`、点商品 `product_detail_mode`）；订单台「马上处理」排序/筛选与到店标记。成员邀请第一波可用刷库冷启动，邀请码可后补。
+
+**顾客商品列表**：`GET /api/v1/products` 可选 `categoryId`、`homeRecommended=true`（首页推荐区）；始终仅返回已上架。
 
 **元数据**：`GET /api/v1/meta/units` → `[{ code: "JIN", label: "斤" }, …]`（或前端常量与后端校验集一致）。
 
@@ -207,7 +210,8 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 | JWT 过期 | 未登录码 + 静默重登 |
 | 跨店写 | 403 |
 | 售罄提交 | 业务错误码 + 前端提示 |
-| 图片上传失败 | 可重试，不挡其它字段 |
+| 图片上传失败 | 可重试，不挡其它字段；多图单张失败不影响已上传张 |
+| 商品图超过 3 张 | 服务端拒绝保存 |
 | 订阅消息失败 | 日志，不阻断订单 |
 
 ---
@@ -247,3 +251,5 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 | 2026-10-07 | 初稿：架构、表、API、小程序底座、状态机与部署对齐 |
 | 2026-10-07 | 对齐顾客增补：再来一单、到货提醒表、我到店了字段 |
 | 2026-10-07 | 单位枚举 / 分类 CRUD / UI§2.8 对齐说明 |
+| 2026-10-07 | `product.image_urls`（≤3）+ 封面 `image_url` 同步；详情轮播 |
+| 2026-10-07 | `product.home_recommended`；顾客 `?homeRecommended=`；商家快捷开关 |

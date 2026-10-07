@@ -3,48 +3,70 @@
   <view class="hint">{{copy.merchant.productHint}}</view>
 
   <view class="field">
-    <view class="label">{{copy.merchant.fieldImage}}</view>
-    <view class="img-box" bind:tap="pickImage">
-      <image wx:if="{{form.imageUrl}}" src="{{form.imageUrl}}" mode="aspectFill" class="img" />
-      <text wx:else class="muted">{{copy.merchant.imageUpload}}</text>
+    <view class="label">{{copy.merchant.fieldImage}} <text class="muted">{{imageUrls.length}}/3</text></view>
+    <view class="img-grid">
+      <view class="img-tile" wx:for="{{imageUrls}}" wx:key="*this">
+        <image class="img" src="{{item}}" mode="aspectFill" />
+        <view class="img-remove" data-index="{{index}}" catch:tap="removeImage">×</view>
+      </view>
+      <view
+        wx:if="{{imageUrls.length < 3}}"
+        class="img-tile img-add"
+        bind:tap="pickImage"
+      >
+        <text class="muted">＋</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="field-row">
+    <view class="field col-7">
+      <view class="label">{{copy.merchant.fieldName}}</view>
+      <input class="field-input" placeholder="商品名称" value="{{form.name}}" bindinput="onName" />
+    </view>
+    <view class="field col-3">
+      <view class="label">{{copy.merchant.fieldUnit}}</view>
+      <picker range="{{unitLabels}}" value="{{unitIndex}}" bindchange="onUnit">
+        <view class="field-input picker">{{unitLabels[unitIndex] || '请选择'}}</view>
+      </picker>
     </view>
   </view>
 
   <view class="field">
-    <view class="label">{{copy.merchant.fieldName}}</view>
-    <input class="field-input" placeholder="商品名称" value="{{form.name}}" bindinput="onName" />
-  </view>
-
-  <view class="field">
-    <view class="label">{{copy.merchant.fieldUnit}}</view>
-    <picker range="{{unitLabels}}" value="{{unitIndex}}" bindchange="onUnit">
-      <view class="field-input picker">{{unitLabels[unitIndex] || '请选择'}}</view>
-    </picker>
-  </view>
-
-  <view class="field">
     <view class="label">{{copy.merchant.fieldSpec}}</view>
-    <input
-      class="field-input"
+    <textarea
+      class="field-textarea"
       placeholder="{{specPlaceholder}}"
       value="{{form.specNote}}"
       maxlength="{{64}}"
+      auto-height
       bindinput="onSpec"
     />
   </view>
 
-  <view class="field">
-    <view class="label">{{copy.merchant.fieldPrice}}</view>
-    <input class="field-input" placeholder="0.00" type="digit" value="{{priceYuan}}" bindinput="onPrice" />
+  <view class="field-row">
+    <view class="field col-3">
+      <view class="label">{{copy.merchant.fieldPrice}}</view>
+      <input class="field-input" placeholder="0.00" type="digit" value="{{priceYuan}}" bindinput="onPrice" />
+    </view>
+    <view class="field col-7">
+      <view class="label-row">
+        <view class="label">{{copy.merchant.fieldCategory}}</view>
+        <view class="label-link" bind:tap="goCats">{{copy.merchant.goCats}}</view>
+      </view>
+      <picker range="{{catLabels}}" value="{{catIndex}}" bindchange="onCat">
+        <view class="field-input picker">{{catLabels[catIndex] || '请先创建分类'}}</view>
+      </picker>
+    </view>
   </view>
 
-  <view class="field">
-    <view class="label">{{copy.merchant.fieldCategory}}</view>
-    <picker range="{{catLabels}}" value="{{catIndex}}" bindchange="onCat">
-      <view class="field-input picker">{{catLabels[catIndex] || '请先创建分类'}}</view>
-    </picker>
+  <view class="field field-toggle" bind:tap="toggleHomeReco">
+    <view class="toggle-text">
+      <view class="label">{{copy.merchant.fieldHomeReco}}</view>
+      <view class="toggle-hint">{{copy.merchant.fieldHomeRecoHint}}</view>
+    </view>
+    <view class="switch {{form.homeRecommended ? 'on' : ''}}"></view>
   </view>
 
-  <button class="btn btn-ghost full" bind:tap="goCats">{{copy.merchant.goCats}}</button>
   <button class="btn btn-cta full" bind:tap="save">{{copy.merchant.save}}</button>
 </view>

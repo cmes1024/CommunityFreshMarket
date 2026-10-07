@@ -1,4 +1,4 @@
-<Header pageName="{{copy.titles.merchantOrders}}" back="{{false}}" />
+<Header pageName="{{copy.titles.merchantOrders}}" back="{{false}}" toCustomer="{{true}}" />
 <view class="orders-page">
   <view class="m-priority">
     <view class="m-priority-title">

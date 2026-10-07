@@ -1,4 +1,4 @@
-<Header pageName="{{copy.titles.cart}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<Header pageName="{{copy.titles.cart}}" back="{{false}}" />
 <view class="page-body cart-page {{cart.itemCount ? 'has-bar' : ''}}">
   <view wx:if="{{!cart.itemCount}}" class="empty-state">
     <view class="empty-title">{{copy.cart.emptyTitle}}</view>
@@ -18,7 +18,6 @@
         </view>
       </view>
     </view>
-    <view class="pay-hint muted">{{copy.pay.offlineHint}}</view>
   </block>
 </view>
 <view class="mini-bar" wx:if="{{cart.itemCount}}" bind:tap="checkout">

@@ -29,6 +29,11 @@ Component({
       type: Boolean,
       value: true,
     },
+    /** 商家 Tab 页左上角回顾客端 */
+    toCustomer: {
+      type: Boolean,
+      value: false,
+    },
     alignContent: {
       type: String,
       value: "center",
@@ -54,8 +59,15 @@ Component({
     },
   },
 
+  observers: {
+    alignContent(v) {
+      this.setData({ isTitleCenter: v !== "left" && v !== "right" });
+    },
+  },
+
   data: {
     ...buildHeaderMetrics(),
+    isTitleCenter: true,
     proxyConfig: {
       themeColor: "#0F766E",
       policy: {
@@ -88,6 +100,9 @@ Component({
       } else {
         wx.navigateBack();
       }
+    },
+    GoCustomer() {
+      wx.reLaunch({ url: "/packageCustomer/pages/home/home" });
     },
     currentPage() {
       const pages = getCurrentPages();

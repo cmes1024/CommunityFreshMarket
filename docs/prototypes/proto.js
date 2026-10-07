@@ -32,7 +32,7 @@ const merchantTabs = [
 const screenMeta = {
   "c-home": { label: "首页", mode: "customer" },
   "c-category": { label: "分类 · 列表加购", mode: "customer" },
-  "c-product": { label: "详情 · 步进加购", mode: "customer" },
+  "c-product": { label: "详情 · 多图轮播", mode: "customer" },
   "c-product-sold": { label: "售罄 · 到货提醒", mode: "customer" },
   "c-cart": { label: "商品篮", mode: "customer" },
   "c-checkout": { label: "结算三步 + 提交", mode: "customer" },
@@ -45,9 +45,9 @@ const screenMeta = {
   "c-profile": { label: "我的", mode: "customer" },
   "m-orders": { label: "订单台 · 马上处理", mode: "merchant" },
   "m-order-detail": { label: "商家订单详情", mode: "merchant" },
-  "m-products": { label: "商品双开关", mode: "merchant" },
+  "m-products": { label: "商品 · 蒙层卡片", mode: "merchant" },
   "m-categories": { label: "分类管理", mode: "merchant" },
-  "m-product-edit": { label: "编辑商品 · 单位/分类", mode: "merchant" },
+  "m-product-edit": { label: "编辑商品 · 最多3图", mode: "merchant" },
   "m-settings": { label: "履约设置", mode: "merchant" },
   "m-profile": { label: "商家我的", mode: "merchant" },
 };
@@ -273,6 +273,11 @@ function go(id, opts = {}) {
   const canBack = history.length > 0 || next.hasAttribute("data-back");
   $("#navBack").hidden = !canBack;
 
+  const toCustomer = next.hasAttribute("data-to-customer") && mode === "merchant";
+  const navCustomer = $("#navCustomer");
+  if (navCustomer) navCustomer.hidden = !toCustomer;
+  $("#topNav").classList.toggle("has-customer", toCustomer);
+
   const showCart = next.hasAttribute("data-show-cart") && mode === "customer";
   $("#navCart").hidden = !showCart;
 
@@ -306,6 +311,28 @@ function goBack() {
 $("#navBack").addEventListener("click", goBack);
 
 document.addEventListener("click", (e) => {
+  const sw = e.target.closest("[data-switch]");
+  if (sw) {
+    e.stopPropagation();
+    const on = sw.classList.toggle("on");
+    sw.setAttribute("aria-checked", on ? "true" : "false");
+    showToast(on ? "已打开" : "已关闭");
+    return;
+  }
+
+  const car = e.target.closest("[data-carousel]");
+  if (car && (e.target.closest(".detail-carousel-track") || e.target.closest(".carousel-dots"))) {
+    const track = $(".detail-carousel-track", car);
+    const dots = $$(".carousel-dots .dot", car);
+    const n = $$(".slide", track).length || 1;
+    let i = Number(car.dataset.index || 0);
+    i = (i + 1) % n;
+    car.dataset.index = String(i);
+    track.style.transform = `translateX(-${i * 100}%)`;
+    dots.forEach((d, di) => d.classList.toggle("on", di === i));
+    return;
+  }
+
   const add = e.target.closest("[data-add]");
   if (add) {
     e.stopPropagation();

@@ -4,18 +4,24 @@ const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const { syncCartCount } = require("../../../utils/cartSync");
 const { detailUnitLine } = require("../../../utils/productUnitLine");
+const { productImages } = require("../../../utils/productImages");
 
 Page({
-  data: { product: {}, qty: 1, watching: false },
+  data: { product: {}, imageUrls: [], qty: 1, watching: false, contactNote: "" },
   async onLoad(query) {
     this.id = Number(query.id);
-    const product = await api.product(this.id);
+    const [product, store] = await Promise.all([
+      api.product(this.id),
+      api.store().catch(() => null),
+    ]);
     this.setData({
       product: {
         ...product,
         priceYuan: fenToYuan(product.priceFen),
         unitLine: detailUnitLine(product),
       },
+      imageUrls: productImages(product),
+      contactNote: ((store && store.contactNote) || "").trim(),
     });
     if (!product.inStock) {
       try {

@@ -39,8 +39,9 @@ public class CatalogController {
 
   @GetMapping("/products")
   public ApiResponse<List<ProductResponse>> products(
-      @RequestParam(required = false) Long categoryId) {
-    return ApiResponse.ok(productService.listForCustomer(categoryId));
+      @RequestParam(required = false) Long categoryId,
+      @RequestParam(required = false) Boolean homeRecommended) {
+    return ApiResponse.ok(productService.listForCustomer(categoryId, homeRecommended));
   }
 
   @GetMapping("/products/{id}")

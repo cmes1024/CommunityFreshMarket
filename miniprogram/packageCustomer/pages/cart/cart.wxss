@@ -24,7 +24,6 @@
 .name { font-weight: 600; margin-bottom: 8rpx; }
 .ops { margin-top: 16rpx; }
 .remove { color: var(--color-muted); font-size: 24rpx; padding: 16rpx; }
-.pay-hint { margin: 8rpx 8rpx 24rpx; }
 .cart-page.has-bar {
   padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 140rpx);
 }

@@ -29,7 +29,7 @@
     <aside class="rail">
       <div class="eyebrow">UI 稿 v2 · 布局 + 交互</div>
       <h1>绿意鲜生</h1>
-      <p class="lede">相对 v1：列表内加购、篮角标、结算三步、横向状态条、提交 loading→成功、返回栈、商家「马上处理」分区。色板见 MASTER。</p>
+      <p class="lede">相对 v1：列表内加购、篮角标、结算三步、横向状态条、提交 loading→成功、返回栈、商家「马上处理」分区。商家商品紧凑行 + 最多 3 图；详情轮播。色板见 MASTER。</p>
       <div class="token-row" aria-label="色板">
         <span class="token" style="background:#0F766E"></span>
         <span class="token" style="background:#2DD4BF"></span>
@@ -47,6 +47,7 @@
         <li><strong>提交预约</strong>按钮进入 loading，再出成功层</li>
         <li><strong>系统返回</strong>顶栏返回走历史栈，不是写死上一页</li>
         <li><strong>商家订单台</strong>「马上处理」置顶，到店单有脉冲标</li>
+        <li><strong>商家商品</strong>紧凑行 + 双开关；编辑最多 3 图；详情可滑轮播</li>
       </ul>
       <h2>屏幕</h2>
       <ul class="screen-list" id="screenNav"></ul>
@@ -59,6 +60,7 @@
           <button type="button" class="back" id="navBack" hidden aria-label="返回">
             <svg class="ico" aria-hidden="true"><use href="#i-back"/></svg>
           </button>
+          <button type="button" class="nav-customer" id="navCustomer" hidden data-go="c-home">用户端</button>
           <div class="title" id="navTitle">绿意鲜生</div>
           <button type="button" class="nav-ghost" id="navCart" data-go="c-cart" aria-label="商品篮" hidden>
             <svg class="ico" aria-hidden="true"><use href="#i-basket"/></svg>
@@ -173,7 +175,16 @@
 
           <!-- PRODUCT -->
           <section class="screen" data-screen="c-product" data-title="商品详情" data-back data-show-cart>
-            <div class="detail-hero veg-hero"></div>
+            <div class="detail-carousel" data-carousel>
+              <div class="detail-carousel-track">
+                <div class="detail-hero veg-hero slide"></div>
+                <div class="detail-hero veg-hero-alt slide"></div>
+                <div class="detail-hero veg-hero-deep slide"></div>
+              </div>
+              <div class="carousel-dots" aria-hidden="true">
+                <span class="dot on"></span><span class="dot"></span><span class="dot"></span>
+              </div>
+            </div>
             <div class="detail-body">
               <div class="detail-top">
                 <h2>本地小白菜</h2>
@@ -182,8 +193,8 @@
               <p class="sub">单位：斤 · 约 1 斤 · 当面称重为准</p>
               <div class="detail-price">¥4.80 <small>/ 斤</small></div>
               <div class="info-block">
-                <h4>履约说明</h4>
-                <p>提交预约后店员确认备货；配送尽快出发，或自提选时段到店。线下收款。</p>
+                <h4>购买须知</h4>
+                <p>尽快配送 / 可自提</p>
               </div>
             </div>
             <div class="detail-actions sticky-buy">
@@ -429,7 +440,7 @@
           </section>
 
           <!-- MERCHANT -->
-          <section class="screen" data-screen="m-orders" data-title="订单台" data-tab="m-orders" data-mode="merchant">
+          <section class="screen" data-screen="m-orders" data-title="订单台" data-tab="m-orders" data-mode="merchant" data-to-customer>
             <div class="m-priority">
               <div class="m-priority-title">马上处理 <span class="pill">2</span></div>
               <div class="order-card urgent" data-go="m-order-detail">
@@ -485,46 +496,67 @@
             </div>
           </section>
 
-          <section class="screen" data-screen="m-products" data-title="商品" data-tab="m-products" data-mode="merchant">
+          <section class="screen" data-screen="m-products" data-title="商品" data-tab="m-products" data-mode="merchant" data-to-customer>
             <div style="padding:12px">
               <div class="m-toolbar">
                 <button type="button" class="btn btn-ghost btn-sm" data-go="m-categories">分类管理</button>
                 <button type="button" class="btn btn-primary btn-sm" data-go="m-product-edit">＋ 新增商品</button>
               </div>
-              <div class="cell m-sku">
-                <div class="cell-row">
-                  <div>
-                    <div style="font-weight:600">本地小白菜</div>
-                    <div class="price" style="font-size:13px">¥4.80 / 斤</div>
-                    <div style="margin-top:6px"><span class="chip">上架</span> <span class="chip">有货</span></div>
-                  </div>
-                  <button type="button" class="linkish" data-go="m-product-edit">编辑</button>
+              <div class="m-filters">
+                <input class="m-search-input" type="search" placeholder="按名称搜索" />
+                <div class="chip-scroll m-filter-chips">
+                  <button type="button" class="chip-nav active">全部</button>
+                  <button type="button" class="chip-nav">叶菜</button>
+                  <button type="button" class="chip-nav">根茎</button>
+                  <button type="button" class="chip-nav">水果</button>
+                  <button type="button" class="chip-nav">蛋奶</button>
                 </div>
-                <div class="toggle-row">
-                  <span>上架<small>关则顾客不可见</small></span>
-                  <div class="switch on" role="switch" aria-checked="true"></div>
-                </div>
-                <div class="toggle-row" style="border:none;padding-bottom:0">
-                  <span>有货<small>关 = 售罄</small></span>
-                  <div class="switch on" role="switch" aria-checked="true"></div>
+                <div class="m-filter-chips">
+                  <button type="button" class="chip-nav active">全部</button>
+                  <button type="button" class="chip-nav">仅推荐</button>
+                  <button type="button" class="chip-nav">未推荐</button>
                 </div>
               </div>
-              <div class="cell m-sku">
-                <div class="cell-row">
-                  <div>
-                    <div style="font-weight:600">红颜草莓</div>
-                    <div class="price" style="font-size:13px">¥28.00 / 份</div>
-                    <div style="margin-top:6px"><span class="chip">上架</span> <span class="chip sold">售罄</span></div>
+              <div class="m-grid">
+                <div class="m-card has-cover">
+                  <div class="m-card-bg veg-hero" aria-hidden="true"></div>
+                  <div class="m-card-mask"></div>
+                  <button type="button" class="m-card-hit" data-go="m-product-edit">
+                    <div class="m-card-name">本地小白菜也有很长的名字示例</div>
+                    <div class="price">¥4.80 / 斤</div>
+                    <div class="m-sku-spec">约 1 斤</div>
+                  </button>
+                  <div class="m-card-toggles">
+                    <label class="m-mini-toggle"><span>上架</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
+                    <label class="m-mini-toggle"><span>有货</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
+                    <label class="m-mini-toggle"><span>首页推荐</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
                   </div>
-                  <button type="button" class="linkish" data-go="m-product-edit">编辑</button>
                 </div>
-                <div class="toggle-row">
-                  <span>上架<small>关则顾客不可见</small></span>
-                  <div class="switch on" role="switch"></div>
+                <div class="m-card has-cover">
+                  <div class="m-card-bg fruit-hero" aria-hidden="true"></div>
+                  <div class="m-card-mask"></div>
+                  <button type="button" class="m-card-hit" data-go="m-product-edit">
+                    <div class="m-card-name">红颜草莓</div>
+                    <div class="price">¥28.00 / 份</div>
+                  </button>
+                  <div class="m-card-toggles">
+                    <label class="m-mini-toggle"><span>上架</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
+                    <label class="m-mini-toggle"><span>有货</span><div class="switch switch-sm" role="switch" data-switch></div></label>
+                    <label class="m-mini-toggle"><span>首页推荐</span><div class="switch switch-sm" role="switch" data-switch></div></label>
+                  </div>
                 </div>
-                <div class="toggle-row" style="border:none;padding-bottom:0">
-                  <span>有货<small>打开即补货可下单</small></span>
-                  <div class="switch" role="switch"></div>
+                <div class="m-card">
+                  <div class="m-card-mask"></div>
+                  <button type="button" class="m-card-hit" data-go="m-product-edit">
+                    <div class="m-card-name">土鸡蛋</div>
+                    <div class="price">¥12.80 / 份</div>
+                    <div class="m-sku-spec">约 10 枚</div>
+                  </button>
+                  <div class="m-card-toggles">
+                    <label class="m-mini-toggle"><span>上架</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
+                    <label class="m-mini-toggle"><span>有货</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
+                    <label class="m-mini-toggle"><span>首页推荐</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -555,22 +587,48 @@
 
           <section class="screen" data-screen="m-product-edit" data-title="编辑商品" data-back data-mode="merchant">
             <div class="section">
-              <p class="hint">单位 = 系统枚举；规格说明可选；分类 = 本店「分类管理」数据（原型示意）。</p>
-              <div class="field"><label>名称</label><input value="本地小白菜" /></div>
-              <div class="field"><label>单位（系统）</label>
-                <select id="unitSelect"><option value="JIN">斤</option><option value="PORTION">份</option><option value="PIECE">件</option></select>
+              <p class="hint hint-tight">图片最多 3 张（第一张=封面）；单位=系统枚举；分类=本店数据。</p>
+              <div class="field field-tight">
+                <label>图片 <span class="muted">0～3</span></label>
+                <div class="img-grid">
+                  <div class="img-tile veg-hero">
+                    <button type="button" class="img-remove" aria-label="删除" data-toast="原型：删除图片">×</button>
+                  </div>
+                  <div class="img-tile veg-hero-alt">
+                    <button type="button" class="img-remove" aria-label="删除" data-toast="原型：删除图片">×</button>
+                  </div>
+                  <button type="button" class="img-tile img-add" data-toast="原型：添加图片（最多 3 张）">＋</button>
+                </div>
               </div>
-              <div class="field"><label>规格说明（可选）</label><input placeholder="如 约 1 斤、约 10 枚" value="约 1 斤" /></div>
-              <div class="field"><label>价格（元）</label><input inputmode="decimal" value="4.80" /></div>
-              <div class="field"><label>分类（本店）</label>
-                <select id="catSelect"><option>叶菜</option><option>根茎</option><option>水果</option><option>蛋奶</option></select>
+              <div class="field-row">
+                <div class="field field-tight col-7"><label>名称</label><input value="本地小白菜" /></div>
+                <div class="field field-tight col-3"><label>单位</label>
+                  <select id="unitSelect"><option value="JIN">斤</option><option value="PORTION">份</option><option value="PIECE">件</option></select>
+                </div>
               </div>
-              <button type="button" class="btn btn-ghost" style="width:100%;margin-bottom:8px" data-go="m-categories">去管理分类</button>
+              <div class="field field-tight"><label>规格说明（可选）</label><textarea rows="2" placeholder="如 约 1 斤、约 10 枚">约 1 斤</textarea></div>
+              <div class="field-row">
+                <div class="field field-tight col-3"><label>价格（元）</label><input inputmode="decimal" value="4.80" /></div>
+                <div class="field field-tight col-7">
+                  <div class="label-row">
+                    <label>分类（本店）</label>
+                    <button type="button" class="label-link" data-go="m-categories">管理分类</button>
+                  </div>
+                  <select id="catSelect"><option>叶菜</option><option>根茎</option><option>水果</option><option>蛋奶</option></select>
+                </div>
+              </div>
+              <div class="field field-tight field-toggle-row">
+                <div>
+                  <label>首页推荐</label>
+                  <p class="hint" style="margin:4px 0 0;font-size:12px">开启后出现在顾客首页；须同时上架</p>
+                </div>
+                <div class="switch on switch-sm" role="switch" data-switch></div>
+              </div>
               <button type="button" class="btn btn-primary" style="width:100%" id="saveProduct">保存</button>
             </div>
           </section>
 
-          <section class="screen" data-screen="m-settings" data-title="履约设置" data-tab="m-settings" data-mode="merchant">
+          <section class="screen" data-screen="m-settings" data-title="履约设置" data-tab="m-settings" data-mode="merchant" data-to-customer>
             <div class="section settings-proto">
               <div class="sec-head">
                 <h3 class="section-title" style="margin:0 0 4px">店铺资料</h3>
@@ -579,7 +637,7 @@
               <div class="settings-group">
                 <div class="settings-cell"><label>店名</label><input value="绿意鲜生" /></div>
                 <div class="settings-cell"><label>电话</label><input inputmode="tel" value="021-6688XXXX" /></div>
-                <div class="settings-cell"><label>履约说明</label><input placeholder="如配送范围、当面收款等" /></div>
+                <div class="settings-cell"><label>购买须知</label><input placeholder="如配送范围、当面收款；留空则商详不展示" value="尽快配送 / 可自提" /></div>
               </div>
               <div class="sec-head" style="margin-top:18px">
                 <h3 class="section-title" style="margin:0 0 4px">顾客首页</h3>

@@ -27,6 +27,8 @@
   }
 
   &-content {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     padding: 0 12rpx 0 24rpx;
@@ -37,11 +39,19 @@
       height: 100%;
       width: 64rpx;
       align-items: center;
+      flex-shrink: 0;
       color: var(--color-primary, #0f766e);
       font-size: 28rpx;
       font-weight: 500;
       .back-icon {
         margin: auto 12rpx auto 0;
+      }
+      &.is-customer {
+        width: auto;
+        min-width: 96rpx;
+        padding-right: 8rpx;
+        font-size: 26rpx;
+        white-space: nowrap;
       }
     }
 
@@ -49,8 +59,8 @@
       display: inline-block;
       height: fit-content;
       margin: auto 0;
-      width: calc(100% - var(--left) - var(--right));
-      align-items: center;
+      flex: 1;
+      min-width: 0;
       overflow-x: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -61,7 +71,6 @@
         font-size: 36rpx;
         font-weight: 700;
         color: var(--color-primary, #0f766e);
-        text-align: left;
       }
     }
 
@@ -69,14 +78,34 @@
       text-align: left;
     }
 
-    .text-align-center {
-      width: calc(100vw - (var(--right) + 24rpx) * 2);
-      text-align: center;
-      margin-left: auto;
-    }
-
     .text-align-right {
       text-align: right;
+    }
+  }
+
+  /* 相对整屏居中（不受胶囊 / 左侧按钮宽度影响） */
+  &-title-center {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24rpx;
+    box-sizing: border-box;
+    pointer-events: none;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: var(--color-text, #134e4a);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.is-brand {
+      font-size: 36rpx;
+      font-weight: 700;
+      color: var(--color-primary, #0f766e);
     }
   }
 }

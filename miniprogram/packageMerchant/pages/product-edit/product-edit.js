@@ -2,6 +2,9 @@ const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const { chooseAndUpload } = require("../../../utils/upload");
+const { productImages } = require("../../../utils/productImages");
+
+const MAX_IMAGES = 3;
 
 function specPlaceholderFor(unit) {
   return unit === "JIN"
@@ -18,10 +21,11 @@ Page({
       unit: "JIN",
       specNote: "",
       priceFen: 0,
-      imageUrl: "",
       inStock: true,
       onShelf: true,
+      homeRecommended: false,
     },
+    imageUrls: [],
     priceYuan: "",
     units: [],
     unitLabels: [],
@@ -48,10 +52,11 @@ Page({
           unit: p.unit,
           specNote: p.specNote || "",
           priceFen: p.priceFen,
-          imageUrl: p.imageUrl || "",
           inStock: p.inStock,
           onShelf: p.onShelf,
+          homeRecommended: !!p.homeRecommended,
         },
+        imageUrls: productImages(p),
         priceYuan: fenToYuan(p.priceFen),
         unitIndex,
         catIndex,
@@ -98,10 +103,23 @@ Page({
     wx.navigateTo({ url: "/packageMerchant/pages/categories/categories" });
   },
   async pickImage() {
+    const left = MAX_IMAGES - (this.data.imageUrls || []).length;
+    if (left <= 0) {
+      wx.showToast({ title: "最多 3 张图", icon: "none" });
+      return;
+    }
     try {
-      const url = await chooseAndUpload();
-      this.setData({ "form.imageUrl": url });
+      const urls = await chooseAndUpload(left);
+      const next = (this.data.imageUrls || []).concat(Array.isArray(urls) ? urls : [urls]);
+      this.setData({ imageUrls: next.slice(0, MAX_IMAGES) });
     } catch (e) {}
+  },
+  removeImage(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const imageUrls = (this.data.imageUrls || []).slice();
+    if (index < 0 || index >= imageUrls.length) return;
+    imageUrls.splice(index, 1);
+    this.setData({ imageUrls });
   },
   onName(e) {
     this.setData({ "form.name": e.detail.value });
@@ -127,14 +145,22 @@ Page({
     const catIndex = Number(e.detail.value);
     this.setData({ catIndex, "form.categoryId": this.data.cats[catIndex].id });
   },
+  toggleHomeReco() {
+    this.setData({ "form.homeRecommended": !this.data.form.homeRecommended });
+  },
   async save() {
-    const { form, id } = this.data;
+    const { form, id, imageUrls } = this.data;
     if (!form.name || form.priceFen < 0 || !form.categoryId) {
       wx.showToast({ title: "请填写名称、价格和分类", icon: "none" });
       return;
     }
-    if (id) await api.merchantProductUpdate(id, form);
-    else await api.merchantProductCreate(form);
+    const payload = {
+      ...form,
+      imageUrls: imageUrls || [],
+      imageUrl: (imageUrls && imageUrls[0]) || "",
+    };
+    if (id) await api.merchantProductUpdate(id, payload);
+    else await api.merchantProductCreate(payload);
     wx.navigateBack();
   },
 });

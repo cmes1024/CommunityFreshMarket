@@ -14,7 +14,20 @@
     <block wx:elif="{{product}}">
       <scroll-view scroll-y class="sheet-body">
         <view class="hero {{product.inStock ? 'veg' : 'fruit'}}">
-          <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" mode="aspectFill" class="hero-img" />
+          <swiper
+            wx:if="{{imageUrls.length}}"
+            class="hero-swiper"
+            indicator-dots="{{imageUrls.length > 1}}"
+            indicator-color="rgba(255,255,255,0.45)"
+            indicator-active-color="#ffffff"
+            circular="{{imageUrls.length > 1}}"
+            autoplay="{{imageUrls.length > 1}}"
+            interval="{{3000}}"
+          >
+            <swiper-item wx:for="{{imageUrls}}" wx:key="*this">
+              <image src="{{item}}" mode="aspectFill" class="hero-img" />
+            </swiper-item>
+          </swiper>
         </view>
         <view class="info">
           <view class="top">
@@ -28,9 +41,13 @@
             ¥{{product.priceYuan}}
             <text class="small">/ {{product.unitLabel}}</text>
           </view>
-          <view class="info-block {{product.inStock ? '' : 'warn'}}">
-            <view class="h4">{{product.inStock ? copy.product.fulfillTitle : copy.product.restockTitle}}</view>
-            <view class="p">{{product.inStock ? copy.product.fulfillBody : copy.product.restockBody}}</view>
+          <view wx:if="{{!product.inStock}}" class="info-block warn">
+            <view class="h4">{{copy.product.restockTitle}}</view>
+            <view class="p">{{copy.product.restockBody}}</view>
+          </view>
+          <view wx:elif="{{contactNote}}" class="info-block">
+            <view class="h4">{{copy.product.noteTitle}}</view>
+            <view class="p">{{contactNote}}</view>
           </view>
         </view>
       </scroll-view>

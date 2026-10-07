@@ -4,6 +4,7 @@ const copy = require("../../utils/copy");
 const { fenToYuan } = require("../../utils/money");
 const { syncCartCount } = require("../../utils/cartSync");
 const { detailUnitLine } = require("../../utils/productUnitLine");
+const { productImages } = require("../../utils/productImages");
 
 Component({
   properties: {
@@ -14,8 +15,10 @@ Component({
     copy,
     loading: false,
     product: null,
+    imageUrls: [],
     qty: 1,
     watching: false,
+    contactNote: "",
   },
   observers: {
     "show, productId"(visible, productId) {
@@ -24,7 +27,14 @@ Component({
         return;
       }
       if (!visible) {
-        this.setData({ product: null, qty: 1, watching: false, loading: false });
+        this.setData({
+          product: null,
+          imageUrls: [],
+          qty: 1,
+          watching: false,
+          loading: false,
+          contactNote: "",
+        });
       }
     },
   },
@@ -32,9 +42,19 @@ Component({
     async load(id) {
       const pid = Number(id);
       if (!pid) return;
-      this.setData({ loading: true, product: null, qty: 1, watching: false });
+      this.setData({
+        loading: true,
+        product: null,
+        imageUrls: [],
+        qty: 1,
+        watching: false,
+        contactNote: "",
+      });
       try {
-        const product = await api.product(pid);
+        const [product, store] = await Promise.all([
+          api.product(pid),
+          api.store().catch(() => null),
+        ]);
         const next = {
           loading: false,
           product: {
@@ -42,8 +62,10 @@ Component({
             priceYuan: fenToYuan(product.priceFen),
             unitLine: detailUnitLine(product),
           },
+          imageUrls: productImages(product),
           qty: 1,
           watching: false,
+          contactNote: ((store && store.contactNote) || "").trim(),
         };
         if (!product.inStock) {
           try {
@@ -53,7 +75,7 @@ Component({
         }
         this.setData(next);
       } catch (e) {
-        this.setData({ loading: false, product: null });
+        this.setData({ loading: false, product: null, contactNote: "" });
         this.close();
       }
     },

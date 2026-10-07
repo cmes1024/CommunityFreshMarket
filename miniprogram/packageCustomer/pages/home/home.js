@@ -33,22 +33,18 @@ Page({
       const [store, categories, products, cart, slots] = await Promise.all([
         api.store(),
         api.categories(),
-        api.products(),
+        api.products({ homeRecommended: true }),
         syncCartCount(),
         api.pickupSlots().catch(() => []),
       ]);
       const qtys = qtyMap(cart);
       const name = storeDisplayName(store);
-      const ranked = (products || [])
-        .slice()
-        .sort((a, b) => Number(!!b.inStock) - Number(!!a.inStock))
-        .slice(0, 12)
-        .map((p) => ({
-          ...p,
-          priceYuan: fenToYuan(p.priceFen),
-          unitLine: listUnitLine(p),
-          qty: qtys[p.id] || 0,
-        }));
+      const ranked = (products || []).map((p) => ({
+        ...p,
+        priceYuan: fenToYuan(p.priceFen),
+        unitLine: listUnitLine(p),
+        qty: qtys[p.id] || 0,
+      }));
       this.setData({
         store,
         displayStoreName: name,
@@ -94,8 +90,8 @@ Page({
     const id = e.currentTarget.dataset.id;
     const qty = e.detail.value;
     try {
-      await api.cartSetQty(id, qty);
-      await syncCartCount();
+      const cart = await api.cartSetQty(id, qty);
+      await syncCartCount(cart);
       const idx = this.data.products.findIndex((p) => p.id === id);
       if (idx >= 0) this.setData({ [`products[${idx}].qty`]: qty });
     } catch (err) {}

@@ -1,3 +1,5 @@
+const { onCartCountChange } = require("../../utils/cartSync");
+
 const CUSTOMER = [
   {
     key: "home",
@@ -80,18 +82,30 @@ Component({
   data: { tabs: CUSTOMER },
   observers: {
     mode() {
-      this.setData({ tabs: buildTabs(this.data.mode) });
+      this.refreshTabs();
     },
   },
   pageLifetimes: {
     show() {
-      this.setData({ tabs: buildTabs(this.data.mode) });
+      this.refreshTabs();
     },
   },
-  attached() {
-    this.setData({ tabs: buildTabs(this.data.mode) });
+  lifetimes: {
+    attached() {
+      this.refreshTabs();
+      this._offCart = onCartCountChange(() => this.refreshTabs());
+    },
+    detached() {
+      if (this._offCart) {
+        this._offCart();
+        this._offCart = null;
+      }
+    },
   },
   methods: {
+    refreshTabs() {
+      this.setData({ tabs: buildTabs(this.data.mode) });
+    },
     onTap(e) {
       const url = e.currentTarget.dataset.url;
       if (!url) return;

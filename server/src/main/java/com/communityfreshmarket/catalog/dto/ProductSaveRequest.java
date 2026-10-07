@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public class ProductSaveRequest {
 
@@ -14,6 +15,11 @@ public class ProductSaveRequest {
   @Size(max = 128)
   private String name;
 
+  /** 完整图列表（优先）；最多 3 张（服务端再校验） */
+  @Size(max = 3)
+  private List<String> imageUrls;
+
+  /** 兼容旧客户端单图；有 imageUrls 时忽略 */
   @Size(max = 512)
   private String imageUrl;
 
@@ -29,6 +35,7 @@ public class ProductSaveRequest {
 
   private Boolean inStock;
   private Boolean onShelf;
+  private Boolean homeRecommended;
 
   public Long getCategoryId() {
     return categoryId;
@@ -44,6 +51,14 @@ public class ProductSaveRequest {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public List<String> getImageUrls() {
+    return imageUrls;
+  }
+
+  public void setImageUrls(List<String> imageUrls) {
+    this.imageUrls = imageUrls;
   }
 
   public String getImageUrl() {
@@ -92,5 +107,13 @@ public class ProductSaveRequest {
 
   public void setOnShelf(Boolean onShelf) {
     this.onShelf = onShelf;
+  }
+
+  public Boolean getHomeRecommended() {
+    return homeRecommended;
+  }
+
+  public void setHomeRecommended(Boolean homeRecommended) {
+    this.homeRecommended = homeRecommended;
   }
 }

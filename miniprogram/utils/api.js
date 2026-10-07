@@ -5,7 +5,15 @@ module.exports = {
   units: () => get("/api/v1/meta/units"),
   store: () => get("/api/v1/store"),
   categories: () => get("/api/v1/categories"),
-  products: (categoryId) => get("/api/v1/products", categoryId ? { categoryId } : {}),
+  products: (categoryIdOrOpts) => {
+    let params = {};
+    if (categoryIdOrOpts != null && typeof categoryIdOrOpts === "object") {
+      params = categoryIdOrOpts;
+    } else if (categoryIdOrOpts) {
+      params = { categoryId: categoryIdOrOpts };
+    }
+    return get("/api/v1/products", params);
+  },
   product: (id) => get(`/api/v1/products/${id}`),
   pickupSlots: () => get("/api/v1/pickup-slots"),
   restockWatch: (productId) => post(`/api/v1/products/${productId}/restock-watch`),
@@ -48,6 +56,8 @@ module.exports = {
   merchantProductUpdate: (id, body) => put(`/api/v1/merchant/products/${id}`, body),
   merchantOnShelf: (id, value) => put(`/api/v1/merchant/products/${id}/on-shelf`, { value }),
   merchantInStock: (id, value) => put(`/api/v1/merchant/products/${id}/in-stock`, { value }),
+  merchantHomeRecommended: (id, value) =>
+    put(`/api/v1/merchant/products/${id}/home-recommended`, { value }),
   merchantUpdateStore: (body) => put("/api/v1/merchant/store", body),
   merchantPickupSlots: () => get("/api/v1/merchant/pickup-slots"),
   merchantPickupSlotCreate: (body) => post("/api/v1/merchant/pickup-slots", body),

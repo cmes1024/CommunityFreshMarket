@@ -31,15 +31,19 @@ public class ProductService {
     this.restockWatchService = restockWatchService;
   }
 
-  public List<ProductResponse> listForCustomer(Long categoryId) {
+  public List<ProductResponse> listForCustomer(Long categoryId, Boolean homeRecommended) {
     long storeId = UserContext.storeId();
     LambdaQueryWrapper<Product> q = new LambdaQueryWrapper<Product>()
         .eq(Product::getStoreId, storeId)
         .eq(Product::getOnShelf, true)
+        .orderByDesc(Product::getInStock)
         .orderByDesc(Product::getUpdatedAt)
         .orderByDesc(Product::getId);
     if (categoryId != null) {
       q.eq(Product::getCategoryId, categoryId);
+    }
+    if (Boolean.TRUE.equals(homeRecommended)) {
+      q.eq(Product::getHomeRecommended, true);
     }
     return productMapper.selectList(q).stream().map(ProductResponse::from).toList();
   }
@@ -54,9 +58,9 @@ public class ProductService {
 
   public List<ProductResponse> listForMerchant(Long categoryId) {
     long storeId = UserContext.storeId();
+    // 稳定排序：按 id，避免改上架/有货/推荐后因 updatedAt 跳动
     LambdaQueryWrapper<Product> q = new LambdaQueryWrapper<Product>()
         .eq(Product::getStoreId, storeId)
-        .orderByDesc(Product::getUpdatedAt)
         .orderByDesc(Product::getId);
     if (categoryId != null) {
       q.eq(Product::getCategoryId, categoryId);
@@ -79,12 +83,13 @@ public class ProductService {
     product.setStoreId(storeId);
     product.setCategoryId(request.getCategoryId());
     product.setName(request.getName().trim());
-    product.setImageUrl(blankToNull(request.getImageUrl()));
+    applyImages(product, request);
     product.setUnit(unit.name());
     product.setSpecNote(blankToNull(request.getSpecNote()));
     product.setPriceFen(request.getPriceFen());
     product.setInStock(request.getInStock() == null || request.getInStock());
     product.setOnShelf(request.getOnShelf() == null || request.getOnShelf());
+    product.setHomeRecommended(Boolean.TRUE.equals(request.getHomeRecommended()));
     product.setCreatedAt(now);
     product.setUpdatedAt(now);
     productMapper.insert(product);
@@ -101,7 +106,7 @@ public class ProductService {
     boolean wasOut = !Boolean.TRUE.equals(product.getInStock());
     product.setCategoryId(request.getCategoryId());
     product.setName(request.getName().trim());
-    product.setImageUrl(blankToNull(request.getImageUrl()));
+    applyImages(product, request);
     product.setUnit(unit.name());
     product.setSpecNote(blankToNull(request.getSpecNote()));
     product.setPriceFen(request.getPriceFen());
@@ -110,6 +115,9 @@ public class ProductService {
     }
     if (request.getOnShelf() != null) {
       product.setOnShelf(request.getOnShelf());
+    }
+    if (request.getHomeRecommended() != null) {
+      product.setHomeRecommended(request.getHomeRecommended());
     }
     product.setUpdatedAt(LocalDateTime.now());
     productMapper.updateById(product);
@@ -142,6 +150,15 @@ public class ProductService {
     return ProductResponse.from(product);
   }
 
+  @Transactional
+  public ProductResponse setHomeRecommended(long id, boolean homeRecommended) {
+    Product product = requireOwned(id);
+    product.setHomeRecommended(homeRecommended);
+    product.setUpdatedAt(LocalDateTime.now());
+    productMapper.updateById(product);
+    return ProductResponse.from(product);
+  }
+
   private void notifyRestockWatchers(Product product) {
     restockWatchService.notifyProductRestocked(product);
   }
@@ -153,6 +170,12 @@ public class ProductService {
       throw new BizException(ErrorCodes.BAD_REQUEST, "商品不存在");
     }
     return product;
+  }
+
+  private static void applyImages(Product product, ProductSaveRequest request) {
+    var urls = ProductImageUrls.fromRequest(request.getImageUrls(), request.getImageUrl());
+    product.setImageUrls(ProductImageUrls.toJson(urls));
+    product.setImageUrl(ProductImageUrls.cover(urls));
   }
 
   private static String blankToNull(String value) {

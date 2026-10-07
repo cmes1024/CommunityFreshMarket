@@ -1,4 +1,4 @@
-<Header pageName="{{copy.titles.profile}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<Header pageName="{{copy.titles.profile}}" back="{{false}}" />
 <view class="profile-page">
   <view class="profile-head">
     <view class="avatar">{{avatarText}}</view>

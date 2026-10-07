@@ -85,4 +85,10 @@ public class MerchantCatalogController {
       @PathVariable long id, @Valid @RequestBody BooleanFlagRequest request) {
     return ApiResponse.ok(productService.setInStock(id, request.getValue()));
   }
+
+  @PutMapping("/products/{id}/home-recommended")
+  public ApiResponse<ProductResponse> setHomeRecommended(
+      @PathVariable long id, @Valid @RequestBody BooleanFlagRequest request) {
+    return ApiResponse.ok(productService.setHomeRecommended(id, request.getValue()));
+  }
 }

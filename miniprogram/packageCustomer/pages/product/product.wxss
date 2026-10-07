@@ -5,7 +5,11 @@
   overflow: hidden;
 }
 .hero.fruit { background: #fcd34d; }
-.hero-img { width: 100%; height: 100%; }
+.hero-swiper {
+  width: 100%;
+  height: 100%;
+}
+.hero-img { width: 100%; height: 100%; display: block; }
 .body { padding: 32rpx; }
 .top {
   display: flex;

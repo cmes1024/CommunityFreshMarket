@@ -15,7 +15,12 @@ public class Product {
   private Long storeId;
   private Long categoryId;
   private String name;
+  /** 封面图 = imageUrls 第一张；可清空 */
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
   private String imageUrl;
+  /** JSON 数组字符串，最多 3 张；可清空 */
+  @TableField(value = "image_urls", updateStrategy = FieldStrategy.ALWAYS)
+  private String imageUrls;
   private String unit;
   /** 可清空：空串保存为 null 时也要写库 */
   @TableField(updateStrategy = FieldStrategy.ALWAYS)
@@ -23,6 +28,7 @@ public class Product {
   private Integer priceFen;
   private Boolean inStock;
   private Boolean onShelf;
+  private Boolean homeRecommended;
   private Integer stockQty;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
@@ -67,6 +73,14 @@ public class Product {
     this.imageUrl = imageUrl;
   }
 
+  public String getImageUrls() {
+    return imageUrls;
+  }
+
+  public void setImageUrls(String imageUrls) {
+    this.imageUrls = imageUrls;
+  }
+
   public String getUnit() {
     return unit;
   }
@@ -105,6 +119,14 @@ public class Product {
 
   public void setOnShelf(Boolean onShelf) {
     this.onShelf = onShelf;
+  }
+
+  public Boolean getHomeRecommended() {
+    return homeRecommended;
+  }
+
+  public void setHomeRecommended(Boolean homeRecommended) {
+    this.homeRecommended = homeRecommended;
   }
 
   public Integer getStockQty() {
