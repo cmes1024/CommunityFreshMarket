@@ -7,6 +7,8 @@
 - 产品设计：`docs/plans/2026-10-07-product-design.md`
 - 技术方案：`docs/plans/2026-10-07-technical-design.md`
 - UI 原型：`docs/plans/2026-10-07-ui-prototype.md`；设计系统 `design-system/communityfreshmarket/MASTER.md`；可点击稿 `docs/prototypes/index.html`
+- 后端：`server/`；本地 Compose：`deploy/`（见 `deploy/README.md`）
+- 小程序：`miniprogram/`（顾客 / 商家分包，无云开发）
 - 人类入口：`README.md`
 
 ## 产品硬约束
@@ -14,8 +16,9 @@
 - **不做在线支付**；收款在线下完成
 - **先单店可用**，所有业务数据带 `storeId`，为多店预留，但第一版不做平台选店首页
 - **一个小程序**：顾客分包 + 商家分包；默认都是顾客；仅店铺成员在「我的」看到商家入口
-- **登录**：微信登录；小程序内不做账密；商家权限看「店铺成员」表
-- **店主 = 原「超级管理员」**；第一版店主与店员能力相同，角色字段预留
+- **登录**：微信登录（真实 `wx.login` code）；小程序内不做账密；商家权限看「店铺成员」表
+- **店主 = 原「超级管理员」**；冷启动用部署项 `BOOTSTRAP_OWNER_OPENID`（与环境无关）；第一版店主与店员能力相同，角色字段预留
+- **不维护「仅开发可用」的登录绕过 / 绑店主接口**；本地与生产同一路径
 - **后端用 Java**，不用微信云函数承载主业务（避免调用次数限制）
 - **无 PC 端**（运营 Web 若以后需要，与小程序分离）
 

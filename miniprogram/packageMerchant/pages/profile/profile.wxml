@@ -1,0 +1,22 @@
+<Header pageName="{{copy.titles.merchantProfile}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<view class="profile-page">
+  <view class="profile-head">
+    <view class="avatar">{{avatarText}}</view>
+    <view class="meta">
+      <view class="name">{{rolePrefix}} · {{storeName}}</view>
+      <view class="sub">{{copy.merchant.roleHint}}</view>
+    </view>
+  </view>
+
+  <view class="menu-list">
+    <view class="menu-link" bind:tap="onInvite">
+      <text>{{copy.merchant.inviteStaff}}</text><text class="arrow">›</text>
+    </view>
+  </view>
+
+  <view class="merchant-entry alt" bind:tap="backCustomer">
+    <view class="me-title">{{copy.merchant.backCustomer}}</view>
+    <view class="me-sub">{{copy.merchant.backCustomerSub}}</view>
+  </view>
+</view>
+<TabBar current="profile" mode="merchant" />

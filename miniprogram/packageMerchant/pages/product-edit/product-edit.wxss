@@ -1,0 +1,56 @@
+.hint {
+  font-size: 24rpx;
+  color: var(--color-muted);
+  line-height: 1.5;
+  margin-bottom: 24rpx;
+  padding: 20rpx 24rpx;
+  background: var(--color-mist);
+  border-radius: var(--radius);
+}
+
+.field {
+  margin-bottom: 24rpx;
+}
+
+.label {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-muted);
+  margin-bottom: 12rpx;
+}
+
+.field-input {
+  min-height: 88rpx;
+  background: var(--color-surface);
+  border: 2rpx solid var(--color-line);
+  border-radius: var(--radius);
+  padding: 0 24rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.field-input.picker {
+  line-height: 88rpx;
+}
+
+.img-box {
+  height: 280rpx;
+  background: var(--color-mist);
+  border-radius: var(--radius);
+  border: 2rpx dashed var(--color-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+}
+
+.full {
+  width: 100%;
+  margin-top: 16rpx;
+}

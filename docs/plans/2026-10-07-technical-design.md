@@ -50,7 +50,7 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 
 - **本地**：`docker compose up` 起 MySQL + API（+ Nginx）
 - **上线**：云主机装 Docker，同一套 Compose；证书挂 Nginx
-- **环境变量**：`WX_APPID`、`WX_SECRET`、JWT 密钥、DB 密码、单店默认 `STORE_ID`（可选）
+- **环境变量**：`WX_APPID`、`WX_SECRET`、JWT 密钥、DB 密码、单店默认 `DEFAULT_STORE_ID`、店主冷启动 `BOOTSTRAP_OWNER_OPENID`
 
 ---
 
@@ -60,13 +60,14 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 
 | 表 | 要点 |
 |----|------|
-| `store` | 店名、联系方式、状态；单店时一条记录 |
+| `store` | 店名、联系方式、状态、首页头图、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）；单店时一条记录 |
 | `user` | `openid` 唯一、昵称/头像可选 |
 | `store_member` | `user_id + store_id + role`（`OWNER` / `STAFF`）；第一版能力相同 |
 | `category` | `store_id`、名称、排序、启用 |
-| `product` | `category_id`、名、图 URL、单位枚举（`PIECE` 件/份 · `JIN` 斤）、价格分、`in_stock`、上下架；`stock_qty` 可空预留第二波 |
+| `product` | `category_id`、名、图 URL、单位枚举（`PIECE`/`PORTION`/`JIN`）、可选 `spec_note`（规格说明，短文案）、价格分、`in_stock`、上下架；`stock_qty` 可空预留第二波 |
 
 **单位**：服务端枚举 + 接口下发或前后端共用常量；**禁止**商品表自由字符串单位。  
+**规格说明**：`spec_note` 可空，最长 64；用于「约 10 枚」等内容，不替代单位枚举。  
 **分类**：仅通过 `category` 表维护；商品编辑下拉与顾客类目均查本店启用分类。
 | `user_address` | 手机、小区、楼栋、室号等；下单时快照进订单 |
 | `pickup_slot` | 自提可约时段 + 启用 |
@@ -106,15 +107,14 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 ### 3.2 登录
 
 1. 小程序 `wx.login` 得 `code`
-2. `POST /auth/wechat`：换 openid，无用户则创建，签发 JWT（含 `userId`）
-3. 开发期可开「测试 openid」开关，便于无真机联调
-4. JWT 过期 / 未登录：约定错误码，小程序静默重登
+2. `POST /auth/wechat`：用 `wx.login` code 换 openid，无用户则创建，签发 JWT（含 `userId`）；若 openid 命中 `BOOTSTRAP_OWNER_OPENID` 且默认店尚无其他店主，则写入 `store_member.OWNER`
+3. JWT 过期 / 未登录：约定错误码，小程序静默重登
 
 ### 3.3 接口边界
 
 **顾客**（登录即可）：分类/商品浏览、商品篮、地址簿、提交预约、我的订单、取消未完成单、订单详情；再来一单（服务端按历史明细生成加购，跳过无效商品）；售罄订阅到货提醒；待自提单「我到店了」。客服走微信原生能力，无自建会话 API。
 
-**商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；**分类 CRUD**；商品 CRUD、有货售罄、上下架（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式；订单台「马上处理」排序/筛选与到店标记。成员邀请第一波可用刷库冷启动，邀请码可后补。
+**商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；**分类 CRUD**；商品 CRUD、有货售罄、上下架（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式与**首页展示**（头图 `hero_image_url`、营业文案 `home_kicker`、主标题 `home_title`、副标题 `home_subtitle`、列数 `home_product_cols`、点商品 `product_detail_mode`）；订单台「马上处理」排序/筛选与到店标记。成员邀请第一波可用刷库冷启动，邀请码可后补。
 
 **元数据**：`GET /api/v1/meta/units` → `[{ code: "JIN", label: "斤" }, …]`（或前端常量与后端校验集一致）。
 
@@ -184,7 +184,12 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 ### 5.1 冷启动店主
 
-开发版登录一次 → 将 `user_id` 写入某店 `store_member.role = OWNER` → 个人中心出现商家入口。
+1. 店主微信先登录一次小程序（写入 `user`）
+2. 查库得到 openid：`SELECT id, openid, nickname FROM user;`
+3. 部署配置 `BOOTSTRAP_OWNER_OPENID=<openid>` 并重启 API
+4. 该账号再登录 → 确保其为默认店唯一 `OWNER`（若他人曾是店主则降为 `STAFF`）→「我的」出现商家工作台  
+
+本地与生产同一机制；亦可直接刷库插入 `store_member`。
 
 ### 5.2 下单
 

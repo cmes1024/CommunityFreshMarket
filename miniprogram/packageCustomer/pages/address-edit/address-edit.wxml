@@ -1,0 +1,10 @@
+<Header pageName="{{id ? copy.titles.addressEdit : copy.titles.addressNew}}" back="{{true}}" />
+<view class="page-body no-tab">
+  <view class="card">
+    <input placeholder="手机号" value="{{form.phone}}" bindinput="onField" data-k="phone" />
+    <input placeholder="小区" value="{{form.community}}" bindinput="onField" data-k="community" />
+    <input placeholder="楼栋" value="{{form.building}}" bindinput="onField" data-k="building" />
+    <input placeholder="室号" value="{{form.room}}" bindinput="onField" data-k="room" />
+  </view>
+  <button class="btn btn-cta" bind:tap="save">保存</button>
+</view>

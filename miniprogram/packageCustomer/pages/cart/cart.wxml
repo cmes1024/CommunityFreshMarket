@@ -1,0 +1,31 @@
+<Header pageName="{{copy.titles.cart}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<view class="page-body cart-page {{cart.itemCount ? 'has-bar' : ''}}">
+  <view wx:if="{{!cart.itemCount}}" class="empty-state">
+    <view class="empty-title">{{copy.cart.emptyTitle}}</view>
+    <view class="muted">{{copy.cart.emptyHint}}</view>
+    <button class="btn btn-cta" bind:tap="goCategory">{{copy.cart.goCategory}}</button>
+  </view>
+  <block wx:else>
+    <view class="line card" wx:for="{{cart.items}}" wx:key="productId">
+      <view class="thumb {{item.available ? 'veg' : 'sold'}}"></view>
+      <view class="meta grow">
+        <view class="name">{{item.name}}</view>
+        <view class="price">¥{{item.priceYuan}} <text class="muted">/ {{item.unitLabel}}</text></view>
+        <view class="muted" wx:if="{{!item.available}}">{{item.unavailableReason}}</view>
+        <view class="row space-between ops" wx:if="{{item.available}}">
+          <Stepper value="{{item.qtyNum}}" min="{{0}}" bind:change="onQty" data-id="{{item.productId}}" />
+          <view class="remove" data-id="{{item.productId}}" bind:tap="remove">{{copy.cart.remove}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="pay-hint muted">{{copy.pay.offlineHint}}</view>
+  </block>
+</view>
+<view class="mini-bar" wx:if="{{cart.itemCount}}" bind:tap="checkout">
+  <view>
+    <text class="mini-count">{{cart.itemCount}}</text> {{copy.category.selectedSuffix}}
+    <text class="price"> ¥{{cart.totalYuan}}</text>
+  </view>
+  <view class="go">{{copy.cart.goCheckout}}</view>
+</view>
+<TabBar current="cart" />

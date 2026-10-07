@@ -1,0 +1,66 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cfm-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_dev_password}
+      MYSQL_DATABASE: cfm
+      MYSQL_USER: cfm
+      MYSQL_PASSWORD: ${DB_PASSWORD:-cfm_dev_password}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - cfm_mysql_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+
+  api:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: cfm-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/cfm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      DB_USER: cfm
+      DB_PASSWORD: ${DB_PASSWORD:-cfm_dev_password}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-32bytes!!}
+      WX_APPID: ${WX_APPID:-}
+      WX_SECRET: ${WX_SECRET:-}
+      DEFAULT_STORE_ID: ${DEFAULT_STORE_ID:-1}
+      BOOTSTRAP_OWNER_OPENID: ${BOOTSTRAP_OWNER_OPENID:-}
+      UPLOAD_DIR: /app/uploads
+      UPLOAD_PUBLIC_BASE: ${UPLOAD_PUBLIC_BASE:-http://127.0.0.1:8088/uploads}
+      WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID: ${WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID:-}
+    volumes:
+      - cfm_uploads:/app/uploads
+    expose:
+      - "8080"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: cfm-nginx
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${HTTP_PORT:-8088}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - cfm_uploads:/var/www/uploads:ro
+
+volumes:
+  cfm_mysql_data:
+  cfm_uploads:

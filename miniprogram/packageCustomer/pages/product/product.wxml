@@ -1,0 +1,25 @@
+<Header pageName="{{copy.titles.product}}" back="{{true}}" />
+<view class="page-body no-tab detail">
+  <view class="hero {{product.inStock ? 'veg' : 'fruit'}}">
+    <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" mode="aspectFill" class="hero-img" />
+  </view>
+  <view class="body">
+    <view class="top">
+      <view class="name">{{product.name}}</view>
+      <view class="chip {{product.inStock ? '' : 'sold'}}">{{product.inStock ? copy.stock.inStock : copy.stock.soldOut}}</view>
+    </view>
+    <view class="sub">{{product.unitLine}}</view>
+    <view class="detail-price">¥{{product.priceYuan}} <text class="small">/ {{product.unitLabel}}</text></view>
+    <view class="info-block {{product.inStock ? '' : 'warn'}}">
+      <view class="h4">{{product.inStock ? copy.product.fulfillTitle : copy.product.restockTitle}}</view>
+      <view class="p">{{product.inStock ? copy.product.fulfillBody : copy.product.restockBody}}</view>
+    </view>
+  </view>
+  <view class="actions" wx:if="{{product.inStock}}">
+    <Stepper value="{{qty}}" min="{{1}}" bind:change="onStepper" />
+    <button class="btn btn-cta grow-btn" bind:tap="addCart">{{copy.product.addCart}}</button>
+  </view>
+  <view class="actions" wx:else>
+    <button class="btn btn-primary grow-btn" bind:tap="watch">{{watching ? copy.product.watching : copy.product.watchMe}}</button>
+  </view>
+</view>

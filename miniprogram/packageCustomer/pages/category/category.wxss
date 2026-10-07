@@ -1,0 +1,116 @@
+.cat-page {
+  display: flex;
+  height: calc(100vh - 200rpx);
+  padding-bottom: calc(var(--tabbar-height) + 120rpx);
+  box-sizing: border-box;
+}
+.side {
+  width: 176rpx;
+  height: 100%;
+  background: #d9f3ef;
+  flex-shrink: 0;
+}
+.side-item {
+  padding: 32rpx 16rpx;
+  min-height: 96rpx;
+  font-size: 24rpx;
+  color: var(--color-muted);
+  text-align: center;
+  border-left: 6rpx solid transparent;
+  box-sizing: border-box;
+}
+.side-item.active {
+  background: var(--color-background);
+  color: var(--color-primary);
+  font-weight: 600;
+  border-left-color: var(--color-primary);
+}
+.main {
+  flex: 1;
+  height: 100%;
+  padding: 16rpx 24rpx;
+  box-sizing: border-box;
+}
+.product-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  min-height: 192rpx;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid var(--color-line);
+}
+.hit {
+  display: flex;
+  gap: 24rpx;
+  align-items: center;
+  min-width: 0;
+}
+.thumb {
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 20rpx;
+  background: #6ee7b7;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.thumb.sold { background: #fcd34d; }
+.thumb-img { width: 100%; height: 100%; }
+.sold-tag {
+  position: absolute;
+  inset: 0;
+  background: rgba(19, 78, 74, 0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+.name { font-size: 28rpx; font-weight: 600; margin-bottom: 6rpx; }
+.unit {
+  font-size: 22rpx;
+  color: var(--color-muted);
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.is-sold .price { opacity: 0.55; }
+.btn-watch {
+  padding: 16rpx 20rpx;
+  min-height: 72rpx;
+  border-radius: var(--radius-pill);
+  border: 1rpx solid var(--color-line);
+  font-size: 24rpx;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+}
+.mini-bar {
+  position: fixed;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 16rpx);
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  min-height: 88rpx;
+  padding: 0 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 15;
+  box-shadow: 0 16rpx 48rpx rgba(15, 118, 110, 0.2);
+}
+.mini-bar .price { color: #fff; font-weight: 700; }
+.go {
+  background: var(--color-cta);
+  padding: 16rpx 28rpx;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 26rpx;
+}
+.mini-count {
+  font-weight: 700;
+}

@@ -1,0 +1,11 @@
+<Header pageName="{{copy.titles.orders}}" back="{{true}}" />
+<view class="page-body no-tab">
+  <view class="card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bind:tap="goDetail">
+    <view class="row space-between">
+      <text>{{item.statusLabel}}</text>
+      <text class="price">¥{{item.totalYuan}}</text>
+    </view>
+    <view class="muted">{{item.fulfillment === 'PICKUP' ? '自提' : '配送'}} · {{item.createdAt}}</view>
+  </view>
+  <view wx:if="{{!list.length}}" class="empty">暂无订单</view>
+</view>

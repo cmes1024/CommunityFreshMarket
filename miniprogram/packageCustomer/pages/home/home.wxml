@@ -1,0 +1,83 @@
+<Header pageName="{{displayStoreName}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<view class="page-body home">
+  <view class="hero {{store.heroImageUrl ? 'has-img' : ''}}">
+    <image wx:if="{{store.heroImageUrl}}" class="hero-bg" src="{{store.heroImageUrl}}" mode="aspectFill" />
+    <view wx:if="{{store.heroImageUrl}}" class="hero-mask"></view>
+    <view class="hero-content">
+      <view class="kicker">{{homeKicker}}</view>
+      <view wx:if="{{homeTitle}}" class="store">{{homeTitle}}</view>
+      <view class="desc">{{homeSubtitle}}</view>
+    </view>
+  </view>
+
+  <view class="status-strip">
+    <view class="status-item">
+      <view class="dot truck"></view>
+      <view>
+        <view class="strong">{{copy.home.delivery}}</view>
+        <view class="muted">{{copy.home.deliverySub}}</view>
+      </view>
+    </view>
+    <view class="status-item">
+      <view class="dot store"></view>
+      <view>
+        <view class="strong">{{copy.home.pickup}}</view>
+        <view class="muted">{{pickupHint || copy.home.pickupSubFallback}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <view class="section-title">{{copy.home.sectionWant}}</view>
+      <view class="linkish" bind:tap="goAll">{{copy.home.all}}</view>
+    </view>
+    <scroll-view scroll-x class="chip-scroll" enable-flex>
+      <view
+        class="chip-nav"
+        wx:for="{{categories}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bind:tap="goCategory"
+      >{{item.name}}</view>
+    </scroll-view>
+
+    <view class="home-grid cols-{{homeProductCols}}">
+      <view
+        class="home-card {{item.inStock ? '' : 'is-sold'}}"
+        wx:for="{{products}}"
+        wx:key="id"
+      >
+        <view class="home-card-hit" data-id="{{item.id}}" bind:tap="goDetail">
+          <view class="thumb {{item.inStock ? 'veg' : 'sold'}}">
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="thumb-img" />
+            <text wx:if="{{!item.inStock}}" class="sold-tag">{{copy.stock.soldOut}}</text>
+          </view>
+          <view class="meta">
+            <view class="name">{{item.name}}</view>
+            <view class="unit">{{item.unitLine}}</view>
+            <view class="price">¥{{item.priceYuan}} <text class="small">/ {{item.unitLabel}}</text></view>
+          </view>
+        </view>
+        <view wx:if="{{item.inStock}}" class="add-wrap" catch:tap="noop">
+          <Stepper
+            value="{{item.qty}}"
+            min="{{0}}"
+            size="{{homeProductCols === 3 ? 'sm' : 'md'}}"
+            bind:change="onQty"
+            data-id="{{item.id}}"
+          />
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!products.length}}" class="empty-reco">{{copy.home.emptyReco}}</view>
+  </view>
+</view>
+<ProductSheet
+  show="{{sheetShow}}"
+  productId="{{sheetProductId}}"
+  bind:close="onSheetClose"
+  bind:changed="onSheetChanged"
+/>
+<TabBar current="home" />

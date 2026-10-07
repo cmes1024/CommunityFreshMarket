@@ -1,0 +1,50 @@
+<Header pageName="{{id ? copy.titles.merchantProductEdit : copy.titles.merchantProductNew}}" back="{{true}}" />
+<view class="page-body no-tab">
+  <view class="hint">{{copy.merchant.productHint}}</view>
+
+  <view class="field">
+    <view class="label">{{copy.merchant.fieldImage}}</view>
+    <view class="img-box" bind:tap="pickImage">
+      <image wx:if="{{form.imageUrl}}" src="{{form.imageUrl}}" mode="aspectFill" class="img" />
+      <text wx:else class="muted">{{copy.merchant.imageUpload}}</text>
+    </view>
+  </view>
+
+  <view class="field">
+    <view class="label">{{copy.merchant.fieldName}}</view>
+    <input class="field-input" placeholder="商品名称" value="{{form.name}}" bindinput="onName" />
+  </view>
+
+  <view class="field">
+    <view class="label">{{copy.merchant.fieldUnit}}</view>
+    <picker range="{{unitLabels}}" value="{{unitIndex}}" bindchange="onUnit">
+      <view class="field-input picker">{{unitLabels[unitIndex] || '请选择'}}</view>
+    </picker>
+  </view>
+
+  <view class="field">
+    <view class="label">{{copy.merchant.fieldSpec}}</view>
+    <input
+      class="field-input"
+      placeholder="{{specPlaceholder}}"
+      value="{{form.specNote}}"
+      maxlength="{{64}}"
+      bindinput="onSpec"
+    />
+  </view>
+
+  <view class="field">
+    <view class="label">{{copy.merchant.fieldPrice}}</view>
+    <input class="field-input" placeholder="0.00" type="digit" value="{{priceYuan}}" bindinput="onPrice" />
+  </view>
+
+  <view class="field">
+    <view class="label">{{copy.merchant.fieldCategory}}</view>
+    <picker range="{{catLabels}}" value="{{catIndex}}" bindchange="onCat">
+      <view class="field-input picker">{{catLabels[catIndex] || '请先创建分类'}}</view>
+    </picker>
+  </view>
+
+  <button class="btn btn-ghost full" bind:tap="goCats">{{copy.merchant.goCats}}</button>
+  <button class="btn btn-cta full" bind:tap="save">{{copy.merchant.save}}</button>
+</view>

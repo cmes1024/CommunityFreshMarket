@@ -1,0 +1,5 @@
+<view class="stepper {{size === 'sm' ? 'sm' : ''}} {{value > 0 ? '' : 'compact'}}">
+  <view wx:if="{{value > 0}}" class="step-btn minus {{disabled || value <= min ? 'off' : ''}}" bind:tap="onMinus">−</view>
+  <text wx:if="{{value > 0}}" class="val">{{display}}</text>
+  <view class="step-btn plus {{disabled || value >= max ? 'off' : ''}}" bind:tap="onPlus">+</view>
+</view>

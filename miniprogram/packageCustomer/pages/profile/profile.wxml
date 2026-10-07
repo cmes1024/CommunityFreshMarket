@@ -1,0 +1,80 @@
+<Header pageName="{{copy.titles.profile}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<view class="profile-page">
+  <view class="profile-head">
+    <view class="avatar">{{avatarText}}</view>
+    <view class="meta">
+      <view class="name">{{user.nickname || copy.profile.defaultNickname}}</view>
+      <view class="sub">{{user.storeMember ? copy.profile.memberHint : copy.profile.guestHint}}</view>
+    </view>
+  </view>
+
+  <view class="menu-list">
+    <view class="menu-link" bind:tap="goAddr">
+      <text>{{copy.profile.addressBook}}</text><text class="arrow">›</text>
+    </view>
+    <view class="menu-link" bind:tap="goOrders">
+      <text>{{copy.profile.orders}}</text><text class="arrow">›</text>
+    </view>
+    <view class="menu-link" bind:tap="openContactSheet">
+      <text>{{copy.profile.contact}}</text><text class="arrow">›</text>
+    </view>
+  </view>
+
+  <view class="merchant-entry" wx:if="{{user.storeMember}}" bind:tap="goMerchant">
+    <view class="me-title">{{copy.profile.merchantEntry}}</view>
+    <view class="me-sub">{{copy.profile.merchantEntrySub}}</view>
+  </view>
+</view>
+
+<page-container
+  show="{{contactSheetShow}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto;"
+  bind:clickoverlay="closeContactSheet"
+  bind:afterleave="closeContactSheet"
+>
+  <view class="contact-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.profile.contactSheetTitle}}</view>
+      <view class="sheet-close" bind:tap="closeContactSheet">关闭</view>
+    </view>
+
+    <view class="sheet-list">
+      <view class="sheet-row" bind:tap="callStore">
+        <view class="sheet-ico phone">
+          <view class="ico-dot"></view>
+        </view>
+        <view class="sheet-row-main single">
+          <view class="sheet-label">{{copy.profile.storePhone}}</view>
+          <view class="sheet-phone {{contactPhone ? '' : 'empty'}}">
+            {{contactPhone || copy.profile.storePhoneEmpty}}
+          </view>
+        </view>
+        <view class="sheet-action">拨打</view>
+      </view>
+
+      <view class="sheet-row sheet-row-contact">
+        <view class="sheet-ico chat">
+          <view class="ico-dot"></view>
+        </view>
+        <view class="sheet-row-main single">
+          <view class="sheet-label">{{copy.profile.onlineService}}</view>
+          <view class="sheet-phone muted">微信会话</view>
+        </view>
+        <view class="sheet-action">打开</view>
+        <button
+          class="sheet-row-hit"
+          open-type="contact"
+          bind:tap="closeContactSheet"
+          hover-class="none"
+        ></button>
+      </view>
+    </view>
+  </view>
+</page-container>
+
+<TabBar current="profile" />

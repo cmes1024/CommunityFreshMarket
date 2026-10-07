@@ -1,0 +1,17 @@
+<view class="tabbar">
+  <view
+    wx:for="{{tabs}}"
+    wx:key="key"
+    class="tab {{item.key === current ? 'active' : ''}}"
+    data-url="{{item.url}}"
+    bind:tap="onTap"
+  >
+    <image
+      class="ico"
+      src="{{item.key === current ? item.iconActive : item.icon}}"
+      mode="aspectFit"
+    />
+    <view class="label">{{item.label}}</view>
+    <view wx:if="{{item.badge > 0}}" class="badge">{{item.badge > 99 ? '99+' : item.badge}}</view>
+  </view>
+</view>

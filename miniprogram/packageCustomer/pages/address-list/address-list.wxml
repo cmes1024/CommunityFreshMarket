@@ -1,0 +1,9 @@
+<Header pageName="{{copy.titles.addressList}}" back="{{true}}" />
+<view class="page-body no-tab">
+  <view class="card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bind:tap="onTap">
+    <view>{{item.community}} {{item.building}} {{item.room}}</view>
+    <view class="muted">{{item.phone}} {{item.isDefault ? '· 默认' : ''}}</view>
+  </view>
+  <view wx:if="{{!list.length}}" class="empty">还没有地址</view>
+  <button class="btn btn-cta" bind:tap="add">新增地址</button>
+</view>

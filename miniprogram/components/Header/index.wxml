@@ -1,0 +1,22 @@
+<!--components/Header/index.wxml-->
+<view
+  class="place {{transparent ? 'is-transparent' : ''}}"
+  style="height: {{headerHeightPx}}px;--header-height: {{headerHeightPx}}px;"
+></view>
+<view
+  class="header {{transparent ? 'is-transparent' : ''}} {{brand ? 'is-brand' : ''}}"
+  style="height: {{headerHeightPx}}px;top:0;{{headerStyle}};z-index:{{zIndex}}"
+>
+  <view
+    class="header-content"
+    style="width:{{menuPositionInfo.left}}px;height: {{menuPositionInfo.height}}px;margin-top:{{menuPositionInfo.top}}px"
+  >
+    <view wx:if="{{back}}" class="header-content-left" bind:tap="BackPage">返回</view>
+    <view
+      class="header-content-title text-align-{{alignContent}} {{brand ? 'is-brand' : ''}}"
+      style="--left:{{back ? '64rpx' : '0px'}};--right: {{menuPositionInfo.width}}px;{{titleStyle}}"
+    >{{pageName}}</view>
+  </view>
+</view>
+<loading zIndex="{{zIndex+1}}"/>
+<mini-use-agreement zIndex="{{zIndex+1}}" config="{{proxyConfig}}" bind:agree="agree" bind:disagree="disagree" bind:agreementClick="agreementClick" ex-panel="ex-panel" ex-wrapper="ex-wrapper" ex-logo="ex-logo" ex-btns="ex-btns" ex-disagree="ex-disagree"/>

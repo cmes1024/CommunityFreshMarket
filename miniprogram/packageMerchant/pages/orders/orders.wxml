@@ -1,0 +1,59 @@
+<Header pageName="{{copy.titles.merchantOrders}}" back="{{false}}" />
+<view class="orders-page">
+  <view class="m-priority">
+    <view class="m-priority-title">
+      {{copy.merchant.urgentTitle}}
+      <text class="pill" wx:if="{{urgentCount}}">{{urgentCount}}</text>
+    </view>
+    <view
+      class="order-card urgent {{item.pulse ? 'pulse' : ''}}"
+      wx:for="{{board.urgent}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bind:tap="go"
+    >
+      <view class="top">
+        <text>#{{item.id}}</text>
+        <text class="chip {{item.chipWarn ? 'warn' : ''}} {{item.chipPulse ? 'pulse-chip' : ''}}">{{item.chipLabel}}</text>
+      </view>
+      <view class="items">{{item.itemsText}}</view>
+      <view class="fulfill">{{item.fulfillText}}</view>
+      <view class="actions">
+        <button
+          wx:if="{{item.canCancel}}"
+          class="act"
+          catch:tap="onCancel"
+          data-id="{{item.id}}"
+        >{{copy.merchant.cancel}}</button>
+        <button
+          wx:if="{{item.nextStatus}}"
+          class="act primary"
+          catch:tap="onAdvance"
+          data-id="{{item.id}}"
+          data-status="{{item.status}}"
+        >{{item.primaryLabel}}</button>
+      </view>
+    </view>
+    <view wx:if="{{!board.urgent.length}}" class="empty-hint">{{copy.merchant.urgentEmpty}}</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">{{copy.merchant.othersTitle}}</view>
+    <view
+      class="order-card"
+      wx:for="{{board.others}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bind:tap="go"
+    >
+      <view class="top">
+        <text>#{{item.id}}</text>
+        <text class="chip">{{item.statusLabel}}</text>
+      </view>
+      <view class="items">{{item.itemsText}}</view>
+      <view class="fulfill">{{item.fulfillText}}</view>
+    </view>
+    <view wx:if="{{!board.others.length}}" class="empty-hint muted">{{copy.merchant.othersEmpty}}</view>
+  </view>
+</view>
+<TabBar current="orders" mode="merchant" />

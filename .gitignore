@@ -1,0 +1,13 @@
+.DS_Store
+.env
+*.log
+*.iml
+.idea/
+.vscode/
+*.class
+target/
+server/uploads/
+deploy/uploads/
+miniprogram/node_modules/
+miniprogram/miniprogram_npm/
+miniprogram/project.private.config.json

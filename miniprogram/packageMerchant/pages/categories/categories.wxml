@@ -1,0 +1,31 @@
+<Header pageName="{{copy.titles.merchantCategories}}" back="{{true}}" />
+<view class="page-body no-tab">
+  <view class="hint">{{copy.merchant.catHint}}</view>
+
+  <view class="cat-row" wx:for="{{list}}" wx:key="id">
+    <text class="cat-name">{{item.name}}</text>
+    <view class="cat-actions">
+      <text
+        class="chip {{item.enabled ? '' : 'off'}}"
+        data-id="{{item.id}}"
+        data-on="{{item.enabled ? 1 : 0}}"
+        data-name="{{item.name}}"
+        bind:tap="toggle"
+      >{{item.enabled ? copy.merchant.catEnabled : copy.merchant.catDisabled}}</text>
+      <text class="link-danger" data-id="{{item.id}}" bind:tap="remove">删除</text>
+    </view>
+  </view>
+
+  <view class="add-box" wx:if="{{adding}}">
+    <input
+      class="field-input"
+      placeholder="{{copy.merchant.catNamePlaceholder}}"
+      value="{{name}}"
+      bindinput="onName"
+      focus="{{true}}"
+    />
+    <button class="btn btn-cta" bind:tap="add">{{copy.merchant.save}}</button>
+  </view>
+
+  <button class="btn btn-cta full" wx:else bind:tap="showAdd">{{copy.merchant.catAdd}}</button>
+</view>

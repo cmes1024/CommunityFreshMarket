@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: community-fresh-market
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/cfm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${DB_USER:cfm}
+    password: ${DB_PASSWORD:cfm_dev_password}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+
+app:
+  default-store-id: ${DEFAULT_STORE_ID:1}
+  jwt-secret: ${JWT_SECRET:dev-only-change-me-please-32bytes!!}
+  jwt-expire-seconds: ${JWT_EXPIRE_SECONDS:604800}
+  wx-appid: ${WX_APPID:}
+  wx-secret: ${WX_SECRET:}
+  bootstrap-owner-openid: ${BOOTSTRAP_OWNER_OPENID:}
+  upload-dir: ${UPLOAD_DIR:/app/uploads}
+  upload-public-base: ${UPLOAD_PUBLIC_BASE:http://127.0.0.1:8088/uploads}
+  subscribe-restock-template-id: ${WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID:}
+
+logging:
+  level:
+    root: INFO
+    com.communityfreshmarket: DEBUG

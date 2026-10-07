@@ -1,0 +1,34 @@
+<Header pageName="{{copy.titles.checkout}}" back="{{true}}" />
+<view class="page-body no-tab">
+  <view class="steps muted">{{copy.checkout.steps}}</view>
+  <view class="seg">
+    <view class="seg-item {{fulfillment === 'DELIVERY' ? 'on' : ''}}" data-v="DELIVERY" bind:tap="switchF">{{copy.checkout.delivery}}</view>
+    <view class="seg-item {{fulfillment === 'PICKUP' ? 'on' : ''}}" data-v="PICKUP" bind:tap="switchF">{{copy.checkout.pickup}}</view>
+  </view>
+  <view class="card" wx:if="{{fulfillment === 'DELIVERY'}}" bind:tap="pickAddress">
+    <view wx:if="{{address}}">{{address.community}} {{address.building}} {{address.room}}</view>
+    <view class="muted" wx:else>{{copy.checkout.pickAddress}}</view>
+    <view class="muted" wx:if="{{address}}">{{address.phone}} · {{copy.checkout.asap}}</view>
+  </view>
+  <view class="card" wx:else>
+    <view
+      class="slot {{item.id === pickupSlotId ? 'on' : ''}}"
+      wx:for="{{slots}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bind:tap="pickSlot"
+    >{{item.label}}</view>
+  </view>
+  <view class="card">
+    <view class="muted">{{copy.checkout.remarkLabel}}</view>
+    <view class="phrases">
+      <view class="chip {{item.on ? 'active' : ''}}" wx:for="{{phrases}}" wx:key="text" data-text="{{item.text}}" bind:tap="togglePhrase">{{item.text}}</view>
+    </view>
+    <textarea class="area" value="{{remark}}" bindinput="onRemark" placeholder="{{copy.checkout.remarkPlaceholder}}" />
+  </view>
+  <view class="card">
+    <view class="row space-between"><text>{{copy.checkout.goods}}</text><text class="price">¥{{totalYuan}}</text></view>
+    <view class="muted">{{copy.pay.offlineHint}}</view>
+  </view>
+  <button class="btn btn-cta" loading="{{submitting}}" disabled="{{submitting}}" bind:tap="submit">{{copy.checkout.submit}}</button>
+</view>

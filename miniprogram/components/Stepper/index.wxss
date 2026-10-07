@@ -1,0 +1,61 @@
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.compact .plus {
+  margin-left: 0;
+}
+.step-btn {
+  width: 36rpx;
+  height: 36rpx;
+  min-width: 36rpx;
+  min-height: 36rpx;
+  max-width: 36rpx;
+  max-height: 36rpx;
+  border-radius: 50%;
+  background: var(--color-cta);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 24rpx;
+  font-weight: 500;
+  line-height: 1;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+.step-btn.minus {
+  background: #fff;
+  color: var(--color-cta);
+  border: 2rpx solid var(--color-cta);
+}
+.step-btn.off {
+  opacity: 0.35;
+}
+.val {
+  min-width: 32rpx;
+  padding: 0 4rpx;
+  text-align: center;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.stepper.sm .step-btn {
+  width: 28rpx;
+  height: 28rpx;
+  min-width: 28rpx;
+  min-height: 28rpx;
+  max-width: 28rpx;
+  max-height: 28rpx;
+  font-size: 20rpx;
+}
+.stepper.sm .val {
+  min-width: 28rpx;
+  font-size: 20rpx;
+}

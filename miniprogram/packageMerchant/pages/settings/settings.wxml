@@ -1,0 +1,162 @@
+<Header pageName="{{copy.titles.merchantSettings}}" back="{{false}}" />
+<view class="page-body settings-page">
+  <!-- 1. 店铺资料 -->
+  <view class="sec">
+    <view class="sec-head">
+      <view class="sec-title">{{copy.settings.storeSec}}</view>
+      <view class="sec-desc">{{copy.settings.storeHint}}</view>
+    </view>
+    <view class="group">
+      <view class="cell">
+        <view class="cell-label">{{copy.settings.nameLabel}}</view>
+        <input
+          class="cell-input"
+          placeholder="{{copy.settings.namePlaceholder}}"
+          value="{{store.name}}"
+          bindinput="onStore"
+          data-k="name"
+        />
+      </view>
+      <view class="cell">
+        <view class="cell-label">{{copy.settings.phoneLabel}}</view>
+        <input
+          class="cell-input"
+          placeholder="{{copy.settings.phonePlaceholder}}"
+          value="{{store.contactPhone}}"
+          bindinput="onStore"
+          data-k="contactPhone"
+          type="number"
+        />
+      </view>
+      <view class="cell last">
+        <view class="cell-label">{{copy.settings.noteLabel}}</view>
+        <input
+          class="cell-input"
+          placeholder="{{copy.settings.notePlaceholder}}"
+          value="{{store.contactNote}}"
+          bindinput="onStore"
+          data-k="contactNote"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 2. 顾客首页 -->
+  <view class="sec">
+    <view class="sec-head">
+      <view class="sec-title">{{copy.settings.homeSec}}</view>
+      <view class="sec-desc">{{copy.settings.homeHint}}</view>
+    </view>
+    <view class="group">
+      <view class="hero-box" bind:tap="pickHero">
+        <image wx:if="{{store.heroImageUrl}}" src="{{store.heroImageUrl}}" mode="aspectFill" class="hero-img" />
+        <view wx:else class="hero-empty">
+          <text class="hero-empty-txt">{{copy.settings.heroUpload}}</text>
+        </view>
+      </view>
+      <view wx:if="{{store.heroImageUrl}}" class="cell hero-actions">
+        <text class="link-danger" bind:tap="clearHero">{{copy.settings.heroClear}}</text>
+      </view>
+      <view class="cell">
+        <view class="cell-label">{{copy.settings.kickerLabel}}</view>
+        <input
+          class="cell-input"
+          placeholder="{{copy.settings.kickerPlaceholder}}"
+          value="{{store.homeKicker}}"
+          bindinput="onStore"
+          data-k="homeKicker"
+          maxlength="64"
+        />
+      </view>
+      <view class="cell">
+        <view class="cell-label">{{copy.settings.titleLabel}}</view>
+        <input
+          class="cell-input"
+          placeholder="{{copy.settings.titlePlaceholder}}"
+          value="{{store.homeTitle}}"
+          bindinput="onStore"
+          data-k="homeTitle"
+          maxlength="64"
+        />
+      </view>
+      <view class="cell">
+        <view class="cell-label">{{copy.settings.subtitleLabel}}</view>
+        <input
+          class="cell-input"
+          placeholder="{{copy.settings.subtitlePlaceholder}}"
+          value="{{store.homeSubtitle}}"
+          bindinput="onStore"
+          data-k="homeSubtitle"
+          maxlength="128"
+        />
+      </view>
+      <view class="cell cols-cell">
+        <view class="cell-label">{{copy.settings.colsLabel}}</view>
+        <view class="cols-row">
+          <view
+            class="cols-opt {{homeProductCols === 1 ? 'on' : ''}}"
+            data-cols="1"
+            bind:tap="onCols"
+          >{{copy.settings.cols1}}</view>
+          <view
+            class="cols-opt {{homeProductCols === 2 ? 'on' : ''}}"
+            data-cols="2"
+            bind:tap="onCols"
+          >{{copy.settings.cols2}}</view>
+          <view
+            class="cols-opt {{homeProductCols === 3 ? 'on' : ''}}"
+            data-cols="3"
+            bind:tap="onCols"
+          >{{copy.settings.cols3}}</view>
+        </view>
+      </view>
+      <view class="cell last cols-cell">
+        <view class="cell-label">{{copy.settings.detailModeLabel}}</view>
+        <view class="cols-row">
+          <view
+            class="cols-opt {{productDetailMode === 'SHEET' ? 'on' : ''}}"
+            data-mode="SHEET"
+            bind:tap="onDetailMode"
+          >{{copy.settings.detailModeSheet}}</view>
+          <view
+            class="cols-opt {{productDetailMode === 'PAGE' ? 'on' : ''}}"
+            data-mode="PAGE"
+            bind:tap="onDetailMode"
+          >{{copy.settings.detailModePage}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 3. 自提时段 -->
+  <view class="sec">
+    <view class="sec-head">
+      <view class="sec-title">{{copy.settings.slotsSec}}</view>
+      <view class="sec-desc">{{copy.settings.slotsHint}}</view>
+    </view>
+    <view class="group">
+      <view class="slot-row {{index === slots.length - 1 && !addingSlot ? 'last' : ''}}" wx:for="{{slots}}" wx:key="id">
+        <text class="slot-label">{{item.label}}{{item.enabled ? '' : ' ' + copy.settings.disabled}}</text>
+        <text class="link-muted" data-id="{{item.id}}" bind:tap="removeSlot">{{copy.settings.remove}}</text>
+      </view>
+      <view class="slot-add" wx:if="{{addingSlot}}">
+        <input
+          class="cell-input grow"
+          placeholder="{{copy.settings.slotPlaceholder}}"
+          value="{{slotLabel}}"
+          bindinput="onSlotLabel"
+          focus="{{true}}"
+        />
+        <button class="btn-inline" bind:tap="addSlot">{{copy.settings.confirmAdd}}</button>
+      </view>
+      <view class="slot-add-btn" wx:else bind:tap="showAddSlot">{{copy.settings.addSlot}}</view>
+    </view>
+  </view>
+
+  <view class="save-spacer"></view>
+</view>
+
+<view class="save-bar">
+  <button class="btn btn-cta save-btn" bind:tap="saveStore">{{copy.settings.saveStore}}</button>
+</view>
+<TabBar current="settings" mode="merchant" />

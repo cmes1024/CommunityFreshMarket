@@ -1,0 +1,44 @@
+<Header pageName="{{copy.titles.category}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<view class="cat-page">
+  <scroll-view scroll-y class="side">
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="side-item {{item.id === activeId ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bind:tap="selectCat"
+    >{{item.name}}</view>
+  </scroll-view>
+  <scroll-view scroll-y class="main">
+    <view class="product-row {{item.inStock ? '' : 'is-sold'}}" wx:for="{{products}}" wx:key="id">
+      <view class="hit grow" data-id="{{item.id}}" bind:tap="goDetail">
+        <view class="thumb {{item.inStock ? 'veg' : 'sold'}}">
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="thumb-img" />
+          <text wx:if="{{!item.inStock}}" class="sold-tag">{{copy.stock.soldOut}}</text>
+        </view>
+        <view class="meta">
+          <view class="name">{{item.name}}</view>
+          <view class="unit">{{item.unitLine}}</view>
+          <view class="price">¥{{item.priceYuan}}</view>
+        </view>
+      </view>
+      <Stepper wx:if="{{item.inStock}}" value="{{item.qty}}" min="{{0}}" bind:change="onQty" data-id="{{item.id}}" />
+      <view wx:else class="btn-watch" data-id="{{item.id}}" bind:tap="goDetail">{{copy.category.watchMe}}</view>
+    </view>
+    <view wx:if="{{!products.length}}" class="empty">{{copy.category.empty}}</view>
+  </scroll-view>
+</view>
+<view class="mini-bar" wx:if="{{cart.itemCount}}" bind:tap="goCheckout">
+  <view>
+    <text class="mini-count">{{cart.itemCount}}</text> {{copy.category.selectedSuffix}}
+    <text class="price"> ¥{{cart.totalYuan}}</text>
+  </view>
+  <view class="go">{{copy.category.goCheckout}}</view>
+</view>
+<ProductSheet
+  show="{{sheetShow}}"
+  productId="{{sheetProductId}}"
+  bind:close="onSheetClose"
+  bind:changed="onSheetChanged"
+/>
+<TabBar current="category" />

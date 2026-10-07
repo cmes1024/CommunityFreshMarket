@@ -1,0 +1,56 @@
+{
+  "pages": ["pages/launch/launch"],
+  "subPackages": [
+    {
+      "root": "packageCustomer",
+      "name": "customer",
+      "pages": [
+        "pages/home/home",
+        "pages/category/category",
+        "pages/product/product",
+        "pages/cart/cart",
+        "pages/checkout/checkout",
+        "pages/address-list/address-list",
+        "pages/address-edit/address-edit",
+        "pages/orders/orders",
+        "pages/order-detail/order-detail",
+        "pages/profile/profile"
+      ]
+    },
+    {
+      "root": "packageMerchant",
+      "name": "merchant",
+      "pages": [
+        "pages/orders/orders",
+        "pages/order-detail/order-detail",
+        "pages/products/products",
+        "pages/product-edit/product-edit",
+        "pages/categories/categories",
+        "pages/settings/settings",
+        "pages/profile/profile"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/launch/launch": {
+      "network": "all",
+      "packages": ["customer"]
+    }
+  },
+  "usingComponents": {
+    "Header": "/components/Header/index",
+    "TabBar": "/components/TabBar/index",
+    "Stepper": "/components/Stepper/index",
+    "ProductSheet": "/components/ProductSheet/index"
+  },
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "绿意鲜生",
+    "navigationBarBackgroundColor": "#F0FDFA",
+    "navigationStyle": "custom",
+    "backgroundColor": "#F0FDFA"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

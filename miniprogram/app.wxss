@@ -1,0 +1,130 @@
+@import "/styles/variable.wxss";
+@import "/styles/common.wxss";
+
+page {
+  --color-primary: #0f766e;
+  --color-secondary: #2dd4bf;
+  --color-cta: #16a34a;
+  --color-background: #f0fdfa;
+  --color-surface: #ffffff;
+  --color-text: #134e4a;
+  --color-muted: #5b7c78;
+  --color-line: #cce5e1;
+  --color-price: #d97706;
+  --color-danger: #dc2626;
+  --color-warn: #b45309;
+  --color-mist: #ccfbf1;
+  --radius: 24rpx;
+  --radius-pill: 999rpx;
+  --space-xs: 8rpx;
+  --space-sm: 16rpx;
+  --space-md: 32rpx;
+  --space-lg: 48rpx;
+  --tabbar-height: 116rpx;
+  font-family: "PingFang SC", "Noto Sans SC", "Helvetica Neue", sans-serif;
+  font-size: 28rpx;
+  color: var(--color-text);
+  background-color: var(--color-background);
+  touch-action: manipulation;
+}
+
+.page-body {
+  padding: 24rpx 32rpx calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 24rpx);
+  box-sizing: border-box;
+}
+
+.page-body.no-tab {
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 28rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid rgba(204, 229, 225, 0.65);
+}
+
+.price {
+  color: var(--color-price);
+  font-weight: 700;
+}
+
+.muted {
+  color: var(--color-muted);
+  font-size: 24rpx;
+}
+
+.btn {
+  min-height: 88rpx;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0 32rpx;
+  border: none;
+}
+.btn::after { border: none; }
+
+.btn-cta {
+  background: var(--color-cta);
+  color: #fff;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2rpx solid var(--color-line);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--color-danger);
+  border: 2rpx solid #fecaca;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.empty {
+  padding: 120rpx 48rpx;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.chip {
+  padding: 12rpx 24rpx;
+  border-radius: var(--radius-pill);
+  background: var(--color-mist);
+  color: var(--color-primary);
+  font-size: 24rpx;
+  margin-right: 12rpx;
+}
+
+.chip.active {
+  background: var(--color-primary);
+  color: #fff;
+}

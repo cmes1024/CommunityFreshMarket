@@ -1,0 +1,253 @@
+.profile-page {
+  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.profile-head {
+  display: flex;
+  gap: 28rpx;
+  align-items: center;
+  padding: 48rpx 40rpx;
+  background: var(--color-surface);
+  border-bottom: 1rpx solid var(--color-line);
+}
+
+.avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #f0fdfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.meta .name {
+  font-size: 34rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.meta .sub {
+  font-size: 24rpx;
+  color: var(--color-muted);
+}
+
+.menu-list {
+  background: var(--color-surface);
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 104rpx;
+  padding: 0 40rpx;
+  font-size: 30rpx;
+  background: var(--color-surface);
+  border-bottom: 1rpx solid var(--color-line);
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  border-radius: 0;
+  line-height: 1.4;
+  font-weight: 400;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.arrow {
+  color: var(--color-muted);
+  font-size: 36rpx;
+}
+
+.contact-sheet {
+  background: var(--color-surface);
+  border-radius: 28rpx 28rpx 0 0;
+  padding: 0 0 calc(16rpx + env(safe-area-inset-bottom));
+}
+
+.grab {
+  width: 56rpx;
+  height: 6rpx;
+  border-radius: 999rpx;
+  background: #d5e8e4;
+  margin: 12rpx auto 0;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 32rpx 4rpx;
+}
+
+.sheet-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.sheet-close {
+  font-size: 26rpx;
+  color: var(--color-muted);
+  padding: 8rpx 0 8rpx 24rpx;
+}
+
+.sheet-list {
+  margin: 0;
+}
+
+.sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  min-height: 0;
+  padding: 18rpx 32rpx;
+  box-sizing: border-box;
+  border-bottom: 1rpx solid var(--color-line);
+  background: transparent;
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  line-height: 1;
+  font-weight: 400;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.sheet-row:last-child {
+  border-bottom: none;
+}
+
+.sheet-row-contact {
+  position: relative;
+}
+
+/* 透明热区覆盖整行，避免原生 button 默认缩宽/居中 */
+.sheet-row-hit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  opacity: 0;
+}
+
+.sheet-row-hit::after {
+  border: none;
+  display: none;
+}
+
+.sheet-ico {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 14rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheet-ico.phone {
+  background: #ccfbf1;
+}
+
+.sheet-ico.chat {
+  background: #dcfce7;
+}
+
+.ico-dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+.sheet-ico.chat .ico-dot {
+  background: var(--color-cta);
+  border-radius: 6rpx;
+}
+
+.sheet-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheet-row-main.single {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  gap: 12rpx;
+  min-width: 0;
+}
+
+.sheet-label {
+  flex-shrink: 0;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.sheet-phone {
+  flex: 1;
+  min-width: 0;
+  font-size: 24rpx;
+  color: var(--color-primary);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheet-phone.muted,
+.sheet-phone.empty {
+  color: var(--color-muted);
+}
+
+.sheet-action {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+  padding: 6rpx 14rpx;
+  border-radius: var(--radius-pill);
+  background: var(--color-mist);
+  line-height: 1.2;
+}
+
+.merchant-entry {
+  margin: 32rpx 24rpx 0;
+  padding: 32rpx;
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.me-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.me-sub {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  font-weight: 300;
+  opacity: 0.85;
+}

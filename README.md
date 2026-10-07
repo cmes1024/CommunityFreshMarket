@@ -6,7 +6,18 @@
 
 ## 当前阶段
 
-产品、技术方案与第一波 UI（含交互 §2.8）已对齐；开发以产品文档 + `docs/prototypes` 为准。下一步可做工程脚手架。
+产品 / 技术方案 / UI 原型已对齐。工程脚手架已落地：`server/`（Spring Boot）+ `deploy/`（Compose）。
+
+本地起后端：
+
+```bash
+cd deploy && cp .env.example .env && docker compose up -d --build
+curl -s http://127.0.0.1:8088/api/v1/health
+```
+
+微信开发者工具打开 `miniprogram/`（见该目录 README）。已打通：登录、逛店加购、地址、提交预约、商家接单推进。
+
+第一波后端主路径与小程序主界面已齐；订阅消息需配置 `WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID` 后才会真推。
 
 ## 文档
 

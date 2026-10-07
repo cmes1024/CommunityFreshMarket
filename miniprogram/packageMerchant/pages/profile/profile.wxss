@@ -1,0 +1,83 @@
+.profile-page {
+  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.profile-head {
+  display: flex;
+  gap: 28rpx;
+  align-items: center;
+  padding: 48rpx 40rpx;
+  background: var(--color-surface);
+  border-bottom: 1rpx solid var(--color-line);
+}
+
+.avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #f0fdfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.meta .name {
+  font-size: 34rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.meta .sub {
+  font-size: 24rpx;
+  color: var(--color-muted);
+}
+
+.menu-list {
+  background: var(--color-surface);
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 104rpx;
+  padding: 0 40rpx;
+  font-size: 30rpx;
+  background: var(--color-surface);
+  border-bottom: 1rpx solid var(--color-line);
+}
+
+.arrow {
+  color: var(--color-muted);
+  font-size: 36rpx;
+}
+
+.merchant-entry {
+  margin: 32rpx 24rpx 0;
+  padding: 32rpx;
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.merchant-entry.alt {
+  background: #3f6f6a;
+}
+
+.me-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.me-sub {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  font-weight: 300;
+  opacity: 0.85;
+}

@@ -1,0 +1,49 @@
+{
+  "compileType": "miniprogram",
+  "libVersion": "3.7.6",
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "setting": {
+    "coverView": true,
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "enhance": true,
+    "showShadowRootInWxmlPanel": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "useCompilerPlugins": [
+      "less"
+    ],
+    "uglifyFileName": false,
+    "ignoreDevUnusedFiles": false,
+    "compileWorklet": false,
+    "ignoreUploadUnusedFiles": false,
+    "uploadWithSourceMap": true,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "urlCheck": false,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "lessSetting": {
+      "commonUseFilePath": "app.less"
+    }
+  },
+  "condition": {},
+  "editorSetting": {
+    "tabIndent": "auto",
+    "tabSize": 2
+  },
+  "appid": "wxb540e86bda9179c5",
+  "simulatorPluginLibVersion": {}
+}

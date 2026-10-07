@@ -1,0 +1,49 @@
+<Header pageName="{{copy.titles.merchantProducts}}" back="{{false}}" />
+<view class="page-body products-page">
+  <view class="m-toolbar">
+    <button class="btn btn-ghost btn-sm" bind:tap="goCats">{{copy.merchant.catManage}}</button>
+    <button class="btn btn-cta btn-sm" bind:tap="create">{{copy.merchant.addProduct}}</button>
+  </view>
+
+  <view class="m-sku" wx:for="{{list}}" wx:key="id">
+    <view class="cell-row">
+      <view class="grow" data-id="{{item.id}}" bind:tap="edit">
+        <view class="name">{{item.name}}</view>
+        <view class="price">¥{{item.priceYuan}} / {{item.unitLabel}}</view>
+        <view wx:if="{{item.specNote}}" class="muted spec">{{item.specNote}}</view>
+        <view class="chips">
+          <text class="chip {{item.onShelf ? '' : 'off'}}">{{item.onShelf ? copy.merchant.shelfOn : copy.merchant.shelfOff}}</text>
+          <text class="chip {{item.inStock ? '' : 'sold'}}">{{item.inStock ? copy.merchant.stockOn : copy.merchant.stockOff}}</text>
+        </view>
+      </view>
+      <view class="linkish" data-id="{{item.id}}" bind:tap="edit">{{copy.merchant.edit}}</view>
+    </view>
+    <view
+      class="toggle-row"
+      data-id="{{item.id}}"
+      data-on="{{item.onShelf ? 1 : 0}}"
+      bind:tap="toggleShelf"
+    >
+      <view class="toggle-label">
+        <text>{{copy.merchant.shelfOn}}</text>
+        <text class="sub">{{copy.merchant.shelfHint}}</text>
+      </view>
+      <view class="switch {{item.onShelf ? 'on' : ''}}"></view>
+    </view>
+    <view
+      class="toggle-row last"
+      data-id="{{item.id}}"
+      data-on="{{item.inStock ? 1 : 0}}"
+      bind:tap="toggleStock"
+    >
+      <view class="toggle-label">
+        <text>{{copy.merchant.stockOn}}</text>
+        <text class="sub">{{item.inStock ? copy.merchant.stockHintOn : copy.merchant.stockHintOff}}</text>
+      </view>
+      <view class="switch {{item.inStock ? 'on' : ''}}"></view>
+    </view>
+  </view>
+
+  <view wx:if="{{!list.length}}" class="empty">暂无商品，点上方新增</view>
+</view>
+<TabBar current="products" mode="merchant" />

@@ -1,0 +1,5 @@
+.steps { flex-wrap: wrap; gap: 8rpx; }
+.step { font-size: 22rpx; color: var(--color-muted); }
+.step.done { color: var(--color-primary); font-weight: 600; }
+.status { font-size: 36rpx; font-weight: 700; margin-top: 16rpx; }
+.btn { margin-top: 16rpx; }

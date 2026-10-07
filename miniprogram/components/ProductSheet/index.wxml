@@ -1,0 +1,48 @@
+<page-container
+  show="{{show}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: 78%;"
+  bind:clickoverlay="close"
+  bind:afterleave="onAfterLeave"
+>
+  <view class="sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view wx:if="{{loading}}" class="loading">加载中…</view>
+    <block wx:elif="{{product}}">
+      <scroll-view scroll-y class="sheet-body">
+        <view class="hero {{product.inStock ? 'veg' : 'fruit'}}">
+          <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" mode="aspectFill" class="hero-img" />
+        </view>
+        <view class="info">
+          <view class="top">
+            <view class="name">{{product.name}}</view>
+            <view class="chip {{product.inStock ? '' : 'sold'}}">
+              {{product.inStock ? copy.stock.inStock : copy.stock.soldOut}}
+            </view>
+          </view>
+          <view class="sub">{{product.unitLine}}</view>
+          <view class="price">
+            ¥{{product.priceYuan}}
+            <text class="small">/ {{product.unitLabel}}</text>
+          </view>
+          <view class="info-block {{product.inStock ? '' : 'warn'}}">
+            <view class="h4">{{product.inStock ? copy.product.fulfillTitle : copy.product.restockTitle}}</view>
+            <view class="p">{{product.inStock ? copy.product.fulfillBody : copy.product.restockBody}}</view>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="actions" wx:if="{{product.inStock}}">
+        <Stepper value="{{qty}}" min="{{1}}" bind:change="onStepper" />
+        <button class="cta" bind:tap="addCart">{{copy.product.addCart}}</button>
+      </view>
+      <view class="actions" wx:else>
+        <button class="cta primary" bind:tap="watch">
+          {{watching ? copy.product.watching : copy.product.watchMe}}
+        </button>
+      </view>
+    </block>
+  </view>
+</page-container>

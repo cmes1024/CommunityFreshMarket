@@ -1,11 +1,11 @@
 /* 绿意鲜生 UI 稿 v2 — 交互：篮状态、返回栈、结算反馈 */
 
 const catalog = [
-  { id: "bok", name: "本地小白菜", unit: "斤", price: 4.8, cat: "叶菜", thumb: "veg", sold: false },
+  { id: "bok", name: "本地小白菜", unit: "斤", price: 4.8, cat: "叶菜", thumb: "veg", sold: false, spec: "约 1 斤" },
   { id: "romaine", name: "罗马生菜", unit: "份", price: 6.5, cat: "叶菜", thumb: "veg", sold: false },
   { id: "carrot", name: "胡萝卜", unit: "斤", price: 3.2, cat: "根茎", thumb: "veg", sold: false },
   { id: "berry", name: "红颜草莓", unit: "份", price: 28, cat: "水果", thumb: "fruit", sold: true },
-  { id: "egg", name: "土鸡蛋", unit: "份", price: 12.8, cat: "蛋奶", thumb: "veg", sold: false },
+  { id: "egg", name: "土鸡蛋", unit: "份", price: 12.8, cat: "蛋奶", thumb: "veg", sold: false, spec: "约 10 枚" },
 ];
 
 const cart = new Map(); // id -> qty
@@ -143,7 +143,7 @@ function renderCategory() {
           <div class="thumb ${p.thumb}${p.sold ? " sold" : ""}"></div>
           <div class="meta">
             <p class="name">${p.name}</p>
-            <p class="unit">${p.sold ? '<span class="chip sold">售罄</span>' : '<span class="chip">有货</span>'} · ${p.unit}</p>
+            <p class="unit">${p.sold ? '<span class="chip sold">售罄</span>' : '<span class="chip">有货</span>'} · ${p.unit}${p.spec ? ` · ${p.spec}` : ""}</p>
             <div class="price">${money(p.price)} <small>/ ${p.unit}</small></div>
           </div>
         </button>
@@ -195,6 +195,8 @@ function renderCartPage() {
     })
     .join("");
   $("#cartTotal").textContent = money(cartSum());
+  const cartCountEl = $("#cartCount");
+  if (cartCountEl) cartCountEl.textContent = String(cartCount());
 }
 
 function renderScreenNav() {
@@ -483,6 +485,23 @@ $("#submitOrder")?.addEventListener("click", async () => {
 $("#sheetOk")?.addEventListener("click", () => {
   $("#successSheet").hidden = true;
   go("c-order-detail", { resetHistory: true });
+});
+
+$("#protoContactStore")?.addEventListener("click", () => {
+  const sheet = $("#contactSheet");
+  if (sheet) sheet.hidden = false;
+});
+$("#contactSheetClose")?.addEventListener("click", () => {
+  const sheet = $("#contactSheet");
+  if (sheet) sheet.hidden = true;
+});
+$("#contactPhoneBtn")?.addEventListener("click", () => {
+  const sheet = $("#contactSheet");
+  if (sheet) sheet.hidden = true;
+});
+$("#contactOnlineBtn")?.addEventListener("click", () => {
+  const sheet = $("#contactSheet");
+  if (sheet) sheet.hidden = true;
 });
 
 $("#sheetHome")?.addEventListener("click", () => {

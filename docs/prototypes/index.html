@@ -70,9 +70,9 @@
           <!-- HOME -->
           <section class="screen active" data-screen="c-home" data-title="绿意鲜生" data-brand data-tab="home">
             <div class="hero-home">
-              <div class="hero-kicker">今日营业中 · 当面收款</div>
-              <h2 class="store">绿意鲜生</h2>
-              <p>预约配送或到店自提，店员备好再联系你</p>
+              <div class="hero-kicker">营业中</div>
+              <h2 class="store">时令鲜到</h2>
+              <p>可预约配送</p>
             </div>
             <div class="status-strip">
               <div class="status-item">
@@ -95,27 +95,56 @@
                 <button type="button" class="chip-nav" data-go="c-category" data-cat="水果">水果</button>
                 <button type="button" class="chip-nav" data-go="c-category" data-cat="蛋奶">蛋奶</button>
               </div>
-              <div class="home-sku" data-go="c-product">
-                <div class="thumb veg"></div>
-                <div class="meta">
-                  <p class="name">本地小白菜</p>
-                  <p class="unit">约 1 斤 · 当面称重结</p>
-                  <div class="price">¥4.80 <small>/ 斤</small></div>
+              <div class="home-grid">
+                <div class="home-card">
+                  <button type="button" class="home-card-hit" data-go="c-product">
+                    <div class="thumb veg"></div>
+                    <div class="meta">
+                      <p class="name">本地小白菜</p>
+                      <p class="unit">斤 · 约 1 斤 · 当面称重结</p>
+                      <div class="price">¥4.80 <small>/ 斤</small></div>
+                    </div>
+                  </button>
+                  <button type="button" class="icon-add" data-add="bok" aria-label="加入商品篮">
+                    <svg class="ico ico-sm"><use href="#i-plus"/></svg>
+                  </button>
                 </div>
-                <button type="button" class="icon-add" data-add="bok" aria-label="加入商品篮">
-                  <svg class="ico ico-sm"><use href="#i-plus"/></svg>
-                </button>
-              </div>
-              <div class="home-sku" data-go="c-product">
-                <div class="thumb veg"></div>
-                <div class="meta">
-                  <p class="name">罗马生菜</p>
-                  <p class="unit">1 份</p>
-                  <div class="price">¥6.50 <small>/ 份</small></div>
+                <div class="home-card">
+                  <button type="button" class="home-card-hit" data-go="c-product">
+                    <div class="thumb veg"></div>
+                    <div class="meta">
+                      <p class="name">罗马生菜</p>
+                      <p class="unit">份</p>
+                      <div class="price">¥6.50 <small>/ 份</small></div>
+                    </div>
+                  </button>
+                  <button type="button" class="icon-add" data-add="romaine" aria-label="加入商品篮">
+                    <svg class="ico ico-sm"><use href="#i-plus"/></svg>
+                  </button>
                 </div>
-                <button type="button" class="icon-add" data-add="romaine" aria-label="加入商品篮">
-                  <svg class="ico ico-sm"><use href="#i-plus"/></svg>
-                </button>
+                <div class="home-card">
+                  <button type="button" class="home-card-hit" data-go="c-product">
+                    <div class="thumb veg"></div>
+                    <div class="meta">
+                      <p class="name">胡萝卜</p>
+                      <p class="unit">斤 · 当面称重结</p>
+                      <div class="price">¥3.20 <small>/ 斤</small></div>
+                    </div>
+                  </button>
+                  <button type="button" class="icon-add" data-add="carrot" aria-label="加入商品篮">
+                    <svg class="ico ico-sm"><use href="#i-plus"/></svg>
+                  </button>
+                </div>
+                <div class="home-card is-sold">
+                  <button type="button" class="home-card-hit" data-go="c-product-sold">
+                    <div class="thumb fruit"><span class="sold-tag">售罄</span></div>
+                    <div class="meta">
+                      <p class="name">红颜草莓</p>
+                      <p class="unit">今日售罄</p>
+                      <div class="price">¥28.00 <small>/ 份</small></div>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
           </section>
@@ -150,7 +179,7 @@
                 <h2>本地小白菜</h2>
                 <span class="chip">有货</span>
               </div>
-              <p class="sub">单位：斤 · 约 1 斤/份，以当面称重为准</p>
+              <p class="sub">单位：斤 · 约 1 斤 · 当面称重为准</p>
               <div class="detail-price">¥4.80 <small>/ 斤</small></div>
               <div class="info-block">
                 <h4>履约说明</h4>
@@ -198,9 +227,12 @@
             </div>
             <div id="cartFilled" hidden>
               <div id="cartLines"></div>
-              <div class="footer-bar cart-footer">
-                <div class="sum">合计 <strong id="cartTotal">¥0.00</strong></div>
-                <button type="button" class="btn btn-primary" style="flex:0 0 132px" data-go="c-checkout">去结算</button>
+              <div class="mini-cart-bar">
+                <div>
+                  <span class="mini-count" id="cartCount">0</span> 件已选
+                  <strong class="price" id="cartTotal">¥0.00</strong>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" data-go="c-checkout">去结算</button>
               </div>
             </div>
           </section>
@@ -389,7 +421,7 @@
             </div>
             <button type="button" class="menu-link" data-go="c-address"><span>地址簿</span><span class="arrow">›</span></button>
             <button type="button" class="menu-link" data-go="c-orders"><span>我的订单</span><span class="arrow">›</span></button>
-            <button type="button" class="menu-link" data-toast="将打开微信客服"><span>联系客服</span><span class="arrow">›</span></button>
+            <button type="button" class="menu-link" id="protoContactStore"><span>联系门店</span><span class="arrow">›</span></button>
             <button type="button" class="merchant-entry" data-go="m-orders" data-mode-switch="merchant">
               商家工作台
               <small>仅店铺成员可见</small>
@@ -523,11 +555,12 @@
 
           <section class="screen" data-screen="m-product-edit" data-title="编辑商品" data-back data-mode="merchant">
             <div class="section">
-              <p class="hint">单位 = 系统枚举；分类 = 本店「分类管理」数据（原型示意）。</p>
+              <p class="hint">单位 = 系统枚举；规格说明可选；分类 = 本店「分类管理」数据（原型示意）。</p>
               <div class="field"><label>名称</label><input value="本地小白菜" /></div>
               <div class="field"><label>单位（系统）</label>
                 <select id="unitSelect"><option value="JIN">斤</option><option value="PORTION">份</option><option value="PIECE">件</option></select>
               </div>
+              <div class="field"><label>规格说明（可选）</label><input placeholder="如 约 1 斤、约 10 枚" value="约 1 斤" /></div>
               <div class="field"><label>价格（元）</label><input inputmode="decimal" value="4.80" /></div>
               <div class="field"><label>分类（本店）</label>
                 <select id="catSelect"><option>叶菜</option><option>根茎</option><option>水果</option><option>蛋奶</option></select>
@@ -538,14 +571,50 @@
           </section>
 
           <section class="screen" data-screen="m-settings" data-title="履约设置" data-tab="m-settings" data-mode="merchant">
-            <div class="section">
-              <h3 class="section-title">店铺联系方式</h3>
-              <div class="field"><label>电话</label><input inputmode="tel" value="021-6688XXXX" /></div>
-              <h3 class="section-title">自提可约时段</h3>
-              <div class="slot static">今天 16:00 – 17:00</div>
-              <div class="slot static">今天 17:00 – 18:00</div>
-              <button type="button" class="btn btn-ghost" style="width:100%;margin:8px 0" data-toast="原型：添加时段">＋ 添加时段</button>
-              <button type="button" class="btn btn-primary" style="width:100%" data-toast="设置已保存">保存</button>
+            <div class="section settings-proto">
+              <div class="sec-head">
+                <h3 class="section-title" style="margin:0 0 4px">店铺资料</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">店名显示在顾客端导航左上角</p>
+              </div>
+              <div class="settings-group">
+                <div class="settings-cell"><label>店名</label><input value="绿意鲜生" /></div>
+                <div class="settings-cell"><label>电话</label><input inputmode="tel" value="021-6688XXXX" /></div>
+                <div class="settings-cell"><label>履约说明</label><input placeholder="如配送范围、当面收款等" /></div>
+              </div>
+              <div class="sec-head" style="margin-top:18px">
+                <h3 class="section-title" style="margin:0 0 4px">顾客首页</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">头图、文案与商品列数；留空文案用默认</p>
+              </div>
+              <div class="settings-group">
+                <div class="settings-cell"><label>营业状态</label><input value="营业中" /></div>
+                <div class="settings-cell"><label>主标题</label><input value="时令鲜到" placeholder="头图大字；留空不显示" /></div>
+                <div class="settings-cell"><label>副标题</label><input value="可预约配送" /></div>
+                <div class="settings-cell settings-cols">
+                  <label>商品列数</label>
+                  <div class="cols-row" style="display:flex;gap:8px;margin-top:6px;width:100%">
+                    <button type="button" class="chip-nav" data-toast="原型：1 列">1 列</button>
+                    <button type="button" class="chip-nav active" data-toast="原型：2 列">2 列</button>
+                    <button type="button" class="chip-nav" data-toast="原型：3 列">3 列</button>
+                  </div>
+                </div>
+                <div class="settings-cell settings-cols">
+                  <label>点商品打开</label>
+                  <div class="cols-row" style="display:flex;gap:8px;margin-top:6px;width:100%">
+                    <button type="button" class="chip-nav active" data-toast="原型：半屏">半屏</button>
+                    <button type="button" class="chip-nav" data-toast="原型：整页">整页</button>
+                  </div>
+                </div>
+              </div>
+              <div class="sec-head" style="margin-top:18px">
+                <h3 class="section-title" style="margin:0 0 4px">自提时段</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">顾客结算自提时可选</p>
+              </div>
+              <div class="settings-group">
+                <div class="slot static" style="margin:0;border:0;border-radius:0;border-bottom:1px solid var(--color-line)">今天 16:00 – 17:00</div>
+                <div class="slot static" style="margin:0;border:0;border-radius:0">今天 17:00 – 18:00</div>
+                <button type="button" class="btn btn-ghost" style="width:100%;margin:0;border-radius:0;border:0;border-top:1px solid var(--color-line)" data-toast="原型：添加时段">添加时段</button>
+              </div>
+              <button type="button" class="btn btn-primary" style="width:100%;margin-top:16px" data-toast="设置已保存">保存设置</button>
             </div>
           </section>
 
@@ -575,6 +644,32 @@
             <p>店员确认后会备货；可在「我的订单」查看进度。收款在线下完成。</p>
             <button type="button" class="btn btn-primary" style="width:100%" id="sheetOk">查看订单</button>
             <button type="button" class="btn btn-ghost" style="width:100%;margin-top:8px" id="sheetHome">回首页</button>
+          </div>
+        </div>
+
+        <div class="sheet" id="contactSheet" hidden>
+          <div class="sheet-card" style="padding:10px 16px 18px;background:#fff;border-radius:16px 16px 0 0">
+            <div style="width:28px;height:3px;border-radius:999px;background:#d5e8e4;margin:0 auto 8px"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong style="font-size:16px">联系门店</strong>
+              <button type="button" id="contactSheetClose" style="border:0;background:transparent;color:var(--color-muted);font-size:13px">关闭</button>
+            </div>
+            <button type="button" class="contact-proto-row" data-toast="原型：拨打门店电话" id="contactPhoneBtn">
+              <span class="contact-proto-ico" style="background:#ccfbf1"></span>
+              <span style="flex:1;text-align:left">
+                <strong style="display:block">门店电话</strong>
+                <small style="color:var(--color-primary)">13900001111</small>
+              </span>
+              <span class="contact-proto-act">拨打</span>
+            </button>
+            <button type="button" class="contact-proto-row" data-toast="原型：打开在线客服" id="contactOnlineBtn">
+              <span class="contact-proto-ico" style="background:#dcfce7"></span>
+              <span style="flex:1;text-align:left">
+                <strong style="display:block">在线客服</strong>
+                <small style="color:var(--color-muted)">微信会话 · 店员在线回复</small>
+              </span>
+              <span class="contact-proto-act">打开</span>
+            </button>
           </div>
         </div>
       </div>
