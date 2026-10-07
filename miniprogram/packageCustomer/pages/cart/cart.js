@@ -3,6 +3,17 @@ const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const { syncCartCount } = require("../../../utils/cartSync");
 
+/** 价格后后缀：份 · 约 10 枚 / 斤 · 当面称重结 */
+function priceHint(item) {
+  const label = (item && item.unitLabel) || "";
+  const note = item && item.specNote && String(item.specNote).trim();
+  if (note) return label ? `${label} · ${note}` : note;
+  if (item && item.unit === "JIN") {
+    return label ? `${label} · ${copy.home.weighHint}` : copy.home.weighHint;
+  }
+  return label;
+}
+
 function decorate(cart) {
   return {
     ...cart,
@@ -11,6 +22,7 @@ function decorate(cart) {
       ...i,
       priceYuan: fenToYuan(i.priceFen),
       qtyNum: Number(i.qty),
+      priceHint: priceHint(i),
     })),
   };
 }

@@ -178,19 +178,19 @@ function renderCartPage() {
   lines.innerHTML = [...cart.entries()]
     .map(([id, q]) => {
       const p = catalog.find((x) => x.id === id);
-      return `<div class="cell cart-line">
-        <div class="cell-row">
-          <div>
-            <div style="font-weight:600">${p.name}</div>
-            <div class="price">${money(p.price)} <small>/ ${p.unit}</small></div>
-          </div>
-          <div class="stepper">
-            <button type="button" data-line-step="${id}" data-delta="-1" aria-label="减"><svg class="ico ico-sm"><use href="#i-minus"/></svg></button>
-            <span>${q}</span>
-            <button type="button" data-line-step="${id}" data-delta="1" aria-label="加"><svg class="ico ico-sm"><use href="#i-plus"/></svg></button>
-          </div>
+      const hint = p.spec ? `${p.unit} · ${p.spec}` : p.unit;
+      return `<div class="cart-row">
+        <div class="cart-thumb" aria-hidden="true"></div>
+        <div class="cart-meta">
+          <div class="cart-name">${p.name}</div>
+          <div class="price">${money(p.price)}<span class="price-hint"> / ${hint}</span></div>
+          <button type="button" class="line-remove" data-remove="${id}">移除</button>
         </div>
-        <button type="button" class="line-remove" data-remove="${id}">移除</button>
+        <div class="stepper">
+          <button type="button" data-line-step="${id}" data-delta="-1" aria-label="减"><svg class="ico ico-sm"><use href="#i-minus"/></svg></button>
+          <span>${q}</span>
+          <button type="button" data-line-step="${id}" data-delta="1" aria-label="加"><svg class="ico ico-sm"><use href="#i-plus"/></svg></button>
+        </div>
       </div>`;
     })
     .join("");

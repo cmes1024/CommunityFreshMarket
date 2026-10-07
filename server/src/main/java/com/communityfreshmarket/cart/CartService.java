@@ -219,6 +219,7 @@ public class CartService {
     } catch (Exception ex) {
       line.setUnitLabel(product.getUnit());
     }
+    line.setSpecNote(product.getSpecNote());
     line.setPriceFen(product.getPriceFen() == null ? 0 : product.getPriceFen());
 
     if (!Boolean.TRUE.equals(product.getOnShelf())) {

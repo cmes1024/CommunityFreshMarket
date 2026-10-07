@@ -9,6 +9,7 @@ public class CartLineResponse {
   private String imageUrl;
   private String unit;
   private String unitLabel;
+  private String specNote;
   private int priceFen;
   private BigDecimal qty;
   private int amountFen;
@@ -53,6 +54,14 @@ public class CartLineResponse {
 
   public void setUnitLabel(String unitLabel) {
     this.unitLabel = unitLabel;
+  }
+
+  public String getSpecNote() {
+    return specNote;
+  }
+
+  public void setSpecNote(String specNote) {
+    this.specNote = specNote;
   }
 
   public int getPriceFen() {

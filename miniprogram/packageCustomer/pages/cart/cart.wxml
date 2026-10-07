@@ -5,20 +5,22 @@
     <view class="muted">{{copy.cart.emptyHint}}</view>
     <button class="btn btn-cta" bind:tap="goCategory">{{copy.cart.goCategory}}</button>
   </view>
-  <block wx:else>
-    <view class="line card" wx:for="{{cart.items}}" wx:key="productId">
-      <view class="thumb {{item.available ? 'veg' : 'sold'}}"></view>
+  <view wx:else class="cart-list">
+    <view class="cart-row" wx:for="{{cart.items}}" wx:key="productId">
+      <view class="thumb {{item.available ? 'veg' : 'sold'}}">
+        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="thumb-img" />
+      </view>
       <view class="meta grow">
         <view class="name">{{item.name}}</view>
-        <view class="price">¥{{item.priceYuan}} <text class="muted">/ {{item.unitLabel}}</text></view>
-        <view class="muted" wx:if="{{!item.available}}">{{item.unavailableReason}}</view>
-        <view class="row space-between ops" wx:if="{{item.available}}">
-          <Stepper value="{{item.qtyNum}}" min="{{0}}" bind:change="onQty" data-id="{{item.productId}}" />
-          <view class="remove" data-id="{{item.productId}}" bind:tap="remove">{{copy.cart.remove}}</view>
+        <view class="price">
+          ¥{{item.priceYuan}}<text class="hint" wx:if="{{item.priceHint}}"> / {{item.priceHint}}</text>
         </view>
+        <view class="muted reason" wx:if="{{!item.available}}">{{item.unavailableReason}}</view>
+        <view class="remove" data-id="{{item.productId}}" bind:tap="remove">{{copy.cart.remove}}</view>
       </view>
+      <Stepper wx:if="{{item.available}}" value="{{item.qtyNum}}" min="{{0}}" bind:change="onQty" data-id="{{item.productId}}" />
     </view>
-  </block>
+  </view>
 </view>
 <view class="mini-bar" wx:if="{{cart.itemCount}}" bind:tap="checkout">
   <view>
