@@ -1,9 +1,10 @@
 <Header pageName="{{copy.titles.coupons}}" back="{{true}}" />
 <view class="page-body no-tab wave-page">
-  <view class="tabs">
+  <view class="tabs {{tab === 'mine' ? 'with-link' : ''}}">
     <view class="tab {{tab === 'claim' ? 'on' : ''}}" data-tab="claim" bind:tap="switchTab">{{copy.coupons.tabClaim}}</view>
     <view class="tab {{tab === 'mine' ? 'on' : ''}}" data-tab="mine" bind:tap="switchTab">{{copy.coupons.tabMine}}</view>
   </view>
+  <view wx:if="{{tab === 'mine'}}" class="history-link" bind:tap="openHistory">{{copy.coupons.history}}</view>
 
   <block wx:if="{{tab === 'claim'}}">
     <view class="coupon" wx:for="{{claimList}}" wx:key="id">
@@ -11,7 +12,14 @@
         <view class="coupon-title">{{item.title}}</view>
         <view class="coupon-sub">{{item.faceText}}<text wx:if="{{item.minText}}"> · {{item.minText}}</text></view>
       </view>
-      <button class="btn btn-cta btn-sm" data-id="{{item.id}}" disabled="{{!item.claimable}}" bind:tap="claim">{{item.actionText}}</button>
+      <button
+        wx:if="{{item.claimable}}"
+        class="btn btn-cta btn-sm"
+        data-id="{{item.id}}"
+        hover-class="none"
+        bind:tap="claim"
+      >{{item.actionText}}</button>
+      <view wx:else class="coupon-state {{item.state}}">{{item.actionText}}</view>
     </view>
     <view wx:if="{{!claimList.length}}" class="empty muted">{{copy.coupons.emptyClaim}}</view>
   </block>
@@ -20,9 +28,39 @@
     <view class="coupon" wx:for="{{mineList}}" wx:key="id">
       <view class="coupon-main">
         <view class="coupon-title">{{item.title}}</view>
-        <view class="coupon-sub">{{item.faceText}} · {{item.statusText}}</view>
+        <view class="coupon-sub">{{item.faceText}}<text wx:if="{{item.minText}}"> · {{item.minText}}</text></view>
       </view>
+      <view wx:if="{{item.inUse}}" class="coupon-state inuse">{{copy.coupons.statusInUse}}</view>
     </view>
     <view wx:if="{{!mineList.length}}" class="empty muted">{{copy.coupons.emptyMine}}</view>
   </block>
 </view>
+
+<page-container
+  show="{{historySheet}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto; max-height: 80vh;"
+  bind:clickoverlay="closeHistory"
+  bind:afterleave="closeHistory"
+>
+  <view class="history-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.coupons.history}}</view>
+      <view class="sheet-close" bind:tap="closeHistory">{{copy.coupons.sheetClose}}</view>
+    </view>
+    <view class="history-list">
+      <view class="coupon" wx:for="{{historyList}}" wx:key="id">
+        <view class="coupon-main">
+          <view class="coupon-title">{{item.title}}</view>
+          <view class="coupon-sub">{{item.faceText}}<text wx:if="{{item.minText}}"> · {{item.minText}}</text></view>
+        </view>
+        <view class="coupon-state past">{{item.historyText}}</view>
+      </view>
+      <view wx:if="{{!historyList.length}}" class="empty muted">{{copy.coupons.emptyHistory}}</view>
+    </view>
+  </view>
+</page-container>
