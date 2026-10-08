@@ -8,28 +8,52 @@
     </view>
   </view>
 
-  <view class="menu-list">
-    <view class="menu-link" bind:tap="goPoints">
-      <text>{{copy.profile.points}}</text><text class="arrow">›</text>
+  <view class="shortcut-grid">
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="goOrders">
+      <view class="mark"><image src="/images/profile-orders.svg" mode="aspectFit" /></view>
+      <view class="shortcut-copy">
+        <view class="shortcut-title">{{copy.profile.orders}}</view>
+        <view class="shortcut-sub">{{copy.profile.ordersSub}}</view>
+      </view>
     </view>
-    <view class="menu-link" bind:tap="goCoupons">
-      <text>{{copy.profile.coupons}}</text><text class="arrow">›</text>
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="goAddr">
+      <view class="mark mark-green"><image src="/images/profile-address.svg" mode="aspectFit" /></view>
+      <view class="shortcut-copy">
+        <view class="shortcut-title">{{copy.profile.addressBook}}</view>
+        <view class="shortcut-sub">{{copy.profile.addressSub}}</view>
+      </view>
     </view>
-    <view class="menu-link" bind:tap="doCheckin">
-      <text>{{copy.profile.checkin}}</text><text class="arrow">›</text>
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="goPoints">
+      <view class="mark mark-amber"><image src="/images/profile-points.svg" mode="aspectFit" /></view>
+      <view class="shortcut-copy">
+        <view class="shortcut-title">{{copy.profile.points}}</view>
+        <view class="shortcut-sub">{{copy.profile.pointsSub}}</view>
+      </view>
     </view>
-    <view class="menu-link" bind:tap="goAddr">
-      <text>{{copy.profile.addressBook}}</text><text class="arrow">›</text>
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="goCoupons">
+      <view class="mark"><image src="/images/profile-coupon.svg" mode="aspectFit" /></view>
+      <view class="shortcut-copy">
+        <view class="shortcut-title">{{copy.profile.coupons}}</view>
+        <view class="shortcut-sub">{{copy.profile.couponsSub}}</view>
+      </view>
     </view>
-    <view class="menu-link" bind:tap="goOrders">
-      <text>{{copy.profile.orders}}</text><text class="arrow">›</text>
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="doCheckin">
+      <view class="mark mark-green"><image src="/images/profile-checkin.svg" mode="aspectFit" /></view>
+      <view class="shortcut-copy">
+        <view class="shortcut-title">{{copy.profile.checkin}}</view>
+        <view class="shortcut-sub">{{copy.profile.checkinSub}}</view>
+      </view>
     </view>
-    <view class="menu-link" bind:tap="openContactSheet">
-      <text>{{copy.profile.contact}}</text><text class="arrow">›</text>
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="openContactSheet">
+      <view class="mark"><image src="/images/profile-contact.svg" mode="aspectFit" /></view>
+      <view class="shortcut-copy">
+        <view class="shortcut-title">{{copy.profile.contact}}</view>
+        <view class="shortcut-sub">{{copy.profile.contactSub}}</view>
+      </view>
     </view>
   </view>
 
-  <view class="merchant-entry" wx:if="{{user.storeMember}}" bind:tap="goMerchant">
+  <view class="merchant-entry" wx:if="{{user.storeMember}}" hover-class="entry-on" bind:tap="goMerchant">
     <view class="me-title">{{copy.profile.merchantEntry}}</view>
     <view class="me-sub">{{copy.profile.merchantEntrySub}}</view>
   </view>

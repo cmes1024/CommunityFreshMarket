@@ -23,6 +23,15 @@
     <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 10h16l-1.5-5H5.5L4 10z"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17l9-10"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 6h14v10H8l-3 3V6z"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M7 4.5h10a1 1 0 0 1 1 1V19l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2L6 19V5.5a1 1 0 0 1 1-1z"/><path d="M9 9h6M9 13h4"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s6-5.1 6-10a6 6 0 1 0-12 0c0 4.9 6 10 6 10z"/><circle cx="12" cy="11" r="2"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5v9M9 10.2h4.2a1.7 1.7 0 0 1 0 3.4H9M9.2 13.6H14"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M4 8.5A2.2 2.2 0 0 0 6.2 6h11.6A2.2 2.2 0 0 0 20 8.5v1.2a2 2 0 0 1 0 4v1.8A2.2 2.2 0 0 1 17.8 18H6.2A2.2 2.2 0 0 1 4 15.5v-1.8a2 2 0 0 1 0-4V8.5z"/><path d="M12 7.5v9" stroke-dasharray="1.6 2.2"/></symbol>
+    <symbol id="i-checkin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8.2 12.2 11 15l4.8-5.4"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M8 4.5h2.6l1.2 2.8-1.8 1.1a9.2 9.2 0 0 0 4.6 4.6l1.1-1.8 2.8 1.2V15a1.8 1.8 0 0 1-2 1.8A13.2 13.2 0 0 1 6.2 6.5 1.8 1.8 0 0 1 8 4.5z"/></symbol>
+    <symbol id="i-cashier" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M8 19h8M12 16v3M8 10h8"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="8" rx="1.2"/><path d="M12 11v8M4 14.5h16"/><path d="M12 11c-1.4-2.8-5.2-2.6-5.2.2 0 1.5 2.2 2 5.2-.2z"/><path d="M12 11c1.4-2.8 5.2-2.6 5.2.2 0 1.5-2.2 2-5.2-.2z"/></symbol>
+    <symbol id="i-invite" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.8 19c1.1-2.6 3.1-3.9 5.2-3.9s4.1 1.3 5.2 3.9"/><path d="M17 8.5v5M14.5 11h5"/></symbol>
   </svg>
 
   <div class="studio">
@@ -423,20 +432,45 @@
           </section>
 
           <section class="screen" data-screen="c-profile" data-title="我的" data-tab="profile">
-            <div class="profile-head">
-              <div class="avatar"></div>
-              <div>
-                <div style="font-weight:700;font-size:16px">微信用户</div>
-                <div style="font-size:12px;color:var(--color-muted);margin-top:4px">默认身份：顾客</div>
+            <div class="profile-page">
+              <div class="profile-head">
+                <div class="avatar"></div>
+                <div>
+                  <div class="profile-name">微信用户</div>
+                  <div class="profile-sub">默认身份：顾客</div>
+                </div>
               </div>
+              <div class="shortcut-grid">
+                <button type="button" class="shortcut" data-go="c-orders">
+                  <span class="mark"><svg class="ico"><use href="#i-receipt"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">我的订单</span><span class="shortcut-sub">进度和再来一单</span></span>
+                </button>
+                <button type="button" class="shortcut" data-go="c-address">
+                  <span class="mark mark-green"><svg class="ico"><use href="#i-pin"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">地址簿</span><span class="shortcut-sub">配送地址</span></span>
+                </button>
+                <button type="button" class="shortcut" data-toast="原型：我的积分">
+                  <span class="mark mark-amber"><svg class="ico"><use href="#i-coin"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">我的积分</span><span class="shortcut-sub">到店可抵</span></span>
+                </button>
+                <button type="button" class="shortcut" data-toast="原型：优惠券">
+                  <span class="mark"><svg class="ico"><use href="#i-ticket"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">优惠券</span><span class="shortcut-sub">看看能用的券</span></span>
+                </button>
+                <button type="button" class="shortcut" data-toast="原型：已报到">
+                  <span class="mark mark-green"><svg class="ico"><use href="#i-checkin"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">快速报到</span><span class="shortcut-sub">让店员认出你</span></span>
+                </button>
+                <button type="button" class="shortcut" id="protoContactStore">
+                  <span class="mark"><svg class="ico"><use href="#i-phone"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">联系门店</span><span class="shortcut-sub">电话或客服</span></span>
+                </button>
+              </div>
+              <button type="button" class="merchant-entry" data-go="m-orders" data-mode-switch="merchant">
+                商家工作台
+                <small>仅店铺成员可见</small>
+              </button>
             </div>
-            <button type="button" class="menu-link" data-go="c-address"><span>地址簿</span><span class="arrow">›</span></button>
-            <button type="button" class="menu-link" data-go="c-orders"><span>我的订单</span><span class="arrow">›</span></button>
-            <button type="button" class="menu-link" id="protoContactStore"><span>联系门店</span><span class="arrow">›</span></button>
-            <button type="button" class="merchant-entry" data-go="m-orders" data-mode-switch="merchant">
-              商家工作台
-              <small>仅店铺成员可见</small>
-            </button>
           </section>
 
           <!-- MERCHANT -->
@@ -738,18 +772,42 @@
           </section>
 
           <section class="screen" data-screen="m-profile" data-title="我的" data-tab="m-profile" data-mode="merchant">
-            <div class="profile-head">
-              <div class="avatar"></div>
-              <div>
-                <div style="font-weight:700">店主 · 绿意鲜生</div>
-                <div style="font-size:12px;color:var(--color-muted);margin-top:4px">店主 / 店员能力相同（预留角色）</div>
+            <div class="profile-page">
+              <div class="profile-head">
+                <div class="avatar"></div>
+                <div>
+                  <div class="profile-name">店主 · 绿意鲜生</div>
+                  <div class="profile-sub">店主 / 店员能力相同（预留角色）</div>
+                </div>
               </div>
+              <div class="shortcut-grid">
+                <button type="button" class="shortcut shortcut-alert" data-toast="原型：站内信">
+                  <span class="mark"><svg class="ico"><use href="#i-bell"/></svg></span>
+                  <span class="inbox-badge">2</span>
+                  <span class="shortcut-copy"><span class="shortcut-title">站内信</span><span class="shortcut-sub alert">有人申请更新图片</span></span>
+                </button>
+                <button type="button" class="shortcut" data-toast="原型：到店收银">
+                  <span class="mark mark-green"><svg class="ico"><use href="#i-cashier"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">到店收银</span><span class="shortcut-sub">现场收款</span></span>
+                </button>
+                <button type="button" class="shortcut" data-toast="原型：优惠券管理">
+                  <span class="mark"><svg class="ico"><use href="#i-ticket"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">优惠券管理</span><span class="shortcut-sub">发放和核销</span></span>
+                </button>
+                <button type="button" class="shortcut" data-toast="原型：积分兑换核销">
+                  <span class="mark mark-amber"><svg class="ico"><use href="#i-gift"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">积分兑换核销</span><span class="shortcut-sub">到店核销</span></span>
+                </button>
+                <button type="button" class="shortcut shortcut-wide" data-toast="原型：邀请店员">
+                  <span class="mark"><svg class="ico"><use href="#i-invite"/></svg></span>
+                  <span class="shortcut-copy"><span class="shortcut-title">邀请店员</span><span class="shortcut-sub">扫码加入门店</span></span>
+                </button>
+              </div>
+              <button type="button" class="merchant-entry alt" data-go="c-home" data-mode-switch="customer">
+                回顾客端
+                <small>继续逛店下单</small>
+              </button>
             </div>
-            <button type="button" class="menu-link" data-toast="原型：邀请后补"><span>邀请店员</span><span class="arrow">›</span></button>
-            <button type="button" class="merchant-entry alt" data-go="c-home" data-mode-switch="customer">
-              回顾客端
-              <small>继续逛店下单</small>
-            </button>
           </section>
         </div>
 
