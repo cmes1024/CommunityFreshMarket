@@ -66,5 +66,36 @@ module.exports = {
   merchantInvite: () => get("/api/v1/merchant/invite"),
   merchantInviteRotate: () => post("/api/v1/merchant/invite/rotate"),
   acceptInvite: (code) => post("/api/v1/invites/accept", { code }),
+
+  pointsMe: () => get("/api/v1/points/me"),
+  pointsRedeem: (body) => post("/api/v1/points/redeem", body),
+
+  livePhotoRequest: (productId) => post(`/api/v1/products/${productId}/live-photo-requests`),
+
+  coupons: () => get("/api/v1/coupons"),
+  couponClaim: (id) => post(`/api/v1/coupons/${id}/claim`),
+  couponsMine: () => get("/api/v1/coupons/mine"),
+
+  checkin: (body) => post("/api/v1/checkins", body || {}),
+
+  merchantPointRedeems: () => get("/api/v1/merchant/points/redeems"),
+  merchantPointRedeemComplete: (id) => post(`/api/v1/merchant/points/redeems/${id}/complete`),
+
+  merchantLivePhotoRequests: () => get("/api/v1/merchant/live-photo-requests"),
+
+  merchantCoupons: () => get("/api/v1/merchant/coupons"),
+  merchantCouponCreate: (body) => post("/api/v1/merchant/coupons", body),
+  merchantCouponUpdate: (id, body) => put(`/api/v1/merchant/coupons/${id}`, body),
+
+  merchantCashierOpen: () => post("/api/v1/merchant/cashier"),
+  merchantCashierOpenList: () => get("/api/v1/merchant/cashier"),
+  merchantCashier: (id) => get(`/api/v1/merchant/cashier/${id}`),
+  merchantCashierAddItem: (id, body) => post(`/api/v1/merchant/cashier/${id}/items`, body),
+  merchantCashierMember: (id, body) => post(`/api/v1/merchant/cashier/${id}/member`, body),
+  merchantCashierComplete: (id, body) =>
+    post(`/api/v1/merchant/cashier/${id}/complete`, body || {}),
+  merchantCashierCancel: (id) => post(`/api/v1/merchant/cashier/${id}/cancel`),
+
+  merchantCheckinsActive: () => get("/api/v1/merchant/checkins/active"),
 };
 

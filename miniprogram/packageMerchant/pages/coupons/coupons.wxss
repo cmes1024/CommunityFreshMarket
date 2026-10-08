@@ -1,0 +1,42 @@
+.form-page {
+  padding: 24rpx 32rpx 48rpx;
+}
+.sec {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 24rpx;
+  border: 1rpx solid var(--color-line);
+  margin-bottom: 32rpx;
+}
+.label {
+  font-size: 22rpx;
+  color: var(--color-muted);
+  margin: 12rpx 0 8rpx;
+}
+.field-input {
+  background: var(--color-mist);
+  border-radius: 16rpx;
+  padding: 18rpx 22rpx;
+  font-size: 28rpx;
+}
+.full {
+  width: 100%;
+  margin-top: 20rpx;
+}
+.row-item {
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid var(--color-line);
+}
+.title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+.sm {
+  font-size: 24rpx;
+  margin-top: 6rpx;
+}

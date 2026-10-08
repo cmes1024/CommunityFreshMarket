@@ -9,6 +9,15 @@
   </view>
 
   <view class="menu-list">
+    <view class="menu-link" bind:tap="goPoints">
+      <text>{{copy.profile.points}}</text><text class="arrow">›</text>
+    </view>
+    <view class="menu-link" bind:tap="goCoupons">
+      <text>{{copy.profile.coupons}}</text><text class="arrow">›</text>
+    </view>
+    <view class="menu-link" bind:tap="doCheckin">
+      <text>{{copy.profile.checkin}}</text><text class="arrow">›</text>
+    </view>
     <view class="menu-link" bind:tap="goAddr">
       <text>{{copy.profile.addressBook}}</text><text class="arrow">›</text>
     </view>

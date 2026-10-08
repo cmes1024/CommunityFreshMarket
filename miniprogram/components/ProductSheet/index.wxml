@@ -15,17 +15,26 @@
       <scroll-view scroll-y class="sheet-body">
         <view class="hero {{product.inStock ? 'veg' : 'fruit'}}">
           <swiper
-            wx:if="{{imageUrls.length}}"
+            wx:if="{{slides.length}}"
             class="hero-swiper"
-            indicator-dots="{{imageUrls.length > 1}}"
+            indicator-dots="{{slides.length > 1}}"
             indicator-color="rgba(255,255,255,0.45)"
             indicator-active-color="#ffffff"
-            circular="{{imageUrls.length > 1}}"
-            autoplay="{{imageUrls.length > 1}}"
+            circular="{{slides.length > 1}}"
+            autoplay="{{slides.length > 1}}"
             interval="{{3000}}"
           >
-            <swiper-item wx:for="{{imageUrls}}" wx:key="*this">
-              <image src="{{item}}" mode="aspectFill" class="hero-img" />
+            <swiper-item wx:for="{{slides}}" wx:key="key">
+              <view class="slide">
+                <image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFill" class="hero-img" />
+                <view wx:else class="live-ph">{{copy.livePhoto.placeholder}}</view>
+                <view wx:if="{{item.takenText}}" class="live-time">{{item.takenText}}</view>
+                <view
+                  wx:if="{{item.showRequest}}"
+                  class="live-req"
+                  catch:tap="requestLivePhoto"
+                >{{item.requestLabel}}</view>
+              </view>
             </swiper-item>
           </swiper>
         </view>
@@ -52,7 +61,7 @@
         </view>
       </scroll-view>
       <view class="actions" wx:if="{{product.inStock}}">
-        <Stepper value="{{qty}}" min="{{1}}" bind:change="onStepper" />
+        <Stepper value="{{qty}}" min="{{qtyMin}}" max="{{qtyMax}}" bind:change="onStepper" />
         <button class="cta" bind:tap="addCart">{{copy.product.addCart}}</button>
       </view>
       <view class="actions" wx:else>

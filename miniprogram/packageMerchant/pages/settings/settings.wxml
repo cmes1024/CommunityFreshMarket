@@ -131,7 +131,37 @@
     </view>
   </view>
 
-  <!-- 3. 自提时段 -->
+  <!-- 3. 积分与实景 -->
+  <view class="sec">
+    <view class="sec-head">
+      <view class="sec-title">{{copy.settings.wave2Sec}}</view>
+      <view class="sec-desc">{{copy.settings.wave2Hint}}</view>
+    </view>
+    <view class="group">
+      <view class="cell">
+        <view class="cell-label">{{copy.settings.pointsPerYuanLabel}}</view>
+        <input
+          class="cell-input"
+          type="number"
+          value="{{store.pointsPerYuan}}"
+          bindinput="onStore"
+          data-k="pointsPerYuan"
+        />
+      </view>
+      <view class="cell last">
+        <view class="cell-label">{{copy.settings.pickTtlLabel}}</view>
+        <input
+          class="cell-input"
+          type="number"
+          value="{{store.pickImageTtlMinutes}}"
+          bindinput="onStore"
+          data-k="pickImageTtlMinutes"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 4. 自提时段 -->
   <view class="sec">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.slotsSec}}</view>

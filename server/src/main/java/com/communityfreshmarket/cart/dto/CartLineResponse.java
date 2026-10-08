@@ -15,6 +15,9 @@ public class CartLineResponse {
   private int amountFen;
   private boolean available;
   private String unavailableReason;
+  private BigDecimal minQty;
+  private BigDecimal maxQty;
+  private BigDecimal stockQty;
 
   public long getProductId() {
     return productId;
@@ -102,5 +105,29 @@ public class CartLineResponse {
 
   public void setUnavailableReason(String unavailableReason) {
     this.unavailableReason = unavailableReason;
+  }
+
+  public BigDecimal getMinQty() {
+    return minQty;
+  }
+
+  public void setMinQty(BigDecimal minQty) {
+    this.minQty = minQty;
+  }
+
+  public BigDecimal getMaxQty() {
+    return maxQty;
+  }
+
+  public void setMaxQty(BigDecimal maxQty) {
+    this.maxQty = maxQty;
+  }
+
+  public BigDecimal getStockQty() {
+    return stockQty;
+  }
+
+  public void setStockQty(BigDecimal stockQty) {
+    this.stockQty = stockQty;
   }
 }

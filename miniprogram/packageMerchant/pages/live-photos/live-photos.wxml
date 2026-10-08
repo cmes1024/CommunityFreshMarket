@@ -1,0 +1,11 @@
+<Header pageName="{{copy.titles.merchantInbox}}" back="{{true}}" toCustomer="{{true}}" />
+<view class="page-body no-tab wave-page">
+  <view class="row-item" wx:for="{{list}}" wx:key="id" data-id="{{item.productId}}" bind:tap="open">
+    <view class="grow">
+      <view class="title">{{item.productName}}</view>
+      <view class="muted sm">{{item.applicantCount}} 人申请 · {{item.timeText}}</view>
+    </view>
+    <text class="arrow">›</text>
+  </view>
+  <view wx:if="{{!list.length}}" class="empty muted">{{copy.merchant.inboxEmpty}}</view>
+</view>

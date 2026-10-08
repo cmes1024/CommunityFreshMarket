@@ -34,6 +34,10 @@ public class StoreQueryService {
     Integer cols = store.getHomeProductCols();
     r.setHomeProductCols(cols != null && cols >= 1 && cols <= 3 ? cols : 2);
     r.setProductDetailMode(normalizeDetailMode(store.getProductDetailMode()));
+    Integer ratio = store.getPointsPerYuan();
+    r.setPointsPerYuan(ratio == null || ratio < 0 ? 1 : ratio);
+    Integer ttl = store.getPickImageTtlMinutes();
+    r.setPickImageTtlMinutes(ttl == null || ttl < 1 ? 15 : ttl);
     return r;
   }
 

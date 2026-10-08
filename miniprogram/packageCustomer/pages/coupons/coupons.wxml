@@ -1,0 +1,28 @@
+<Header pageName="{{copy.titles.coupons}}" back="{{true}}" />
+<view class="page-body no-tab wave-page">
+  <view class="tabs">
+    <view class="tab {{tab === 'claim' ? 'on' : ''}}" data-tab="claim" bind:tap="switchTab">{{copy.coupons.tabClaim}}</view>
+    <view class="tab {{tab === 'mine' ? 'on' : ''}}" data-tab="mine" bind:tap="switchTab">{{copy.coupons.tabMine}}</view>
+  </view>
+
+  <block wx:if="{{tab === 'claim'}}">
+    <view class="coupon" wx:for="{{claimList}}" wx:key="id">
+      <view class="coupon-main">
+        <view class="coupon-title">{{item.title}}</view>
+        <view class="coupon-sub">{{item.faceText}}<text wx:if="{{item.minText}}"> · {{item.minText}}</text></view>
+      </view>
+      <button class="btn btn-cta btn-sm" data-id="{{item.id}}" bind:tap="claim">{{copy.coupons.claim}}</button>
+    </view>
+    <view wx:if="{{!claimList.length}}" class="empty muted">{{copy.coupons.emptyClaim}}</view>
+  </block>
+
+  <block wx:else>
+    <view class="coupon" wx:for="{{mineList}}" wx:key="id">
+      <view class="coupon-main">
+        <view class="coupon-title">{{item.title}}</view>
+        <view class="coupon-sub">{{item.faceText}} · {{item.status}}</view>
+      </view>
+    </view>
+    <view wx:if="{{!mineList.length}}" class="empty muted">{{copy.coupons.emptyMine}}</view>
+  </block>
+</view>

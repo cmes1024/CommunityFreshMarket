@@ -24,6 +24,27 @@ Page({
       });
     } catch (e) {}
   },
+  goPoints() {
+    wx.navigateTo({ url: "/packageCustomer/pages/points/points" });
+  },
+  goCoupons() {
+    wx.navigateTo({ url: "/packageCustomer/pages/coupons/coupons" });
+  },
+  async doCheckin() {
+    let body = {};
+    try {
+      const loc = await new Promise((resolve, reject) => {
+        wx.getLocation({ type: "gcj02", success: resolve, fail: reject });
+      });
+      body = { lat: loc.latitude, lng: loc.longitude };
+    } catch (e) {}
+    try {
+      await api.checkin(body);
+      wx.showToast({ title: copy.profile.checkinDone, icon: "none" });
+    } catch (e) {
+      wx.showToast({ title: copy.profile.checkinFail, icon: "none" });
+    }
+  },
   goOrders() {
     wx.navigateTo({ url: "/packageCustomer/pages/orders/orders" });
   },

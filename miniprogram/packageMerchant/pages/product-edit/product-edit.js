@@ -1,7 +1,7 @@
 const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
-const { chooseAndUpload } = require("../../../utils/upload");
+const { chooseAndUpload, chooseLivePhoto } = require("../../../utils/upload");
 const { productImages } = require("../../../utils/productImages");
 
 const MAX_IMAGES = 3;
@@ -24,8 +24,10 @@ Page({
       inStock: true,
       onShelf: true,
       homeRecommended: false,
+      livePhotoEnabled: false,
     },
     imageUrls: [],
+    livePhotoUrl: "",
     priceYuan: "",
     units: [],
     unitLabels: [],
@@ -34,6 +36,9 @@ Page({
     catLabels: [],
     catIndex: 0,
     specPlaceholder: copy.merchant.fieldSpecPlaceholderJin,
+    stockQtyStr: "",
+    minQtyStr: "",
+    maxQtyStr: "",
   },
   async onLoad(query) {
     this._skipShow = true;
@@ -55,12 +60,17 @@ Page({
           inStock: p.inStock,
           onShelf: p.onShelf,
           homeRecommended: !!p.homeRecommended,
+          livePhotoEnabled: !!p.livePhotoEnabled,
         },
         imageUrls: productImages(p),
+        livePhotoUrl: p.livePhotoUrl || "",
         priceYuan: fenToYuan(p.priceFen),
         unitIndex,
         catIndex,
         specPlaceholder: specPlaceholderFor(p.unit),
+        stockQtyStr: p.stockQty != null ? String(p.stockQty) : "",
+        minQtyStr: p.minQty != null ? String(p.minQty) : "",
+        maxQtyStr: p.maxQty != null ? String(p.maxQty) : "",
       });
     }
   },
@@ -148,8 +158,35 @@ Page({
   toggleHomeReco() {
     this.setData({ "form.homeRecommended": !this.data.form.homeRecommended });
   },
+  toggleLivePhoto() {
+    this.setData({ "form.livePhotoEnabled": !this.data.form.livePhotoEnabled });
+  },
+  async pickLivePhoto() {
+    try {
+      const url = await chooseLivePhoto();
+      this.setData({ livePhotoUrl: url });
+    } catch (e) {}
+  },
+  clearLivePhoto() {
+    this.setData({ livePhotoUrl: "" });
+  },
+  onStockQty(e) {
+    this.setData({ stockQtyStr: e.detail.value });
+  },
+  onMinQty(e) {
+    this.setData({ minQtyStr: e.detail.value });
+  },
+  onMaxQty(e) {
+    this.setData({ maxQtyStr: e.detail.value });
+  },
+  nullableQty(str) {
+    const s = str == null ? "" : String(str).trim();
+    if (!s) return null;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  },
   async save() {
-    const { form, id, imageUrls } = this.data;
+    const { form, id, imageUrls, stockQtyStr, minQtyStr, maxQtyStr, livePhotoUrl } = this.data;
     if (!form.name || form.priceFen < 0 || !form.categoryId) {
       wx.showToast({ title: "请填写名称、价格和分类", icon: "none" });
       return;
@@ -158,6 +195,11 @@ Page({
       ...form,
       imageUrls: imageUrls || [],
       imageUrl: (imageUrls && imageUrls[0]) || "",
+      stockQty: this.nullableQty(stockQtyStr),
+      minQty: this.nullableQty(minQtyStr),
+      maxQty: this.nullableQty(maxQtyStr),
+      livePhotoEnabled: !!form.livePhotoEnabled,
+      livePhotoUrl: livePhotoUrl || "",
     };
     if (id) await api.merchantProductUpdate(id, payload);
     else await api.merchantProductCreate(payload);

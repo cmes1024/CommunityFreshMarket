@@ -7,6 +7,8 @@ import com.communityfreshmarket.auth.UserContext;
 import com.communityfreshmarket.cart.CartService;
 import com.communityfreshmarket.cart.dto.CartLineResponse;
 import com.communityfreshmarket.cart.dto.CartResponse;
+import com.communityfreshmarket.catalog.ProductQtyRules;
+import com.communityfreshmarket.catalog.StockInventoryService;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.domain.Order;
@@ -18,6 +20,7 @@ import com.communityfreshmarket.mapper.OrderItemMapper;
 import com.communityfreshmarket.mapper.OrderMapper;
 import com.communityfreshmarket.mapper.ProductMapper;
 import com.communityfreshmarket.notify.OrderNotifyService;
+import com.communityfreshmarket.points.PointsService;
 import com.communityfreshmarket.order.dto.CancelOrderRequest;
 import com.communityfreshmarket.order.dto.MerchantOrderBoardResponse;
 import com.communityfreshmarket.order.dto.OrderItemResponse;
@@ -50,6 +53,8 @@ public class OrderService {
   private final ProductMapper productMapper;
   private final ObjectMapper objectMapper;
   private final OrderNotifyService orderNotifyService;
+  private final StockInventoryService stockInventoryService;
+  private final PointsService pointsService;
 
   public OrderService(
       OrderMapper orderMapper,
@@ -59,7 +64,9 @@ public class OrderService {
       PickupSlotService pickupSlotService,
       ProductMapper productMapper,
       ObjectMapper objectMapper,
-      OrderNotifyService orderNotifyService) {
+      OrderNotifyService orderNotifyService,
+      StockInventoryService stockInventoryService,
+      PointsService pointsService) {
     this.orderMapper = orderMapper;
     this.orderItemMapper = orderItemMapper;
     this.cartService = cartService;
@@ -68,6 +75,8 @@ public class OrderService {
     this.productMapper = productMapper;
     this.objectMapper = objectMapper;
     this.orderNotifyService = orderNotifyService;
+    this.stockInventoryService = stockInventoryService;
+    this.pointsService = pointsService;
   }
 
   @Transactional
@@ -84,14 +93,25 @@ public class OrderService {
       throw new BizException(ErrorCodes.BAD_REQUEST, "商品篮没有可预约的商品");
     }
 
-    // 二次校验：下单瞬间仍须上架有货
+    // 二次校验：下单瞬间仍须上架有货，且数量符合起购/限购/库存
     for (CartLineResponse line : available) {
       Product product = productMapper.selectById(line.getProductId());
-      if (product == null
-          || !Objects.equals(product.getStoreId(), storeId)
-          || !Boolean.TRUE.equals(product.getOnShelf())
-          || !Boolean.TRUE.equals(product.getInStock())) {
+      if (product == null || !Objects.equals(product.getStoreId(), storeId)) {
         throw new BizException(ErrorCodes.BAD_REQUEST, line.getName() + " 已不可购买，请调整商品篮");
+      }
+      if (!Boolean.TRUE.equals(product.getOnShelf())) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, line.getName() + " 已下架，请调整商品篮");
+      }
+      if (!Boolean.TRUE.equals(product.getInStock())) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, line.getName() + " 已售罄，请调整商品篮");
+      }
+      if (product.getStockQty() != null && product.getStockQty().compareTo(line.getQty()) < 0) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, line.getName() + " 库存不足，请调整商品篮");
+      }
+      try {
+        ProductQtyRules.validatePurchasableQty(product, line.getQty());
+      } catch (BizException ex) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, line.getName() + "：" + ex.getMessage());
       }
     }
 
@@ -144,6 +164,7 @@ public class OrderService {
       item.setAmountFen(line.getAmountFen());
       item.setCreatedAt(now);
       orderItemMapper.insert(item);
+      stockInventoryService.deduct(line.getProductId(), storeId, line.getQty());
       purchasedIds.add(line.getProductId());
     }
 
@@ -270,7 +291,11 @@ public class OrderService {
     if (updated == 0) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "订单状态已变化，请刷新后重试");
     }
-    return toResponse(orderMapper.selectById(id));
+    Order fresh = orderMapper.selectById(id);
+    if (OrderStatus.require(fresh.getStatus()) == OrderStatus.COMPLETED) {
+      pointsService.awardOrderComplete(fresh);
+    }
+    return toResponse(fresh);
   }
 
   @Transactional
@@ -300,10 +325,19 @@ public class OrderService {
     if (updated == 0) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "订单状态已变化，请刷新后重试");
     }
+    restoreStock(order.getId(), order.getStoreId());
     log.info("order cancelled id={} by={}", order.getId(), by);
     Order fresh = orderMapper.selectById(order.getId());
     if (fresh != null) {
       orderNotifyService.notifyCancel(fresh, by);
+    }
+  }
+
+  private void restoreStock(long orderId, long storeId) {
+    for (OrderItem item : listItems(orderId)) {
+      if (item.getProductId() != null && item.getQty() != null) {
+        stockInventoryService.restore(item.getProductId(), storeId, item.getQty());
+      }
     }
   }
 

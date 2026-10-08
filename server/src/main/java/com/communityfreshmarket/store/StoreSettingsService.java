@@ -9,6 +9,8 @@ import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.domain.Store;
 import com.communityfreshmarket.mapper.StoreMapper;
 import com.communityfreshmarket.store.dto.StoreUpdateRequest;
+import com.communityfreshmarket.upload.UploadCleanup;
+import java.util.List;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +21,13 @@ public class StoreSettingsService {
 
   private final StoreMapper storeMapper;
   private final StoreQueryService storeQueryService;
+  private final UploadCleanup uploadCleanup;
 
-  public StoreSettingsService(StoreMapper storeMapper, StoreQueryService storeQueryService) {
+  public StoreSettingsService(
+      StoreMapper storeMapper, StoreQueryService storeQueryService, UploadCleanup uploadCleanup) {
     this.storeMapper = storeMapper;
     this.storeQueryService = storeQueryService;
+    this.uploadCleanup = uploadCleanup;
   }
 
   @Transactional
@@ -42,6 +47,7 @@ public class StoreSettingsService {
       store.setContactNote(blankToNull(request.getContactNote()));
     }
     boolean clearHero = false;
+    String previousHero = store.getHeroImageUrl();
     if (request.getHeroImageUrl() != null) {
       String hero = blankToNull(request.getHeroImageUrl());
       store.setHeroImageUrl(hero);
@@ -79,6 +85,16 @@ public class StoreSettingsService {
       }
       store.setProductDetailMode(mode);
     }
+    if (request.getPointsPerYuan() != null) {
+      store.setPointsPerYuan(request.getPointsPerYuan());
+    }
+    if (request.getPickImageTtlMinutes() != null) {
+      int ttl = request.getPickImageTtlMinutes();
+      if (ttl < 1) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "实景有效时间至少 1 分钟");
+      }
+      store.setPickImageTtlMinutes(ttl);
+    }
     store.setUpdatedAt(LocalDateTime.now());
     storeMapper.updateById(store);
     // updateById 默认跳过 null，清除需显式 set null
@@ -99,7 +115,16 @@ public class StoreSettingsService {
       }
       storeMapper.update(null, clear);
     }
+    if (request.getHeroImageUrl() != null && !sameText(previousHero, store.getHeroImageUrl())) {
+      uploadCleanup.release(previousHero == null ? List.of() : List.of(previousHero));
+    }
     return storeQueryService.currentStore();
+  }
+
+  private static boolean sameText(String left, String right) {
+    String a = StringUtils.hasText(left) ? left.trim() : "";
+    String b = StringUtils.hasText(right) ? right.trim() : "";
+    return a.equals(b);
   }
 
   private static String blankToNull(String value) {

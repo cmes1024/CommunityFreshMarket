@@ -6,6 +6,8 @@ RUN mvn -q -DskipTests package
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
+ENV TZ=Asia/Shanghai
+ENV JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Shanghai
 RUN addgroup -S app && adduser -S app -G app \
   && mkdir -p /app/uploads && chown -R app:app /app
 USER app

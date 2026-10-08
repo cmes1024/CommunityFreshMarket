@@ -24,6 +24,10 @@ public class Store {
   private String inviteCode;
   /** 与 inviteCode 对应的小程序码 PNG base64 缓存 */
   private String inviteQrcodeBase64;
+  /** 每消费 1 元入账积分；0=关闭 */
+  private Integer pointsPerYuan;
+  /** 图像选品会话有效分钟数 */
+  private Integer pickImageTtlMinutes;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
@@ -129,6 +133,22 @@ public class Store {
 
   public void setInviteQrcodeBase64(String inviteQrcodeBase64) {
     this.inviteQrcodeBase64 = inviteQrcodeBase64;
+  }
+
+  public Integer getPointsPerYuan() {
+    return pointsPerYuan;
+  }
+
+  public void setPointsPerYuan(Integer pointsPerYuan) {
+    this.pointsPerYuan = pointsPerYuan;
+  }
+
+  public Integer getPickImageTtlMinutes() {
+    return pickImageTtlMinutes;
+  }
+
+  public void setPickImageTtlMinutes(Integer pickImageTtlMinutes) {
+    this.pickImageTtlMinutes = pickImageTtlMinutes;
   }
 
   public LocalDateTime getCreatedAt() {

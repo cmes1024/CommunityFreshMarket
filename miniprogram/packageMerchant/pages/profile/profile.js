@@ -18,18 +18,25 @@ Page({
     inviteCode: "",
     inviteUrl: "",
     inviteQrSrc: "",
+    inboxCount: 0,
   },
   async onShow() {
     try {
-      const [user, store] = await Promise.all([api.me(), api.store()]);
+      const [user, store, requests] = await Promise.all([
+        api.me(),
+        api.store(),
+        api.merchantLivePhotoRequests().catch(() => []),
+      ]);
       const role = user.role === "OWNER" ? copy.merchant.ownerPrefix : copy.merchant.staffPrefix;
       const storeName = storeDisplayName(store);
       const nick = user.nickname || role;
+      const inboxCount = (requests || []).length;
       this.setData({
         user,
         rolePrefix: role,
         storeName,
         avatarText: nick.slice(0, 1),
+        inboxCount,
       });
     } catch (e) {}
   },
@@ -58,6 +65,18 @@ Page({
       this.applyInvite(res);
       wx.showToast({ title: copy.merchant.inviteRotated, icon: "none" });
     } catch (e) {}
+  },
+  goInbox() {
+    wx.navigateTo({ url: "/packageMerchant/pages/live-photos/live-photos" });
+  },
+  goCashier() {
+    wx.navigateTo({ url: "/packageMerchant/pages/cashier/cashier" });
+  },
+  goCoupons() {
+    wx.navigateTo({ url: "/packageMerchant/pages/coupons/coupons" });
+  },
+  goPointRedeems() {
+    wx.navigateTo({ url: "/packageMerchant/pages/point-redeems/point-redeems" });
   },
   backCustomer() {
     wx.reLaunch({ url: "/packageCustomer/pages/home/home" });

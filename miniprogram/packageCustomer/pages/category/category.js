@@ -3,6 +3,7 @@ const { fenToYuan } = require("../../../utils/money");
 const { syncCartCount, qtyMap } = require("../../../utils/cartSync");
 const { listUnitLine } = require("../../../utils/productUnitLine");
 const { openProduct } = require("../../../utils/productOpen");
+const { qtyBounds, normalizeCartQty } = require("../../../utils/productQty");
 
 Page({
   data: {
@@ -27,12 +28,18 @@ Page({
     const [products, cart] = await Promise.all([api.products(categoryId), syncCartCount()]);
     const qtys = qtyMap(cart);
     this.setData({
-      products: (products || []).map((p) => ({
-        ...p,
-        priceYuan: fenToYuan(p.priceFen),
-        unitLine: listUnitLine(p),
-        qty: qtys[p.id] || 0,
-      })),
+      products: (products || []).map((p) => {
+        const bounds = qtyBounds(p, { forDetail: false });
+        const minAdd = bounds.min > 0 ? bounds.min : 1;
+        return {
+          ...p,
+          priceYuan: fenToYuan(p.priceFen),
+          unitLine: listUnitLine(p),
+          qty: qtys[p.id] || 0,
+          qtyMax: bounds.max,
+          qtyMinAdd: minAdd,
+        };
+      }),
       cart: { ...cart, totalYuan: fenToYuan(cart?.totalFen) },
     });
   },
@@ -56,13 +63,18 @@ Page({
   },
   async onQty(e) {
     const id = e.currentTarget.dataset.id;
-    const qty = e.detail.value;
-    const cart = await api.cartSetQty(id, qty);
-    await syncCartCount(cart);
-    const idx = this.data.products.findIndex((p) => p.id === id);
-    this.setData({
-      [`products[${idx}].qty`]: qty,
-      cart: { ...cart, totalYuan: fenToYuan(cart.totalFen) },
-    });
+    const minAdd = Number(e.currentTarget.dataset.min) || 1;
+    const max = Number(e.currentTarget.dataset.max) || 999;
+    let qty = normalizeCartQty(e.detail.value, minAdd);
+    qty = Math.min(max, qty);
+    try {
+      const cart = await api.cartSetQty(id, qty);
+      await syncCartCount(cart);
+      const idx = this.data.products.findIndex((p) => p.id === id);
+      this.setData({
+        [`products[${idx}].qty`]: qty,
+        cart: { ...cart, totalYuan: fenToYuan(cart.totalFen) },
+      });
+    } catch (err) {}
   },
 });

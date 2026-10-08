@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class ProductSaveRequest {
@@ -36,6 +37,17 @@ public class ProductSaveRequest {
   private Boolean inStock;
   private Boolean onShelf;
   private Boolean homeRecommended;
+
+  /** null = 不限制 / 不追踪 */
+  private BigDecimal stockQty;
+  private BigDecimal minQty;
+  private BigDecimal maxQty;
+
+  private Boolean livePhotoEnabled;
+
+  /** 空串表示清掉实景图；null 表示本次不改 */
+  @Size(max = 512)
+  private String livePhotoUrl;
 
   public Long getCategoryId() {
     return categoryId;
@@ -115,5 +127,45 @@ public class ProductSaveRequest {
 
   public void setHomeRecommended(Boolean homeRecommended) {
     this.homeRecommended = homeRecommended;
+  }
+
+  public BigDecimal getStockQty() {
+    return stockQty;
+  }
+
+  public void setStockQty(BigDecimal stockQty) {
+    this.stockQty = stockQty;
+  }
+
+  public BigDecimal getMinQty() {
+    return minQty;
+  }
+
+  public void setMinQty(BigDecimal minQty) {
+    this.minQty = minQty;
+  }
+
+  public BigDecimal getMaxQty() {
+    return maxQty;
+  }
+
+  public void setMaxQty(BigDecimal maxQty) {
+    this.maxQty = maxQty;
+  }
+
+  public Boolean getLivePhotoEnabled() {
+    return livePhotoEnabled;
+  }
+
+  public void setLivePhotoEnabled(Boolean livePhotoEnabled) {
+    this.livePhotoEnabled = livePhotoEnabled;
+  }
+
+  public String getLivePhotoUrl() {
+    return livePhotoUrl;
+  }
+
+  public void setLivePhotoUrl(String livePhotoUrl) {
+    this.livePhotoUrl = livePhotoUrl;
   }
 }

@@ -22,7 +22,17 @@
           <view class="price">¥{{item.priceYuan}}</view>
         </view>
       </view>
-      <Stepper wx:if="{{item.inStock}}" value="{{item.qty}}" min="{{0}}" bind:change="onQty" data-id="{{item.id}}" />
+      <Stepper
+        wx:if="{{item.inStock}}"
+        value="{{item.qty}}"
+        min="{{0}}"
+        max="{{item.qtyMax}}"
+        step="{{item.qty > 0 ? 1 : item.qtyMinAdd}}"
+        bind:change="onQty"
+        data-id="{{item.id}}"
+        data-min="{{item.qtyMinAdd}}"
+        data-max="{{item.qtyMax}}"
+      />
       <view wx:else class="btn-watch" data-id="{{item.id}}" bind:tap="goDetail">{{copy.category.watchMe}}</view>
     </view>
     <view wx:if="{{!products.length}}" class="empty">{{copy.category.empty}}</view>

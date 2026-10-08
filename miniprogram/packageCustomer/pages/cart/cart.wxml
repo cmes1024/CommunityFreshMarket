@@ -16,9 +16,11 @@
           ¥{{item.priceYuan}}<text class="hint" wx:if="{{item.priceHint}}"> / {{item.priceHint}}</text>
         </view>
         <view class="muted reason" wx:if="{{!item.available}}">{{item.unavailableReason}}</view>
+      </view>
+      <view class="side">
+        <Stepper wx:if="{{item.available}}" value="{{item.qtyNum}}" min="{{0}}" bind:change="onQty" data-id="{{item.productId}}" />
         <view class="remove" data-id="{{item.productId}}" bind:tap="remove">{{copy.cart.remove}}</view>
       </view>
-      <Stepper wx:if="{{item.available}}" value="{{item.qtyNum}}" min="{{0}}" bind:change="onQty" data-id="{{item.productId}}" />
     </view>
   </view>
 </view>

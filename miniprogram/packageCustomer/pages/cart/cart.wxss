@@ -21,12 +21,21 @@
 
 .cart-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 20rpx;
   padding: 20rpx 24rpx;
   background: var(--color-surface);
   border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 20rpx;
+  margin: -8rpx -16rpx -12rpx 0;
 }
 
 .thumb {
@@ -66,13 +75,17 @@
   margin-top: 4rpx;
 }
 .remove {
-  display: inline-block;
-  margin-top: 8rpx;
+  min-width: 140rpx;
+  min-height: 60rpx;
+  padding: 0rpx 16rpx 0rpx 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   color: var(--color-danger);
   font-size: 24rpx;
   font-weight: 600;
   line-height: 1.4;
-  padding: 4rpx 0;
 }
 
 .mini-bar {

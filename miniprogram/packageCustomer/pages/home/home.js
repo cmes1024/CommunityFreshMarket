@@ -4,6 +4,7 @@ const { syncCartCount, qtyMap } = require("../../../utils/cartSync");
 const copy = require("../../../utils/copy");
 const { listUnitLine } = require("../../../utils/productUnitLine");
 const { openProduct } = require("../../../utils/productOpen");
+const { qtyBounds, normalizeCartQty } = require("../../../utils/productQty");
 const { storeDisplayName } = copy;
 
 function normalizeCols(cols) {
@@ -39,12 +40,18 @@ Page({
       ]);
       const qtys = qtyMap(cart);
       const name = storeDisplayName(store);
-      const ranked = (products || []).map((p) => ({
-        ...p,
-        priceYuan: fenToYuan(p.priceFen),
-        unitLine: listUnitLine(p),
-        qty: qtys[p.id] || 0,
-      }));
+      const ranked = (products || []).map((p) => {
+        const bounds = qtyBounds(p, { forDetail: false });
+        const minAdd = bounds.min > 0 ? bounds.min : 1;
+        return {
+          ...p,
+          priceYuan: fenToYuan(p.priceFen),
+          unitLine: listUnitLine(p),
+          qty: qtys[p.id] || 0,
+          qtyMax: bounds.max,
+          qtyMinAdd: minAdd,
+        };
+      });
       this.setData({
         store,
         displayStoreName: name,
@@ -88,7 +95,10 @@ Page({
   noop() {},
   async onQty(e) {
     const id = e.currentTarget.dataset.id;
-    const qty = e.detail.value;
+    const minAdd = Number(e.currentTarget.dataset.min) || 1;
+    const max = Number(e.currentTarget.dataset.max) || 999;
+    let qty = normalizeCartQty(e.detail.value, minAdd);
+    qty = Math.min(max, qty);
     try {
       const cart = await api.cartSetQty(id, qty);
       await syncCartCount(cart);

@@ -7,9 +7,12 @@ import com.communityfreshmarket.catalog.dto.ProductSaveRequest;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.domain.Product;
+import com.communityfreshmarket.livephoto.LivePhotoService;
 import com.communityfreshmarket.mapper.ProductMapper;
 import com.communityfreshmarket.notify.RestockWatchService;
+import com.communityfreshmarket.upload.UploadCleanup;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +24,20 @@ public class ProductService {
   private final ProductMapper productMapper;
   private final CategoryService categoryService;
   private final RestockWatchService restockWatchService;
+  private final LivePhotoService livePhotoService;
+  private final UploadCleanup uploadCleanup;
 
   public ProductService(
       ProductMapper productMapper,
       CategoryService categoryService,
-      RestockWatchService restockWatchService) {
+      RestockWatchService restockWatchService,
+      LivePhotoService livePhotoService,
+      UploadCleanup uploadCleanup) {
     this.productMapper = productMapper;
     this.categoryService = categoryService;
     this.restockWatchService = restockWatchService;
+    this.livePhotoService = livePhotoService;
+    this.uploadCleanup = uploadCleanup;
   }
 
   public List<ProductResponse> listForCustomer(Long categoryId, Boolean homeRecommended) {
@@ -45,7 +54,14 @@ public class ProductService {
     if (Boolean.TRUE.equals(homeRecommended)) {
       q.eq(Product::getHomeRecommended, true);
     }
-    return productMapper.selectList(q).stream().map(ProductResponse::from).toList();
+    return productMapper.selectList(q).stream().map(p -> {
+      ProductResponse r = ProductResponse.from(p);
+      if (!r.isLivePhotoEnabled()) {
+        r.setLivePhotoUrl(null);
+        r.setLivePhotoTakenAt(null);
+      }
+      return r;
+    }).toList();
   }
 
   public ProductResponse detailForCustomer(long id) {
@@ -53,7 +69,9 @@ public class ProductService {
     if (!Boolean.TRUE.equals(product.getOnShelf())) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "商品不可见");
     }
-    return ProductResponse.from(product);
+    ProductResponse response = ProductResponse.from(product);
+    livePhotoService.attachCustomer(response, product);
+    return response;
   }
 
   public List<ProductResponse> listForMerchant(Long categoryId) {
@@ -69,7 +87,10 @@ public class ProductService {
   }
 
   public ProductResponse detailForMerchant(long id) {
-    return ProductResponse.from(requireOwned(id));
+    Product product = requireOwned(id);
+    ProductResponse response = ProductResponse.from(product);
+    livePhotoService.attachMerchant(response, product);
+    return response;
   }
 
   @Transactional
@@ -90,6 +111,11 @@ public class ProductService {
     product.setInStock(request.getInStock() == null || request.getInStock());
     product.setOnShelf(request.getOnShelf() == null || request.getOnShelf());
     product.setHomeRecommended(Boolean.TRUE.equals(request.getHomeRecommended()));
+    applyQtyLimits(product, request);
+    if (product.getLivePhotoEnabled() == null) {
+      product.setLivePhotoEnabled(false);
+    }
+    livePhotoService.applySave(product, request);
     product.setCreatedAt(now);
     product.setUpdatedAt(now);
     productMapper.insert(product);
@@ -104,6 +130,7 @@ public class ProductService {
     ProductUnit unit = ProductUnit.require(request.getUnit());
 
     boolean wasOut = !Boolean.TRUE.equals(product.getInStock());
+    List<String> previousImages = referencedImages(product);
     product.setCategoryId(request.getCategoryId());
     product.setName(request.getName().trim());
     applyImages(product, request);
@@ -119,12 +146,16 @@ public class ProductService {
     if (request.getHomeRecommended() != null) {
       product.setHomeRecommended(request.getHomeRecommended());
     }
+    applyQtyLimits(product, request);
+    livePhotoService.applySave(product, request);
     product.setUpdatedAt(LocalDateTime.now());
     productMapper.updateById(product);
 
     if (wasOut && Boolean.TRUE.equals(product.getInStock())) {
       notifyRestockWatchers(product);
     }
+    previousImages.removeAll(referencedImages(product));
+    uploadCleanup.release(previousImages);
     return ProductResponse.from(product);
   }
 
@@ -172,10 +203,31 @@ public class ProductService {
     return product;
   }
 
+  private static List<String> referencedImages(Product product) {
+    List<String> urls = new ArrayList<>(ProductImageUrls.resolve(product.getImageUrls(), product.getImageUrl()));
+    if (StringUtils.hasText(product.getLivePhotoUrl())) {
+      urls.add(product.getLivePhotoUrl().trim());
+    }
+    return urls;
+  }
+
   private static void applyImages(Product product, ProductSaveRequest request) {
     var urls = ProductImageUrls.fromRequest(request.getImageUrls(), request.getImageUrl());
     product.setImageUrls(ProductImageUrls.toJson(urls));
     product.setImageUrl(ProductImageUrls.cover(urls));
+  }
+
+  private static void applyQtyLimits(Product product, ProductSaveRequest request) {
+    ProductQtyRules.validateLimitsConfig(
+        request.getMinQty(), request.getMaxQty(), request.getStockQty());
+    product.setStockQty(ProductQtyRules.normalizeStock(request.getStockQty()));
+    product.setMinQty(ProductQtyRules.normalizeStock(request.getMinQty()));
+    product.setMaxQty(ProductQtyRules.normalizeStock(request.getMaxQty()));
+    if (product.getStockQty() != null
+        && product.getStockQty().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+      product.setInStock(false);
+      product.setStockQty(java.math.BigDecimal.ZERO);
+    }
   }
 
   private static String blankToNull(String value) {

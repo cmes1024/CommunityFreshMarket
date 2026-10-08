@@ -63,9 +63,13 @@
           <Stepper
             value="{{item.qty}}"
             min="{{0}}"
+            max="{{item.qtyMax}}"
+            step="{{item.qty > 0 ? 1 : item.qtyMinAdd}}"
             size="{{homeProductCols === 3 ? 'sm' : 'md'}}"
             bind:change="onQty"
             data-id="{{item.id}}"
+            data-min="{{item.qtyMinAdd}}"
+            data-max="{{item.qtyMax}}"
           />
         </view>
       </view>

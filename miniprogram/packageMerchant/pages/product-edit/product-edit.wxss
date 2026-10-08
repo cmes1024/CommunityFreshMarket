@@ -99,6 +99,41 @@
   color: var(--color-text);
 }
 
+.img-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+
+.img-head .label {
+  margin-bottom: 0;
+}
+
+.live-inline {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.live-inline-label {
+  font-size: 24rpx;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.img-live-hint {
+  margin: -4rpx 0 12rpx;
+}
+
+.live-slot {
+  font-size: 24rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
 .img-grid {
   display: flex;
   flex-wrap: wrap;

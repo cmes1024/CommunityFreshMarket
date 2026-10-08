@@ -1,0 +1,50 @@
+<Header pageName="{{copy.titles.merchantCashier}}" back="{{true}}" toCustomer="{{true}}" />
+<view class="page-body no-tab cashier-page" wx:if="{{sale}}">
+  <view class="toolbar">
+    <button class="btn btn-ghost btn-sm" bind:tap="newSale">{{copy.merchantCashier.newSale}}</button>
+    <button class="btn btn-ghost btn-sm" bind:tap="cancelSale">{{copy.merchantCashier.cancel}}</button>
+  </view>
+
+  <view class="card">
+    <view class="row-line">
+      <text>{{copy.merchantCashier.total}}</text>
+      <text class="price">¥{{sale.totalYuan}}</text>
+    </view>
+    <view class="row-line">
+      <text>{{copy.merchantCashier.pay}}</text>
+      <text class="price strong">¥{{sale.payYuan}}</text>
+    </view>
+    <view class="muted sm" wx:if="{{sale.memberUserId}}">会员 ID：{{sale.memberUserId}}</view>
+  </view>
+
+  <view class="sec">{{copy.merchantCashier.checkins}}</view>
+  <view class="checkin" wx:for="{{checkins}}" wx:key="id" data-id="{{item.id}}" bind:tap="attachCheckin">
+    <view class="grow">{{item.nickname || ('用户' + item.userId)}}</view>
+    <text class="link">{{copy.merchantCashier.attachMember}}</text>
+  </view>
+  <view wx:if="{{!checkins.length}}" class="empty muted">{{copy.merchantCashier.emptyCheckins}}</view>
+
+  <view class="sec">{{copy.merchantCashier.addProduct}}</view>
+  <scroll-view scroll-x class="prod-scroll">
+    <view
+      class="prod-chip {{addProductId == item.id ? 'on' : ''}}"
+      wx:for="{{products}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bind:tap="pickProduct"
+    >{{item.name}}</view>
+  </scroll-view>
+  <view class="add-row">
+    <input class="field-input grow" type="digit" placeholder="数量" value="{{addQty}}" bindinput="onAddQty" />
+    <button class="btn btn-cta" bind:tap="addItem">添加</button>
+  </view>
+
+  <view class="sec">明细</view>
+  <view class="item" wx:for="{{sale.items}}" wx:key="id">
+    <view class="grow">{{item.productName}} × {{item.qty}}</view>
+    <view>¥{{item.amountYuan}}</view>
+  </view>
+  <view wx:if="{{!sale.items.length}}" class="empty muted">{{copy.merchantCashier.emptyItems}}</view>
+
+  <button class="btn btn-cta full complete" bind:tap="completeSale">{{copy.merchantCashier.complete}}</button>
+</view>

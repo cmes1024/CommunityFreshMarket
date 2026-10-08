@@ -64,7 +64,7 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 | `user` | `openid` 唯一、昵称/头像可选 |
 | `store_member` | `user_id + store_id + role`（`OWNER` / `STAFF`）；第一版能力相同 |
 | `category` | `store_id`、名称、排序、启用 |
-| `product` | `category_id`、名、`image_url`（封面=第一张）、`image_urls`（JSON 数组，最多 3 条 URL）、单位枚举（`PIECE`/`PORTION`/`JIN`）、可选 `spec_note`（规格说明，短文案）、价格分、`in_stock`、上下架、`home_recommended`（首页推荐，默认否）；`stock_qty`、`min_qty`（起购）、`max_qty`（限购）可空预留第二波 |
+| `product` | `category_id`、名、`image_url`（封面=第一张）、`image_urls`（JSON 数组，最多 3 条 URL）、单位枚举（`PIECE`/`PORTION`/`JIN`）、可选 `spec_note`（规格说明，短文案）、价格分、`in_stock`、上下架、`home_recommended`（首页推荐，默认否）；第二波启用 `stock_qty`/`min_qty`/`max_qty`（`DECIMAL(10,2)`，可空=不限制） |
 
 **单位**：服务端枚举 + 接口下发或前后端共用常量；**禁止**商品表自由字符串单位。  
 **规格说明**：`spec_note` 可空，最长 64；用于「约 10 枚」等内容，不替代单位枚举。  
@@ -231,7 +231,8 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 ## 6. 第一波明确不做（工程侧）
 
-在线支付、Redis、OSS 必选、真实库存扣减、商品起购/限购、图像选品、积分/券/收银/快速定位、店员细权限、PC 端、小程序账密、云函数主业务。
+在线支付、Redis、OSS 必选、店员细权限、PC 端、小程序账密、云函数主业务。  
+第二/三波（库存扣减、起购限购、积分、图像选品、券、收银、快速报到）见 `docs/plans/2026-10-07-wave2-wave3-design.md`。
 
 ---
 
@@ -266,3 +267,4 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 | 2026-10-07 | 单位枚举 / 分类 CRUD / UI§2.8 对齐说明 |
 | 2026-10-07 | `product.image_urls`（≤3）+ 封面 `image_url` 同步；详情轮播 |
 | 2026-10-07 | `product.home_recommended`；顾客 `?homeRecommended=`；商家快捷开关 |
+| 2026-10-07 | 第二/三波：指向 wave2-wave3-design；商品数量字段启用 |

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.communityfreshmarket.auth.UserContext;
 import com.communityfreshmarket.cart.dto.CartLineResponse;
 import com.communityfreshmarket.cart.dto.CartResponse;
+import com.communityfreshmarket.catalog.ProductQtyRules;
 import com.communityfreshmarket.catalog.ProductUnit;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
@@ -25,8 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CartService {
-
-  private static final BigDecimal MAX_QTY = new BigDecimal("999");
 
   private final CartItemMapper cartItemMapper;
   private final ProductMapper productMapper;
@@ -65,13 +64,14 @@ public class CartService {
   @Transactional
   public CartResponse add(long productId, BigDecimal qtyDelta) {
     Product product = requirePurchasable(productId);
-    normalizeQty(product.getUnit(), qtyDelta);
+    ProductQtyRules.validateUnitQty(product.getUnit(), qtyDelta);
 
     long userId = UserContext.requireUserId();
     long storeId = UserContext.storeId();
     CartItem existing = findItem(userId, storeId, productId);
     LocalDateTime now = LocalDateTime.now();
     if (existing == null) {
+      ProductQtyRules.validatePurchasableQty(product, qtyDelta);
       CartItem item = new CartItem();
       item.setUserId(userId);
       item.setStoreId(storeId);
@@ -82,7 +82,7 @@ public class CartService {
       cartItemMapper.insert(item);
     } else {
       BigDecimal next = existing.getQty().add(qtyDelta);
-      validateQty(product.getUnit(), next);
+      ProductQtyRules.validatePurchasableQty(product, next);
       existing.setQty(next);
       existing.setUpdatedAt(now);
       cartItemMapper.updateById(existing);
@@ -100,7 +100,7 @@ public class CartService {
     }
 
     Product product = requirePurchasable(productId);
-    validateQty(product.getUnit(), qty);
+    ProductQtyRules.validatePurchasableQty(product, qty);
 
     CartItem existing = findItem(userId, storeId, productId);
     LocalDateTime now = LocalDateTime.now();
@@ -163,6 +163,37 @@ public class CartService {
     }
   }
 
+  /** 商家确认选品后写入指定顾客商品篮。 */
+  @Transactional
+  public void addForUser(long userId, long storeId, long productId, BigDecimal qty) {
+    Product product = productMapper.selectById(productId);
+    if (product == null || !product.getStoreId().equals(storeId) || !Boolean.TRUE.equals(product.getOnShelf())) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "商品不可用");
+    }
+    if (!Boolean.TRUE.equals(product.getInStock())) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "商品已售罄");
+    }
+    ProductQtyRules.validatePurchasableQty(product, qty);
+    CartItem existing = findItem(userId, storeId, productId);
+    LocalDateTime now = LocalDateTime.now();
+    if (existing == null) {
+      CartItem item = new CartItem();
+      item.setUserId(userId);
+      item.setStoreId(storeId);
+      item.setProductId(productId);
+      item.setQty(qty);
+      item.setCreatedAt(now);
+      item.setUpdatedAt(now);
+      cartItemMapper.insert(item);
+    } else {
+      BigDecimal next = existing.getQty().add(qty);
+      ProductQtyRules.validatePurchasableQty(product, next);
+      existing.setQty(next);
+      existing.setUpdatedAt(now);
+      cartItemMapper.updateById(existing);
+    }
+  }
+
   private Product requirePurchasable(long productId) {
     long storeId = UserContext.storeId();
     Product product = productMapper.selectById(productId);
@@ -221,6 +252,9 @@ public class CartService {
     }
     line.setSpecNote(product.getSpecNote());
     line.setPriceFen(product.getPriceFen() == null ? 0 : product.getPriceFen());
+    line.setMinQty(product.getMinQty());
+    line.setMaxQty(ProductQtyRules.effectiveMax(product));
+    line.setStockQty(product.getStockQty());
 
     if (!Boolean.TRUE.equals(product.getOnShelf())) {
       line.setAvailable(false);
@@ -234,37 +268,24 @@ public class CartService {
       line.setAmountFen(0);
       return line;
     }
+    try {
+      ProductQtyRules.validatePurchasableQty(product, item.getQty());
+    } catch (BizException ex) {
+      line.setAvailable(false);
+      line.setUnavailableReason(ex.getMessage());
+      line.setAmountFen(0);
+      return line;
+    }
 
     line.setAvailable(true);
     line.setAmountFen(calcAmountFen(line.getPriceFen(), item.getQty()));
     return line;
   }
 
-  static int calcAmountFen(int priceFen, BigDecimal qty) {
+  public static int calcAmountFen(int priceFen, BigDecimal qty) {
     return BigDecimal.valueOf(priceFen)
         .multiply(qty)
         .setScale(0, RoundingMode.HALF_UP)
         .intValueExact();
-  }
-
-  private static void normalizeQty(String unit, BigDecimal qty) {
-    validateQty(unit, qty);
-  }
-
-  private static void validateQty(String unit, BigDecimal qty) {
-    if (qty == null || qty.compareTo(BigDecimal.ZERO) <= 0) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "数量须大于 0");
-    }
-    if (qty.compareTo(MAX_QTY) > 0) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "数量过大");
-    }
-    ProductUnit u = ProductUnit.require(unit);
-    if (u == ProductUnit.JIN) {
-      if (qty.scale() > 2) {
-        throw new BizException(ErrorCodes.BAD_REQUEST, "斤最多两位小数");
-      }
-    } else if (qty.stripTrailingZeros().scale() > 0) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "件/份须为整数");
-    }
   }
 }

@@ -1,0 +1,21 @@
+<Header pageName="{{copy.titles.merchantCoupons}}" back="{{true}}" toCustomer="{{true}}" />
+<view class="page-body no-tab form-page">
+  <view class="sec">{{copy.merchantCouponForm.create}}</view>
+  <view class="card">
+    <view class="label">{{copy.merchantCouponForm.title}}</view>
+    <input class="field-input" value="{{title}}" bindinput="onTitle" />
+    <view class="label">{{copy.merchantCouponForm.face}}</view>
+    <input class="field-input" type="digit" value="{{faceYuan}}" bindinput="onFace" />
+    <view class="label">{{copy.merchantCouponForm.minSpend}}</view>
+    <input class="field-input" type="digit" value="{{minSpendYuan}}" bindinput="onMin" />
+    <button class="btn btn-cta full" bind:tap="create">{{copy.merchantCouponForm.create}}</button>
+  </view>
+
+  <view class="sec">{{copy.merchantCouponForm.list}}</view>
+  <view class="row-item" wx:for="{{list}}" wx:key="id">
+    <view class="grow">
+      <view class="title">{{item.title}}</view>
+      <view class="muted sm">减 ¥{{item.faceYuan}} · 满 ¥{{item.minYuan}} · {{item.enabled ? '启用' : '停用'}}</view>
+    </view>
+  </view>
+</view>

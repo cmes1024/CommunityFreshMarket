@@ -15,7 +15,9 @@
         "pages/orders/orders",
         "pages/order-detail/order-detail",
         "pages/profile/profile",
-        "pages/join-store/join-store"
+        "pages/join-store/join-store",
+        "pages/points/points",
+        "pages/coupons/coupons"
       ]
     },
     {
@@ -28,7 +30,11 @@
         "pages/product-edit/product-edit",
         "pages/categories/categories",
         "pages/settings/settings",
-        "pages/profile/profile"
+        "pages/profile/profile",
+        "pages/live-photos/live-photos",
+        "pages/cashier/cashier",
+        "pages/coupons/coupons",
+        "pages/point-redeems/point-redeems"
       ]
     }
   ],

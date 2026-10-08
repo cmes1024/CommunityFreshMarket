@@ -1,0 +1,11 @@
+<Header pageName="{{copy.titles.merchantPointRedeems}}" back="{{true}}" toCustomer="{{true}}" />
+<view class="page-body no-tab wave-page">
+  <view class="row-item" wx:for="{{list}}" wx:key="id">
+    <view class="grow">
+      <view class="title">{{item.title}}</view>
+      <view class="muted sm">{{item.timeText}} · 用户 {{item.userId}} · {{item.costPoints}} 分</view>
+    </view>
+    <button class="btn btn-cta btn-sm" data-id="{{item.id}}" bind:tap="complete">{{copy.merchantPointRedeem.complete}}</button>
+  </view>
+  <view wx:if="{{!list.length}}" class="empty muted">{{copy.merchantPointRedeem.empty}}</view>
+</view>

@@ -9,6 +9,25 @@
   </view>
 
   <view class="menu-list">
+    <view class="menu-link {{inboxCount ? 'inbox-pending' : ''}}" bind:tap="goInbox">
+      <view class="menu-main">
+        <text>{{copy.merchant.inbox}}</text>
+        <text wx:if="{{inboxCount}}" class="menu-hint">有人申请更新图片</text>
+      </view>
+      <view class="menu-side">
+        <view wx:if="{{inboxCount}}" class="inbox-badge">{{inboxCount > 99 ? '99+' : inboxCount}}</view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+    <view class="menu-link" bind:tap="goCashier">
+      <text>{{copy.merchant.cashier}}</text><text class="arrow">›</text>
+    </view>
+    <view class="menu-link" bind:tap="goCoupons">
+      <text>{{copy.merchant.merchantCoupons}}</text><text class="arrow">›</text>
+    </view>
+    <view class="menu-link" bind:tap="goPointRedeems">
+      <text>{{copy.merchant.pointRedeems}}</text><text class="arrow">›</text>
+    </view>
     <view class="menu-link" bind:tap="onInvite">
       <text>{{copy.merchant.inviteStaff}}</text><text class="arrow">›</text>
     </view>

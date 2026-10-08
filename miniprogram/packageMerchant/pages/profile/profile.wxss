@@ -53,6 +53,44 @@
   border-bottom: 1rpx solid var(--color-line);
 }
 
+.menu-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  min-width: 0;
+}
+
+.menu-hint {
+  font-size: 22rpx;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.menu-side {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.inbox-pending {
+  background: #fef2f2;
+}
+
+.inbox-badge {
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 10rpx;
+  border-radius: 999rpx;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 36rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
 .arrow {
   color: var(--color-muted);
   font-size: 36rpx;

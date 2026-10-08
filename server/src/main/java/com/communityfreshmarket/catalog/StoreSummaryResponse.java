@@ -12,6 +12,8 @@ public class StoreSummaryResponse {
   private String homeSubtitle;
   private int homeProductCols = 2;
   private String productDetailMode = "SHEET";
+  private int pointsPerYuan = 1;
+  private int pickImageTtlMinutes = 15;
 
   public long getId() {
     return id;
@@ -91,5 +93,21 @@ public class StoreSummaryResponse {
 
   public void setProductDetailMode(String productDetailMode) {
     this.productDetailMode = productDetailMode;
+  }
+
+  public int getPointsPerYuan() {
+    return pointsPerYuan;
+  }
+
+  public void setPointsPerYuan(int pointsPerYuan) {
+    this.pointsPerYuan = pointsPerYuan;
+  }
+
+  public int getPickImageTtlMinutes() {
+    return pickImageTtlMinutes;
+  }
+
+  public void setPickImageTtlMinutes(int pickImageTtlMinutes) {
+    this.pickImageTtlMinutes = pickImageTtlMinutes;
   }
 }

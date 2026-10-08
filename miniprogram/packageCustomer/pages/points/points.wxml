@@ -1,0 +1,40 @@
+<Header pageName="{{copy.titles.points}}" back="{{true}}" />
+<view class="page-body no-tab wave-page">
+  <view class="card balance-card">
+    <view class="label">{{copy.points.balance}}</view>
+    <view class="balance-num">{{balance}}</view>
+    <view class="muted sub">{{perYuanText}}</view>
+    <button class="btn btn-ghost checkin-btn" bind:tap="doCheckin">{{copy.points.quickCheckin}}</button>
+  </view>
+
+  <view class="sec-title">{{copy.points.redeemTitle}}</view>
+  <view class="card form-card">
+    <input class="field-input" placeholder="如：兑换鸡蛋一份" value="{{redeemTitle}}" bindinput="onRedeemTitle" />
+    <input class="field-input" type="number" placeholder="{{copy.points.redeemCost}}" value="{{redeemCost}}" bindinput="onRedeemCost" />
+    <button class="btn btn-cta full" bind:tap="submitRedeem">{{copy.points.redeemSubmit}}</button>
+  </view>
+
+  <view class="sec-title">{{copy.points.ledger}}</view>
+  <view class="card">
+    <view class="row" wx:for="{{recent}}" wx:key="id">
+      <view class="grow">
+        <view class="row-title">{{item.reason}}{{item.remark ? ' · ' + item.remark : ''}}</view>
+        <view class="muted sm">{{item.timeText}}</view>
+      </view>
+      <view class="delta {{item.delta >= 0 ? 'plus' : ''}}">{{item.deltaText}}</view>
+    </view>
+    <view wx:if="{{!recent.length}}" class="empty muted">{{copy.points.emptyLedger}}</view>
+  </view>
+
+  <view class="sec-title">{{copy.points.redeems}}</view>
+  <view class="card">
+    <view class="row" wx:for="{{redeems}}" wx:key="id">
+      <view class="grow">
+        <view class="row-title">{{item.title}}</view>
+        <view class="muted sm">{{item.timeText}} · {{item.status}}</view>
+      </view>
+      <view class="muted">-{{item.costPoints}}</view>
+    </view>
+    <view wx:if="{{!redeems.length}}" class="empty muted">{{copy.points.emptyRedeem}}</view>
+  </view>
+</view>

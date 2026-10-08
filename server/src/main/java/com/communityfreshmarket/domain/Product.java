@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @TableName("product")
@@ -29,7 +30,18 @@ public class Product {
   private Boolean inStock;
   private Boolean onShelf;
   private Boolean homeRecommended;
-  private Integer stockQty;
+  /** NULL = 不追踪数量 */
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private BigDecimal stockQty;
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private BigDecimal minQty;
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private BigDecimal maxQty;
+  private Boolean livePhotoEnabled;
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private String livePhotoUrl;
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private LocalDateTime livePhotoTakenAt;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
@@ -129,12 +141,52 @@ public class Product {
     this.homeRecommended = homeRecommended;
   }
 
-  public Integer getStockQty() {
+  public BigDecimal getStockQty() {
     return stockQty;
   }
 
-  public void setStockQty(Integer stockQty) {
+  public void setStockQty(BigDecimal stockQty) {
     this.stockQty = stockQty;
+  }
+
+  public BigDecimal getMinQty() {
+    return minQty;
+  }
+
+  public void setMinQty(BigDecimal minQty) {
+    this.minQty = minQty;
+  }
+
+  public BigDecimal getMaxQty() {
+    return maxQty;
+  }
+
+  public void setMaxQty(BigDecimal maxQty) {
+    this.maxQty = maxQty;
+  }
+
+  public Boolean getLivePhotoEnabled() {
+    return livePhotoEnabled;
+  }
+
+  public void setLivePhotoEnabled(Boolean livePhotoEnabled) {
+    this.livePhotoEnabled = livePhotoEnabled;
+  }
+
+  public String getLivePhotoUrl() {
+    return livePhotoUrl;
+  }
+
+  public void setLivePhotoUrl(String livePhotoUrl) {
+    this.livePhotoUrl = livePhotoUrl;
+  }
+
+  public LocalDateTime getLivePhotoTakenAt() {
+    return livePhotoTakenAt;
+  }
+
+  public void setLivePhotoTakenAt(LocalDateTime livePhotoTakenAt) {
+    this.livePhotoTakenAt = livePhotoTakenAt;
   }
 
   public LocalDateTime getCreatedAt() {

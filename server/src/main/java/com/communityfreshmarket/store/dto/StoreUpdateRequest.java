@@ -40,6 +40,14 @@ public class StoreUpdateRequest {
   @Size(max = 16)
   private String productDetailMode;
 
+  @Min(0)
+  @Max(100)
+  private Integer pointsPerYuan;
+
+  @Min(1)
+  @Max(120)
+  private Integer pickImageTtlMinutes;
+
   public String getName() {
     return name;
   }
@@ -110,5 +118,21 @@ public class StoreUpdateRequest {
 
   public void setProductDetailMode(String productDetailMode) {
     this.productDetailMode = productDetailMode;
+  }
+
+  public Integer getPointsPerYuan() {
+    return pointsPerYuan;
+  }
+
+  public void setPointsPerYuan(Integer pointsPerYuan) {
+    this.pointsPerYuan = pointsPerYuan;
+  }
+
+  public Integer getPickImageTtlMinutes() {
+    return pickImageTtlMinutes;
+  }
+
+  public void setPickImageTtlMinutes(Integer pickImageTtlMinutes) {
+    this.pickImageTtlMinutes = pickImageTtlMinutes;
   }
 }

@@ -3,7 +3,14 @@
   <view class="hint">{{copy.merchant.productHint}}</view>
 
   <view class="field">
-    <view class="label">{{copy.merchant.fieldImage}} <text class="muted">{{imageUrls.length}}/3</text></view>
+    <view class="img-head">
+      <view class="label">{{copy.merchant.fieldImage}} <text class="muted">{{imageUrls.length}}/3</text></view>
+      <view class="live-inline" catch:tap="toggleLivePhoto">
+        <text class="live-inline-label">{{copy.merchant.fieldLivePhoto}}</text>
+        <view class="switch {{form.livePhotoEnabled ? 'on' : ''}}"></view>
+      </view>
+    </view>
+    <view class="toggle-hint img-live-hint">{{copy.merchant.fieldLivePhotoHint}}</view>
     <view class="img-grid">
       <view class="img-tile" wx:for="{{imageUrls}}" wx:key="*this">
         <image class="img" src="{{item}}" mode="aspectFill" />
@@ -15,6 +22,15 @@
         bind:tap="pickImage"
       >
         <text class="muted">＋</text>
+      </view>
+      <view
+        wx:if="{{form.livePhotoEnabled}}"
+        class="img-tile {{livePhotoUrl ? '' : 'img-add'}}"
+        bind:tap="pickLivePhoto"
+      >
+        <image wx:if="{{livePhotoUrl}}" class="img" src="{{livePhotoUrl}}" mode="aspectFill" />
+        <text wx:else class="live-slot">{{copy.merchant.livePhotoSlot}}</text>
+        <view wx:if="{{livePhotoUrl}}" class="img-remove" catch:tap="clearLivePhoto">×</view>
       </view>
     </view>
   </view>
@@ -57,6 +73,22 @@
       <picker range="{{catLabels}}" value="{{catIndex}}" bindchange="onCat">
         <view class="field-input picker">{{catLabels[catIndex] || '请先创建分类'}}</view>
       </picker>
+    </view>
+  </view>
+
+  <view class="hint">{{copy.merchant.qtyOptionalHint}}</view>
+  <view class="field-row">
+    <view class="field col-3">
+      <view class="label">{{copy.merchant.fieldStockQty}}</view>
+      <input class="field-input" type="digit" placeholder="—" value="{{stockQtyStr}}" bindinput="onStockQty" />
+    </view>
+    <view class="field col-3">
+      <view class="label">{{copy.merchant.fieldMinQty}}</view>
+      <input class="field-input" type="digit" placeholder="—" value="{{minQtyStr}}" bindinput="onMinQty" />
+    </view>
+    <view class="field col-3">
+      <view class="label">{{copy.merchant.fieldMaxQty}}</view>
+      <input class="field-input" type="digit" placeholder="—" value="{{maxQtyStr}}" bindinput="onMaxQty" />
     </view>
   </view>
 

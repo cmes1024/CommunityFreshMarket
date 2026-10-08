@@ -37,14 +37,18 @@ Page({
     wx.reLaunch({ url: "/packageCustomer/pages/category/category" });
   },
   async onQty(e) {
-    const cart = await api.cartSetQty(e.currentTarget.dataset.id, e.detail.value);
-    await syncCartCount();
-    this.setData({ cart: decorate(cart) });
+    try {
+      const cart = await api.cartSetQty(e.currentTarget.dataset.id, e.detail.value);
+      await syncCartCount();
+      this.setData({ cart: decorate(cart) });
+    } catch (e) {}
   },
   async remove(e) {
-    const cart = await api.cartRemove(e.currentTarget.dataset.id);
-    await syncCartCount();
-    this.setData({ cart: decorate(cart) });
+    try {
+      const cart = await api.cartRemove(e.currentTarget.dataset.id);
+      await syncCartCount();
+      this.setData({ cart: decorate(cart) });
+    } catch (e) {}
   },
   checkout() {
     if (!this.data.cart.availableCount) {
