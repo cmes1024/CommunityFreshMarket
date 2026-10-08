@@ -1,21 +1,56 @@
 <Header pageName="{{copy.titles.merchantCoupons}}" back="{{true}}" toCustomer="{{true}}" />
 <view class="page-body no-tab form-page">
-  <view class="sec">{{copy.merchantCouponForm.create}}</view>
-  <view class="card">
-    <view class="label">{{copy.merchantCouponForm.title}}</view>
-    <input class="field-input" value="{{title}}" bindinput="onTitle" />
-    <view class="label">{{copy.merchantCouponForm.face}}</view>
-    <input class="field-input" type="digit" value="{{faceYuan}}" bindinput="onFace" />
-    <view class="label">{{copy.merchantCouponForm.minSpend}}</view>
-    <input class="field-input" type="digit" value="{{minSpendYuan}}" bindinput="onMin" />
-    <button class="btn btn-cta full" bind:tap="create">{{copy.merchantCouponForm.create}}</button>
+  <view class="sec-row">
+    <view class="add-entry" bind:tap="openSheet">{{copy.merchantCouponForm.add}}</view>
   </view>
-
-  <view class="sec">{{copy.merchantCouponForm.list}}</view>
   <view class="row-item" wx:for="{{list}}" wx:key="id">
     <view class="grow">
       <view class="title">{{item.title}}</view>
-      <view class="muted sm">减 ¥{{item.faceYuan}} · 满 ¥{{item.minYuan}} · {{item.enabled ? '启用' : '停用'}}</view>
+      <view class="muted sm">{{item.offerText}}{{item.expireText ? ' · 至 ' + item.expireText : ''}} · 已领 {{item.claimUserCount}} 人 · {{item.expired ? copy.merchantCouponForm.expired : (item.enabled ? '启用' : '停用')}}</view>
+    </view>
+    <view class="row-actions">
+      <button wx:if="{{!item.expired}}" class="btn btn-ghost btn-sm" data-id="{{item.id}}" bind:tap="toggle">{{item.enabled ? copy.merchantCouponForm.disable : copy.merchantCouponForm.enable}}</button>
+      <button class="btn btn-danger btn-sm" data-id="{{item.id}}" data-title="{{item.title}}" bind:tap="remove">{{copy.merchantCouponForm.remove}}</button>
     </view>
   </view>
+  <view wx:if="{{!list.length}}" class="empty">{{copy.merchantCouponForm.empty}}</view>
 </view>
+
+<page-container
+  show="{{sheetOpen}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto; max-height: 70vh;"
+  bind:clickoverlay="closeSheet"
+  bind:afterleave="closeSheet"
+>
+  <view class="sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.merchantCouponForm.add}}</view>
+      <view class="sheet-close" bind:tap="closeSheet">{{copy.merchantCouponForm.sheetClose}}</view>
+    </view>
+    <view class="label">{{copy.merchantCouponForm.title}}</view>
+    <input class="field-input" value="{{title}}" bindinput="onTitle" />
+    <view class="field-row">
+      <view class="field-col">
+        <view class="label">{{copy.merchantCouponForm.face}}</view>
+        <input class="field-input" type="digit" value="{{faceYuan}}" bindinput="onFace" />
+      </view>
+      <view class="field-col">
+        <view class="label">{{copy.merchantCouponForm.minSpendShort}}</view>
+        <input class="field-input" type="digit" placeholder="{{copy.merchantCouponForm.minSpendPh}}" value="{{minSpendYuan}}" bindinput="onMin" />
+      </view>
+    </view>
+    <view class="label-row">
+      <view class="label">{{copy.merchantCouponForm.expire}}</view>
+      <view wx:if="{{expireDate}}" class="pick-clear" bind:tap="clearExpire">清除</view>
+    </view>
+    <picker mode="date" value="{{expireDate}}" start="{{today}}" bindchange="onExpire">
+      <view class="field-input {{expireDate ? '' : 'ph'}}">{{expireDate || copy.merchantCouponForm.expirePh}}</view>
+    </picker>
+    <button class="btn btn-cta add-btn" bind:tap="create">{{copy.merchantCouponForm.create}}</button>
+  </view>
+</page-container>

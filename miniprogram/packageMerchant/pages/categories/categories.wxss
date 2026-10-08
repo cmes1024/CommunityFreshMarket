@@ -58,8 +58,8 @@
 
 .field-input {
   min-height: 88rpx;
-  background: var(--color-surface);
-  border: 2rpx solid var(--color-line);
+  background: #f4f7f6;
+  border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
   padding: 0 24rpx;
   margin-bottom: 16rpx;

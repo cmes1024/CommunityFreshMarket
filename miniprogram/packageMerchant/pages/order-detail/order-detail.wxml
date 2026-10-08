@@ -18,9 +18,10 @@
     <view class="muted">{{fulfillText}}</view>
     <view class="items-line">{{itemsText}}</view>
     <view class="price-line">
-      <text class="price">¥{{order.totalYuan}}</text>
+      <text class="price">¥{{order.discountFen ? order.payYuan : order.totalYuan}}</text>
       <text class="muted"> · {{copy.merchant.offlinePay}}</text>
     </view>
+    <view class="muted remark" wx:if="{{order.discountFen}}">券抵扣 -¥{{order.discountYuan}}（商品 ¥{{order.totalYuan}}）</view>
     <view class="muted remark" wx:if="{{order.remark}}">备注 {{order.remark}}</view>
   </view>
 

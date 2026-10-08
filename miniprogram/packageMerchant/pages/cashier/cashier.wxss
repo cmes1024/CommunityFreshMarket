@@ -37,6 +37,18 @@
   margin-bottom: 12rpx;
   border: 1rpx solid var(--color-line);
 }
+.checkin.on {
+  border-color: var(--color-primary);
+}
+.scan-btn {
+  margin-bottom: 16rpx;
+}
+.reason {
+  margin-top: 12rpx;
+}
+.remove {
+  margin-left: 16rpx;
+}
 .link {
   color: var(--color-primary);
   font-size: 26rpx;
@@ -64,7 +76,8 @@
   margin-bottom: 16rpx;
 }
 .field-input {
-  background: var(--color-mist);
+  background: #f4f7f6;
+  border: 1rpx solid var(--color-line);
   border-radius: 16rpx;
   padding: 16rpx 20rpx;
   font-size: 28rpx;

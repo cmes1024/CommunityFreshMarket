@@ -9,6 +9,8 @@
   <view class="card">
     <view wx:for="{{order.items}}" wx:key="productName">{{item.productName}} × {{item.qty}} {{item.unitLabel}}</view>
     <view class="row space-between"><text>合计</text><text class="price">¥{{order.totalYuan}}</text></view>
+    <view class="row space-between" wx:if="{{order.discountFen}}"><text>券抵扣</text><text>-¥{{order.discountYuan}}</text></view>
+    <view class="row space-between" wx:if="{{order.discountFen}}"><text>应付</text><text class="price">¥{{order.payYuan}}</text></view>
     <view class="muted">{{order.fulfillment === 'PICKUP' ? order.pickupSlotLabel : '尽快配送'}}</view>
     <view class="muted" wx:if="{{order.remark}}">备注 {{order.remark}}</view>
   </view>

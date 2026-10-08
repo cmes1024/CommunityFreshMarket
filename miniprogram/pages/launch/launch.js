@@ -7,7 +7,12 @@ Page({
   onLoad() {
     const app = getApp();
     const go = () => {
-      wx.reLaunch({ url: "/packageCustomer/pages/home/home" });
+      const member = !!(app.globalData && app.globalData.isStoreMember);
+      wx.reLaunch({
+        url: member
+          ? "/packageMerchant/pages/orders/orders"
+          : "/packageCustomer/pages/home/home",
+      });
     };
     if (app.loginPromise) {
       app.loginPromise.finally(go);

@@ -10,6 +10,10 @@
       <text>{{copy.merchantCashier.total}}</text>
       <text class="price">¥{{sale.totalYuan}}</text>
     </view>
+    <view class="row-line" wx:if="{{sale.couponDiscountFen}}">
+      <text>{{copy.merchantCashier.couponOff}}</text>
+      <text>-¥{{sale.couponYuan}}</text>
+    </view>
     <view class="row-line">
       <text>{{copy.merchantCashier.pay}}</text>
       <text class="price strong">¥{{sale.payYuan}}</text>
@@ -24,7 +28,28 @@
   </view>
   <view wx:if="{{!checkins.length}}" class="empty muted">{{copy.merchantCashier.emptyCheckins}}</view>
 
+  <block wx:if="{{sale.memberUserId}}">
+    <view class="sec">{{copy.merchantCashier.memberCoupon}}</view>
+    <view
+      class="checkin {{!sale.couponClaimId ? 'on' : ''}}"
+      data-id="0"
+      bind:tap="pickMemberCoupon"
+    >
+      <view class="grow">{{copy.merchantCashier.clearCoupon}}</view>
+    </view>
+    <view
+      class="checkin {{sale.couponClaimId == item.id ? 'on' : ''}}"
+      wx:for="{{memberCoupons}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bind:tap="pickMemberCoupon"
+    >
+      <view class="grow">{{item.title}} · 减 ¥{{item.faceYuan}}</view>
+    </view>
+  </block>
+
   <view class="sec">{{copy.merchantCashier.addProduct}}</view>
+  <button class="btn btn-ghost scan-btn" bind:tap="scanAdd">{{copy.merchantCashier.scan}}</button>
   <scroll-view scroll-x class="prod-scroll">
     <view
       class="prod-chip {{addProductId == item.id ? 'on' : ''}}"
@@ -43,8 +68,13 @@
   <view class="item" wx:for="{{sale.items}}" wx:key="id">
     <view class="grow">{{item.productName}} × {{item.qty}}</view>
     <view>¥{{item.amountYuan}}</view>
+    <text class="link remove" data-id="{{item.id}}" bind:tap="removeItem">{{copy.merchantCashier.remove}}</text>
   </view>
   <view wx:if="{{!sale.items.length}}" class="empty muted">{{copy.merchantCashier.emptyItems}}</view>
+
+  <view class="sec">{{copy.merchantCashier.discount}}</view>
+  <input class="field-input" type="digit" placeholder="0" value="{{discountYuan}}" bindinput="onDiscount" />
+  <input class="field-input reason" placeholder="{{copy.merchantCashier.reason}}" value="{{adjustReason}}" bindinput="onReason" />
 
   <button class="btn btn-cta full complete" bind:tap="completeSale">{{copy.merchantCashier.complete}}</button>
 </view>

@@ -1,11 +1,96 @@
-<Header pageName="{{copy.titles.merchantPointRedeems}}" back="{{true}}" toCustomer="{{true}}" />
+<Header pageName="{{copy.titles.merchantPointRedeems}}" back="{{true}}" />
 <view class="page-body no-tab wave-page">
-  <view class="row-item" wx:for="{{list}}" wx:key="id">
+  <view class="sec-row">
+    <view class="sec">{{copy.merchantPointRedeem.catalog}}</view>
+    <view class="pending-entry" bind:tap="openPending">
+      {{copy.merchantPointRedeem.pending}}
+      <view wx:if="{{list.length}}" class="pending-dot"></view>
+    </view>
+  </view>
+  <view class="card">
+    <view class="card-head">
+      <view class="label">
+        <text class="head-name">{{productId ? productName : copy.merchantPointRedeem.pickProduct}}</text>
+        <text wx:if="{{productId}}" class="pick-clear" catch:tap="clearProduct">{{copy.merchantPointRedeem.clearPick}}</text>
+      </view>
+      <view class="pick-btn" bind:tap="openPicker">{{copy.merchantPointRedeem.pick}}</view>
+    </view>
+    <view class="field-row">
+      <view class="field-name">
+        <input class="field-input" placeholder="{{copy.merchantPointRedeem.title}}" value="{{title}}" bindinput="onTitle" />
+      </view>
+      <view class="field-cost">
+        <input class="field-input" type="number" placeholder="{{copy.merchantPointRedeem.cost}}" value="{{cost}}" bindinput="onCost" />
+      </view>
+    </view>
+    <button class="btn btn-cta add-btn" bind:tap="addItem">{{copy.merchantPointRedeem.add}}</button>
+  </view>
+  <view class="row-item" wx:for="{{items}}" wx:key="id">
     <view class="grow">
       <view class="title">{{item.title}}</view>
-      <view class="muted sm">{{item.timeText}} · 用户 {{item.userId}} · {{item.costPoints}} 分</view>
+      <view class="muted sm">{{item.costPoints}} 分 · {{item.enabled ? '启用' : '停用'}}</view>
     </view>
-    <button class="btn btn-cta btn-sm" data-id="{{item.id}}" bind:tap="complete">{{copy.merchantPointRedeem.complete}}</button>
+    <view class="row-actions">
+      <button class="btn btn-ghost btn-sm" data-id="{{item.id}}" bind:tap="toggleItem">{{item.enabled ? copy.merchantPointRedeem.disable : copy.merchantPointRedeem.enable}}</button>
+      <button class="btn btn-danger btn-sm" data-id="{{item.id}}" data-title="{{item.title}}" bind:tap="removeItem">{{copy.merchantPointRedeem.remove}}</button>
+    </view>
   </view>
-  <view wx:if="{{!list.length}}" class="empty muted">{{copy.merchantPointRedeem.empty}}</view>
+
 </view>
+
+<page-container
+  show="{{!!sheet}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: 72vh;"
+  bind:clickoverlay="closeSheet"
+  bind:afterleave="closeSheet"
+>
+  <view wx:if="{{sheet === 'picker'}}" class="picker-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.merchantPointRedeem.pickProduct}}</view>
+      <view class="sheet-close" bind:tap="closeSheet">{{copy.merchantPointRedeem.sheetClose}}</view>
+    </view>
+    <view class="m-search">
+      <input
+        class="m-search-input"
+        placeholder="{{copy.merchantPointRedeem.searchProduct}}"
+        value="{{keyword}}"
+        confirm-type="search"
+        bindinput="onKeyword"
+      />
+      <view wx:if="{{keyword}}" class="m-search-clear" bind:tap="clearKeyword">×</view>
+    </view>
+    <scroll-view scroll-y class="picker-list">
+      <view
+        class="picker-row {{productId == item.id ? 'on' : ''}}"
+        wx:for="{{filtered}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bind:tap="selectProduct"
+      >{{item.name}}</view>
+      <view wx:if="{{!filtered.length}}" class="empty muted">{{copy.merchantPointRedeem.emptySearch}}</view>
+    </scroll-view>
+  </view>
+  <view wx:elif="{{sheet === 'pending'}}" class="picker-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.merchantPointRedeem.pending}}</view>
+      <view class="sheet-close" bind:tap="closeSheet">{{copy.merchantPointRedeem.sheetClose}}</view>
+    </view>
+    <scroll-view scroll-y class="picker-list">
+      <view class="pending-card" wx:for="{{list}}" wx:key="id">
+        <view class="title">{{item.title}}</view>
+        <view class="muted sm">{{item.timeText}} · 用户 {{item.userId}} · {{item.costPoints}} 分</view>
+        <view class="pending-actions">
+          <button class="btn btn-ghost btn-sm" data-id="{{item.id}}" bind:tap="reject">{{copy.merchantPointRedeem.reject}}</button>
+          <button class="btn btn-cta btn-sm" data-id="{{item.id}}" bind:tap="complete">{{copy.merchantPointRedeem.complete}}</button>
+        </view>
+      </view>
+      <view wx:if="{{!list.length}}" class="empty muted">{{copy.merchantPointRedeem.empty}}</view>
+    </scroll-view>
+  </view>
+</page-container>

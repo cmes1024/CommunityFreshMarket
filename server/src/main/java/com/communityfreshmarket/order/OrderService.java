@@ -9,6 +9,7 @@ import com.communityfreshmarket.cart.dto.CartLineResponse;
 import com.communityfreshmarket.cart.dto.CartResponse;
 import com.communityfreshmarket.catalog.ProductQtyRules;
 import com.communityfreshmarket.catalog.StockInventoryService;
+import com.communityfreshmarket.coupon.CouponService;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.domain.Order;
@@ -55,6 +56,7 @@ public class OrderService {
   private final OrderNotifyService orderNotifyService;
   private final StockInventoryService stockInventoryService;
   private final PointsService pointsService;
+  private final CouponService couponService;
 
   public OrderService(
       OrderMapper orderMapper,
@@ -66,7 +68,8 @@ public class OrderService {
       ObjectMapper objectMapper,
       OrderNotifyService orderNotifyService,
       StockInventoryService stockInventoryService,
-      PointsService pointsService) {
+      PointsService pointsService,
+      CouponService couponService) {
     this.orderMapper = orderMapper;
     this.orderItemMapper = orderItemMapper;
     this.cartService = cartService;
@@ -77,6 +80,7 @@ public class OrderService {
     this.orderNotifyService = orderNotifyService;
     this.stockInventoryService = stockInventoryService;
     this.pointsService = pointsService;
+    this.couponService = couponService;
   }
 
   @Transactional
@@ -149,7 +153,15 @@ public class OrderService {
 
     int total = available.stream().mapToInt(CartLineResponse::getAmountFen).sum();
     order.setTotalAmountFen(total);
+    order.setDiscountFen(0);
     orderMapper.insert(order);
+    if (request.getCouponClaimId() != null) {
+      int discount = couponService.reserveForOrder(
+          request.getCouponClaimId(), userId, storeId, order.getId(), total);
+      order.setCouponClaimId(request.getCouponClaimId());
+      order.setDiscountFen(discount);
+      orderMapper.updateById(order);
+    }
 
     List<Long> purchasedIds = new ArrayList<>();
     for (CartLineResponse line : available) {
@@ -293,6 +305,7 @@ public class OrderService {
     }
     Order fresh = orderMapper.selectById(id);
     if (OrderStatus.require(fresh.getStatus()) == OrderStatus.COMPLETED) {
+      couponService.useByOrder(fresh.getId());
       pointsService.awardOrderComplete(fresh);
     }
     return toResponse(fresh);
@@ -326,6 +339,7 @@ public class OrderService {
       throw new BizException(ErrorCodes.BAD_REQUEST, "订单状态已变化，请刷新后重试");
     }
     restoreStock(order.getId(), order.getStoreId());
+    couponService.releaseByOrder(order.getId());
     log.info("order cancelled id={} by={}", order.getId(), by);
     Order fresh = orderMapper.selectById(order.getId());
     if (fresh != null) {

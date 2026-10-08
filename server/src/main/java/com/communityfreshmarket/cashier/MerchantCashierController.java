@@ -3,9 +3,11 @@ package com.communityfreshmarket.cashier;
 import com.communityfreshmarket.cashier.dto.CashierAddItemRequest;
 import com.communityfreshmarket.cashier.dto.CashierAttachMemberRequest;
 import com.communityfreshmarket.cashier.dto.CashierCompleteRequest;
+import com.communityfreshmarket.cashier.dto.CashierCouponRequest;
 import com.communityfreshmarket.cashier.dto.CashierSaleResponse;
 import com.communityfreshmarket.common.ApiResponse;
 import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +44,18 @@ public class MerchantCashierController {
   public ApiResponse<CashierSaleResponse> addItem(
       @PathVariable long id, @RequestBody CashierAddItemRequest request) {
     return ApiResponse.ok(cashierService.addItem(id, request));
+  }
+
+  @DeleteMapping("/{id}/items/{itemId}")
+  public ApiResponse<CashierSaleResponse> removeItem(
+      @PathVariable long id, @PathVariable long itemId) {
+    return ApiResponse.ok(cashierService.removeItem(id, itemId));
+  }
+
+  @PostMapping("/{id}/coupon")
+  public ApiResponse<CashierSaleResponse> coupon(
+      @PathVariable long id, @RequestBody(required = false) CashierCouponRequest request) {
+    return ApiResponse.ok(cashierService.applyCoupon(id, request));
   }
 
   @PostMapping("/{id}/member")

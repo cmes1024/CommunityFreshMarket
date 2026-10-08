@@ -136,11 +136,31 @@ PTS=$(req GET /api/v1/points/me "$CUST_TOKEN")
 assert_json "points earned >=10" "d.get('code')==0 and d['data']['balance']>=10" "$PTS"
 
 echo "=== redeem ==="
-RED=$(req POST /api/v1/points/redeem "$CUST_TOKEN" '{"title":"SMOKE换鸡蛋","costPoints":5}')
+ITEM5=$(req POST /api/v1/merchant/points/items "$OWNER_TOKEN" "{\"productId\":$PID,\"costPoints\":5,\"enabled\":true}")
+assert_json "create redeem item from product" "d.get('code')==0 and d['data']['title']=='SMOKE起购蛋' and d['data']['productId']==$PID" "$ITEM5"
+ITEM5_ID=$(echo "$ITEM5" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+RED=$(req POST /api/v1/points/redeem "$CUST_TOKEN" "{\"itemId\":$ITEM5_ID}")
 assert_json "redeem" "d.get('code')==0 and d['data']['status']=='PENDING'" "$RED"
 RID=$(echo "$RED" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
 DONE=$(req POST "/api/v1/merchant/points/redeems/$RID/complete" "$OWNER_TOKEN")
 assert_json "redeem complete" "d.get('code')==0 and d['data']['status']=='DONE'" "$DONE"
+BAL=$(req GET /api/v1/points/me "$CUST_TOKEN")
+BEFORE=$(echo "$BAL" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['balance'])")
+ITEM1=$(req POST /api/v1/merchant/points/items "$OWNER_TOKEN" '{"title":"SMOKE驳回","costPoints":1,"enabled":true}')
+ITEM1_ID=$(echo "$ITEM1" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+RED2=$(req POST /api/v1/points/redeem "$CUST_TOKEN" "{\"itemId\":$ITEM1_ID}")
+assert_json "redeem pending for reject" "d.get('code')==0" "$RED2"
+RID2=$(echo "$RED2" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+REJ=$(req POST "/api/v1/merchant/points/redeems/$RID2/cancel" "$OWNER_TOKEN")
+assert_json "redeem reject" "d.get('code')==0 and d['data']['status']=='CANCELLED'" "$REJ"
+BAL2=$(req GET /api/v1/points/me "$CUST_TOKEN")
+assert_json "points restored after reject" "d.get('code')==0 and d['data']['balance']==$BEFORE" "$BAL2"
+DELITEM=$(req POST /api/v1/merchant/points/items "$OWNER_TOKEN" '{"title":"SMOKE删除","costPoints":3,"enabled":true}')
+DELID=$(echo "$DELITEM" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+DEL=$(req DELETE "/api/v1/merchant/points/items/$DELID" "$OWNER_TOKEN")
+assert_json "delete redeem item" "d.get('code')==0" "$DEL"
+LEFT=$(req GET /api/v1/merchant/points/items "$OWNER_TOKEN")
+assert_json "deleted item gone" "d.get('code')==0 and not any(x['id']==$DELID for x in d['data'])" "$LEFT"
 
 echo "=== live photo ==="
 put_live() {
@@ -196,6 +216,28 @@ CL=$(req POST "/api/v1/coupons/$CID/claim" "$CUST_TOKEN")
 assert_json "claim coupon" "d.get('code')==0 and d['data']['status']=='UNUSED'" "$CL"
 CL2=$(req POST "/api/v1/coupons/$CID/claim" "$CUST_TOKEN")
 assert_json "claim twice rejected" "d.get('code')!=0" "$CL2"
+CLAIM_ID=$(echo "$CL" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+
+echo "=== order reserves coupon then cancel releases ==="
+CP=$(req POST /api/v1/merchant/products "$OWNER_TOKEN" \
+  '{"categoryId":1,"name":"SMOKE券商品","unit":"PIECE","priceFen":2000,"inStock":true,"onShelf":true}')
+assert_json "coupon product" "d.get('code')==0" "$CP"
+CPID=$(echo "$CP" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+CART_CLR=$(req GET /api/v1/cart "$CUST_TOKEN")
+for oid in $(echo "$CART_CLR" | python3 -c "import sys,json; print(' '.join(str(i['productId']) for i in json.load(sys.stdin)['data']['items']))"); do
+  req DELETE "/api/v1/cart/items/$oid" "$CUST_TOKEN" >/dev/null || true
+done
+req PUT "/api/v1/cart/items/$CPID" "$CUST_TOKEN" '{"qty":1}' >/dev/null
+CORD=$(req POST /api/v1/orders "$CUST_TOKEN" \
+  "{\"fulfillment\":\"DELIVERY\",\"addressId\":$AID,\"asap\":true,\"couponClaimId\":$CLAIM_ID}")
+assert_json "order with coupon" "d.get('code')==0 and d['data']['discountFen']==300 and d['data']['payFen']==1700" "$CORD"
+COID=$(echo "$CORD" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+MINE=$(req GET /api/v1/coupons/mine "$CUST_TOKEN")
+assert_json "coupon reserved" "d.get('code')==0 and any(x['id']==$CLAIM_ID and x['status']=='RESERVED' for x in d['data'])" "$MINE"
+CCAN=$(req POST "/api/v1/orders/$COID/cancel" "$CUST_TOKEN" '{"reason":"release coupon"}')
+assert_json "cancel releases coupon" "d.get('code')==0" "$CCAN"
+MINE2=$(req GET /api/v1/coupons/mine "$CUST_TOKEN")
+assert_json "coupon unused again" "d.get('code')==0 and any(x['id']==$CLAIM_ID and x['status']=='UNUSED' for x in d['data'])" "$MINE2"
 
 echo "=== checkin + cashier ==="
 CHK=$(req POST /api/v1/checkins "$CUST_TOKEN" '{"lat":31.2,"lng":121.5}')
@@ -207,13 +249,120 @@ SALE=$(req POST /api/v1/merchant/cashier "$OWNER_TOKEN")
 assert_json "open cashier" "d.get('code')==0 and d['data']['status']=='OPEN'" "$SALE"
 SID=$(echo "$SALE" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
 ITEM=$(req POST "/api/v1/merchant/cashier/$SID/items" "$OWNER_TOKEN" \
-  '{"productId":1,"qty":1}')
-assert_json "cashier add item" "d.get('code')==0 and d['data']['totalFen']>0" "$ITEM"
+  "{\"productId\":$CPID,\"qty\":1}")
+assert_json "cashier add item" "d.get('code')==0 and d['data']['totalFen']==2000" "$ITEM"
 MEM=$(req POST "/api/v1/merchant/cashier/$SID/member" "$OWNER_TOKEN" \
   "{\"checkinId\":$CHKID}")
 assert_json "attach checkin member" "d.get('code')==0 and d['data']['memberUserId']==2" "$MEM"
-CMP=$(req POST "/api/v1/merchant/cashier/$SID/complete" "$OWNER_TOKEN" '{}')
-assert_json "cashier complete" "d.get('code')==0 and d['data']['status']=='COMPLETED'" "$CMP"
+ITEM_ID=$(echo "$ITEM" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['items'][0]['id'])")
+RM=$(req DELETE "/api/v1/merchant/cashier/$SID/items/$ITEM_ID" "$OWNER_TOKEN")
+assert_json "remove cashier item" "d.get('code')==0 and d['data']['totalFen']==0" "$RM"
+ITEM=$(req POST "/api/v1/merchant/cashier/$SID/items" "$OWNER_TOKEN" \
+  "{\"productId\":$CPID,\"qty\":1}")
+assert_json "cashier readd item" "d.get('code')==0 and d['data']['totalFen']==2000" "$ITEM"
+APPLIED=$(req POST "/api/v1/merchant/cashier/$SID/coupon" "$OWNER_TOKEN" \
+  "{\"claimId\":$CLAIM_ID}")
+assert_json "cashier apply coupon" "d.get('code')==0 and d['data']['couponDiscountFen']==300" "$APPLIED"
+CMP=$(req POST "/api/v1/merchant/cashier/$SID/complete" "$OWNER_TOKEN" \
+  '{"discountFen":100,"adjustReason":"抹零"}')
+assert_json "cashier complete with extra off" "d.get('code')==0 and d['data']['status']=='COMPLETED' and d['data']['discountFen']==400" "$CMP"
+USED=$(req GET /api/v1/coupons/mine "$CUST_TOKEN")
+assert_json "coupon used" "d.get('code')==0 and any(x['id']==$CLAIM_ID and x['status']=='USED' for x in d['data'])" "$USED"
+
+echo "=== delete coupon ==="
+UDEL=$(req DELETE "/api/v1/merchant/coupons/$CID" "$OWNER_TOKEN")
+assert_json "delete used coupon" "d.get('code')==0" "$UDEL"
+CLIST=$(req GET /api/v1/merchant/coupons "$OWNER_TOKEN")
+assert_json "deleted coupon hidden" "d.get('code')==0 and not any(x['id']==$CID for x in d['data'])" "$CLIST"
+USED2=$(req GET /api/v1/coupons/mine "$CUST_TOKEN")
+assert_json "used claim kept" "d.get('code')==0 and any(x['id']==$CLAIM_ID and x['status']=='USED' and x.get('title')=='SMOKE减3元' for x in d['data'])" "$USED2"
+DC=$(req POST /api/v1/merchant/coupons "$OWNER_TOKEN" \
+  '{"title":"SMOKE待删","type":"FIXED","faceFen":100,"minSpendFen":0,"enabled":true}')
+assert_json "coupon to delete" "d.get('code')==0" "$DC"
+DCID=$(echo "$DC" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+DCL=$(req POST "/api/v1/coupons/$DCID/claim" "$CUST_TOKEN")
+assert_json "claim coupon to delete" "d.get('code')==0" "$DCL"
+DCLID=$(echo "$DCL" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+CART_CLR=$(req GET /api/v1/cart "$CUST_TOKEN")
+for oid in $(echo "$CART_CLR" | python3 -c "import sys,json; print(' '.join(str(i['productId']) for i in json.load(sys.stdin)['data']['items']))"); do
+  req DELETE "/api/v1/cart/items/$oid" "$CUST_TOKEN" >/dev/null || true
+done
+req PUT "/api/v1/cart/items/$CPID" "$CUST_TOKEN" '{"qty":1}' >/dev/null
+RORD=$(req POST /api/v1/orders "$CUST_TOKEN" \
+  "{\"fulfillment\":\"DELIVERY\",\"addressId\":$AID,\"asap\":true,\"couponClaimId\":$DCLID}")
+assert_json "reserve coupon to delete" "d.get('code')==0" "$RORD"
+ROID=$(echo "$RORD" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+RBLOCK=$(req DELETE "/api/v1/merchant/coupons/$DCID" "$OWNER_TOKEN")
+assert_json "delete reserved coupon rejected" "d.get('code')!=0" "$RBLOCK"
+req POST "/api/v1/orders/$ROID/cancel" "$CUST_TOKEN" '{"reason":"release before delete"}' >/dev/null
+DOK=$(req DELETE "/api/v1/merchant/coupons/$DCID" "$OWNER_TOKEN")
+assert_json "delete unused coupon" "d.get('code')==0" "$DOK"
+MINE3=$(req GET /api/v1/coupons/mine "$CUST_TOKEN")
+assert_json "unused claim voided" "d.get('code')==0 and not any(x['id']==$DCLID for x in d['data'])" "$MINE3"
+CLIST2=$(req GET /api/v1/merchant/coupons "$OWNER_TOKEN")
+assert_json "deleted unused coupon hidden" "d.get('code')==0 and not any(x['id']==$DCID for x in d['data'])" "$CLIST2"
+
+echo "=== coupon expiry ==="
+PAST_AT=$(python3 -c "from datetime import datetime,timedelta; print((datetime.now()-timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S'))")
+FUTURE_AT=$(python3 -c "from datetime import datetime,timedelta; print((datetime.now()+timedelta(days=2)).strftime('%Y-%m-%dT23:59:59'))")
+BAD=$(req POST /api/v1/merchant/coupons "$OWNER_TOKEN" \
+  "{\"title\":\"SMOKE已过期\",\"type\":\"FIXED\",\"faceFen\":100,\"minSpendFen\":0,\"endsAt\":\"$PAST_AT\",\"enabled\":true}")
+assert_json "reject past expiry" "d.get('code')!=0" "$BAD"
+EC=$(req POST /api/v1/merchant/coupons "$OWNER_TOKEN" \
+  "{\"title\":\"SMOKE将过期\",\"type\":\"FIXED\",\"faceFen\":100,\"minSpendFen\":0,\"endsAt\":\"$FUTURE_AT\",\"enabled\":true}")
+assert_json "create expiring coupon" "d.get('code')==0 and d['data']['enabled'] is True" "$EC"
+EID=$(echo "$EC" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+ECL=$(req POST "/api/v1/coupons/$EID/claim" "$CUST_TOKEN")
+assert_json "claim expiring coupon" "d.get('code')==0" "$ECL"
+ECLID=$(echo "$ECL" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+EUPD=$(req PUT "/api/v1/merchant/coupons/$EID" "$OWNER_TOKEN" \
+  "{\"title\":\"SMOKE将过期\",\"type\":\"FIXED\",\"faceFen\":100,\"minSpendFen\":0,\"endsAt\":\"$PAST_AT\",\"enabled\":true}")
+assert_json "past expiry disables coupon" "d.get('code')==0 and d['data']['enabled'] is False" "$EUPD"
+ELIST=$(req GET /api/v1/merchant/coupons "$OWNER_TOKEN")
+assert_json "expired coupon stays disabled" "d.get('code')==0 and any(x['id']==$EID and x['enabled'] is False for x in d['data'])" "$ELIST"
+EMINE=$(req GET /api/v1/coupons/mine "$CUST_TOKEN")
+assert_json "unused claim expired" "d.get('code')==0 and any(x['id']==$ECLID and x['status']=='EXPIRED' for x in d['data'])" "$EMINE"
+ECLAIM=$(req POST "/api/v1/coupons/$EID/claim" "$CUST2_TOKEN")
+assert_json "expired coupon cannot be claimed" "d.get('code')!=0" "$ECLAIM"
+
+echo "=== disable keeps claimed coupon usable ==="
+HC=$(req POST /api/v1/merchant/coupons "$OWNER_TOKEN" \
+  '{"title":"SMOKE停用仍可用","type":"FIXED","faceFen":100,"minSpendFen":0,"enabled":true}')
+assert_json "coupon for disable" "d.get('code')==0" "$HC"
+HID=$(echo "$HC" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+HCL=$(req POST "/api/v1/coupons/$HID/claim" "$CUST_TOKEN")
+assert_json "claim before disable" "d.get('code')==0" "$HCL"
+HCLID=$(echo "$HCL" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+HLIST=$(req GET /api/v1/merchant/coupons "$OWNER_TOKEN")
+assert_json "claim user count" "d.get('code')==0 and any(x['id']==$HID and x['claimUserCount']==1 and x['unusedCount']==1 for x in d['data'])" "$HLIST"
+HUPD=$(req PUT "/api/v1/merchant/coupons/$HID" "$OWNER_TOKEN" \
+  '{"title":"SMOKE停用仍可用","type":"FIXED","faceFen":100,"minSpendFen":0,"enabled":false}')
+assert_json "disable coupon" "d.get('code')==0 and d['data']['enabled'] is False" "$HUPD"
+HAGAIN=$(req POST "/api/v1/coupons/$HID/claim" "$CUST2_TOKEN")
+assert_json "disabled coupon cannot be claimed" "d.get('code')!=0" "$HAGAIN"
+CART_CLR=$(req GET /api/v1/cart "$CUST_TOKEN")
+for oid in $(echo "$CART_CLR" | python3 -c "import sys,json; print(' '.join(str(i['productId']) for i in json.load(sys.stdin)['data']['items']))"); do
+  req DELETE "/api/v1/cart/items/$oid" "$CUST_TOKEN" >/dev/null || true
+done
+req PUT "/api/v1/cart/items/$CPID" "$CUST_TOKEN" '{"qty":1}' >/dev/null
+HORD=$(req POST /api/v1/orders "$CUST_TOKEN" \
+  "{\"fulfillment\":\"DELIVERY\",\"addressId\":$AID,\"asap\":true,\"couponClaimId\":$HCLID}")
+assert_json "disabled coupon still usable" "d.get('code')==0 and d['data']['discountFen']==100" "$HORD"
+HOID=$(echo "$HORD" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+req POST "/api/v1/orders/$HOID/cancel" "$CUST_TOKEN" '{"reason":"release disabled coupon"}' >/dev/null
+
+echo "=== cashier deducts stock ==="
+STK=$(req POST /api/v1/merchant/products "$OWNER_TOKEN" \
+  '{"categoryId":1,"name":"SMOKE收银库存","unit":"PIECE","priceFen":100,"inStock":true,"onShelf":true,"stockQty":4}')
+assert_json "cashier stock product" "d.get('code')==0" "$STK"
+STKID=$(echo "$STK" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+SALE2=$(req POST /api/v1/merchant/cashier "$OWNER_TOKEN")
+SID2=$(echo "$SALE2" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['id'])")
+req POST "/api/v1/merchant/cashier/$SID2/items" "$OWNER_TOKEN" "{\"productId\":$STKID,\"qty\":1}" >/dev/null
+CMP2=$(req POST "/api/v1/merchant/cashier/$SID2/complete" "$OWNER_TOKEN" '{}')
+assert_json "cashier stock sale" "d.get('code')==0" "$CMP2"
+STK_P=$(req GET "/api/v1/merchant/products/$STKID" "$OWNER_TOKEN")
+assert_json "cashier stock deducted" "d.get('code')==0 and float(d['data']['stockQty'])==3" "$STK_P"
 
 echo "=== store settings wave2 fields ==="
 ST=$(req PUT /api/v1/merchant/store "$OWNER_TOKEN" \

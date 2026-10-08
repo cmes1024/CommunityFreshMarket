@@ -20,7 +20,7 @@
     <view class="coupon" wx:for="{{mineList}}" wx:key="id">
       <view class="coupon-main">
         <view class="coupon-title">{{item.title}}</view>
-        <view class="coupon-sub">{{item.faceText}} · {{item.status}}</view>
+        <view class="coupon-sub">{{item.faceText}} · {{item.statusText}}</view>
       </view>
     </view>
     <view wx:if="{{!mineList.length}}" class="empty muted">{{copy.coupons.emptyMine}}</view>

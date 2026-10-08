@@ -12,9 +12,11 @@ public class CashierSale {
   private Long id;
   private Long storeId;
   private Long memberUserId;
+  private Long couponClaimId;
   private String status;
   private Integer totalFen;
   private Integer discountFen;
+  private Integer couponDiscountFen;
   private Integer payFen;
   private String adjustReason;
   private Long createdBy;
@@ -46,6 +48,14 @@ public class CashierSale {
     this.memberUserId = memberUserId;
   }
 
+  public Long getCouponClaimId() {
+    return couponClaimId;
+  }
+
+  public void setCouponClaimId(Long couponClaimId) {
+    this.couponClaimId = couponClaimId;
+  }
+
   public String getStatus() {
     return status;
   }
@@ -68,6 +78,14 @@ public class CashierSale {
 
   public void setDiscountFen(Integer discountFen) {
     this.discountFen = discountFen;
+  }
+
+  public Integer getCouponDiscountFen() {
+    return couponDiscountFen;
+  }
+
+  public void setCouponDiscountFen(Integer couponDiscountFen) {
+    this.couponDiscountFen = couponDiscountFen;
   }
 
   public Integer getPayFen() {

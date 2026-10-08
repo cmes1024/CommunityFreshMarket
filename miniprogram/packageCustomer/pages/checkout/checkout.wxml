@@ -26,8 +26,21 @@
     </view>
     <textarea class="area" value="{{remark}}" bindinput="onRemark" placeholder="{{copy.checkout.remarkPlaceholder}}" />
   </view>
+  <view class="card" wx:if="{{coupons.length}}">
+    <view class="muted">{{copy.checkout.coupon}}</view>
+    <view class="slot {{couponClaimId === 0 ? 'on' : ''}}" data-id="0" bind:tap="pickCoupon">{{copy.checkout.noCoupon}}</view>
+    <view
+      class="slot {{item.id === couponClaimId ? 'on' : ''}} {{item.eligible ? '' : 'muted'}}"
+      wx:for="{{coupons}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bind:tap="pickCoupon"
+    >{{item.title}} · 减 ¥{{item.faceYuan}}{{item.eligible ? '' : ' · ' + copy.checkout.belowMin}}</view>
+  </view>
   <view class="card">
     <view class="row space-between"><text>{{copy.checkout.goods}}</text><text class="price">¥{{totalYuan}}</text></view>
+    <view class="row space-between" wx:if="{{couponClaimId}}"><text>{{copy.checkout.couponOff}}</text><text>-¥{{discountYuan}}</text></view>
+    <view class="row space-between" wx:if="{{couponClaimId}}"><text>{{copy.checkout.payable}}</text><text class="price">¥{{payYuan}}</text></view>
     <view class="muted">{{copy.pay.offlineHint}}</view>
   </view>
   <view class="muted subscribe-hint">{{copy.checkout.subscribeHint}}</view>

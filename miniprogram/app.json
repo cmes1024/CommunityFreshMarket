@@ -41,7 +41,7 @@
   "preloadRule": {
     "pages/launch/launch": {
       "network": "all",
-      "packages": ["customer"]
+      "packages": ["customer", "merchant"]
     }
   },
   "usingComponents": {

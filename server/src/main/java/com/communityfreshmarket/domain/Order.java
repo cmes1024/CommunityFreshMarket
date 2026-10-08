@@ -20,6 +20,8 @@ public class Order {
   private Long pickupSlotId;
   private String pickupSlotLabel;
   private Integer totalAmountFen;
+  private Long couponClaimId;
+  private Integer discountFen;
   private Boolean merchantUnread;
   private LocalDateTime customerArrivedAt;
   private String cancelBy;
@@ -114,6 +116,22 @@ public class Order {
 
   public void setTotalAmountFen(Integer totalAmountFen) {
     this.totalAmountFen = totalAmountFen;
+  }
+
+  public Long getCouponClaimId() {
+    return couponClaimId;
+  }
+
+  public void setCouponClaimId(Long couponClaimId) {
+    this.couponClaimId = couponClaimId;
+  }
+
+  public Integer getDiscountFen() {
+    return discountFen;
+  }
+
+  public void setDiscountFen(Integer discountFen) {
+    this.discountFen = discountFen;
   }
 
   public Boolean getMerchantUnread() {

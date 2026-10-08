@@ -10,9 +10,11 @@ public class CashierSaleResponse {
 
   private long id;
   private Long memberUserId;
+  private Long couponClaimId;
   private String status;
   private int totalFen;
   private int discountFen;
+  private int couponDiscountFen;
   private int payFen;
   private String adjustReason;
   private LocalDateTime createdAt;
@@ -23,9 +25,11 @@ public class CashierSaleResponse {
     CashierSaleResponse r = new CashierSaleResponse();
     r.id = sale.getId();
     r.memberUserId = sale.getMemberUserId();
+    r.couponClaimId = sale.getCouponClaimId();
     r.status = sale.getStatus();
     r.totalFen = sale.getTotalFen() == null ? 0 : sale.getTotalFen();
     r.discountFen = sale.getDiscountFen() == null ? 0 : sale.getDiscountFen();
+    r.couponDiscountFen = sale.getCouponDiscountFen() == null ? 0 : sale.getCouponDiscountFen();
     r.payFen = sale.getPayFen() == null ? 0 : sale.getPayFen();
     r.adjustReason = sale.getAdjustReason();
     r.createdAt = sale.getCreatedAt();
@@ -42,6 +46,10 @@ public class CashierSaleResponse {
     return memberUserId;
   }
 
+  public Long getCouponClaimId() {
+    return couponClaimId;
+  }
+
   public String getStatus() {
     return status;
   }
@@ -52,6 +60,10 @@ public class CashierSaleResponse {
 
   public int getDiscountFen() {
     return discountFen;
+  }
+
+  public int getCouponDiscountFen() {
+    return couponDiscountFen;
   }
 
   public int getPayFen() {

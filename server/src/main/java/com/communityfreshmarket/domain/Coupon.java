@@ -21,6 +21,7 @@ public class Coupon {
   private LocalDateTime startsAt;
   private LocalDateTime endsAt;
   private Boolean enabled;
+  private Boolean removed;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
@@ -118,6 +119,14 @@ public class Coupon {
 
   public void setEnabled(Boolean enabled) {
     this.enabled = enabled;
+  }
+
+  public Boolean getRemoved() {
+    return removed;
+  }
+
+  public void setRemoved(Boolean removed) {
+    this.removed = removed;
   }
 
   public LocalDateTime getCreatedAt() {

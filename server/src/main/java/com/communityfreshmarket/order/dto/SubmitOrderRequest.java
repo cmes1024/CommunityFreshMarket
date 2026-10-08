@@ -15,6 +15,8 @@ public class SubmitOrderRequest {
   @Size(max = 512)
   private String remark;
 
+  private Long couponClaimId;
+
   public String getFulfillment() {
     return fulfillment;
   }
@@ -53,5 +55,13 @@ public class SubmitOrderRequest {
 
   public void setRemark(String remark) {
     this.remark = remark;
+  }
+
+  public Long getCouponClaimId() {
+    return couponClaimId;
+  }
+
+  public void setCouponClaimId(Long couponClaimId) {
+    this.couponClaimId = couponClaimId;
   }
 }

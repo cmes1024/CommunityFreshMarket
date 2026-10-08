@@ -14,24 +14,65 @@ Page({
     pickupSlotId: 0,
     phrases: PHRASES.map((text) => ({ text, on: false })),
     remark: "",
+    totalFen: 0,
     totalYuan: "0.00",
+    coupons: [],
+    couponClaimId: 0,
+    discountYuan: "0.00",
+    payYuan: "0.00",
     submitting: false,
   },
   async onShow() {
-    const [cart, addresses, slots] = await Promise.all([
+    const [cart, addresses, slots, mine] = await Promise.all([
       api.cart(),
       api.addresses(),
       api.pickupSlots(),
+      api.couponsMine().catch(() => []),
     ]);
     const picked = getApp().globalData.pickedAddress;
     const address =
       picked || addresses.find((a) => a.isDefault) || addresses[0] || null;
+    const totalFen = cart.totalFen || 0;
+    const coupons = (mine || [])
+      .filter((c) => c.status === "UNUSED")
+      .map((c) => ({
+        ...c,
+        faceYuan: fenToYuan(c.faceFen),
+        eligible: totalFen >= (c.minSpendFen || 0),
+      }));
+    const still = coupons.some((c) => c.id === this.data.couponClaimId && c.eligible);
     this.setData({
-      totalYuan: fenToYuan(cart.totalFen),
+      totalFen,
+      totalYuan: fenToYuan(totalFen),
+      coupons,
+      couponClaimId: still ? this.data.couponClaimId : 0,
       address,
       slots,
       pickupSlotId: this.data.pickupSlotId || (slots[0] && slots[0].id) || 0,
     });
+    this.refreshPay();
+  },
+  refreshPay() {
+    const coupon = (this.data.coupons || []).find((c) => c.id === this.data.couponClaimId);
+    let discountFen = 0;
+    if (coupon && coupon.eligible) {
+      discountFen = Math.min(coupon.faceFen || 0, this.data.totalFen || 0);
+    }
+    const payFen = Math.max(0, (this.data.totalFen || 0) - discountFen);
+    this.setData({
+      discountYuan: fenToYuan(discountFen),
+      payYuan: fenToYuan(payFen),
+    });
+  },
+  pickCoupon(e) {
+    const id = Number(e.currentTarget.dataset.id) || 0;
+    const coupon = (this.data.coupons || []).find((c) => c.id === id);
+    if (id && coupon && !coupon.eligible) {
+      wx.showToast({ title: copy.checkout.belowMin, icon: "none" });
+      return;
+    }
+    this.setData({ couponClaimId: id });
+    this.refreshPay();
   },
   switchF(e) {
     this.setData({ fulfillment: e.currentTarget.dataset.v });
@@ -67,6 +108,9 @@ Page({
         return;
       }
       body.pickupSlotId = this.data.pickupSlotId;
+    }
+    if (this.data.couponClaimId) {
+      body.couponClaimId = this.data.couponClaimId;
     }
     this.setData({ submitting: true });
     try {

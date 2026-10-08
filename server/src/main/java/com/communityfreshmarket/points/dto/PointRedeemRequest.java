@@ -1,33 +1,17 @@
 package com.communityfreshmarket.points.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 public class PointRedeemRequest {
 
-  @NotBlank
-  @Size(max = 128)
-  private String title;
-
   @NotNull
-  @Min(1)
-  private Integer costPoints;
+  private Long itemId;
 
-  public String getTitle() {
-    return title;
+  public Long getItemId() {
+    return itemId;
   }
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public Integer getCostPoints() {
-    return costPoints;
-  }
-
-  public void setCostPoints(Integer costPoints) {
-    this.costPoints = costPoints;
+  public void setItemId(Long itemId) {
+    this.itemId = itemId;
   }
 }

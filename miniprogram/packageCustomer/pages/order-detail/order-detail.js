@@ -15,7 +15,12 @@ Page({
     const codes = steps(order.fulfillment);
     const idx = codes.indexOf(order.status);
     this.setData({
-      order: { ...order, totalYuan: fenToYuan(order.totalAmountFen) },
+      order: {
+        ...order,
+        totalYuan: fenToYuan(order.totalAmountFen),
+        discountYuan: fenToYuan(order.discountFen || 0),
+        payYuan: fenToYuan(order.payFen != null ? order.payFen : order.totalAmountFen),
+      },
       stepList: codes.map((code, i) => ({
         code,
         label: label(code),

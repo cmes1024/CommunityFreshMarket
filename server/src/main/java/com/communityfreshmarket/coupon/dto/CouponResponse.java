@@ -13,6 +13,9 @@ public class CouponResponse {
   private Integer totalLimit;
   private int perUserLimit;
   private int claimedCount;
+  private int claimUserCount;
+  private int unusedCount;
+  private int reservedCount;
   private LocalDateTime startsAt;
   private LocalDateTime endsAt;
   private boolean enabled;
@@ -63,6 +66,30 @@ public class CouponResponse {
 
   public int getClaimedCount() {
     return claimedCount;
+  }
+
+  public int getClaimUserCount() {
+    return claimUserCount;
+  }
+
+  public void setClaimUserCount(int claimUserCount) {
+    this.claimUserCount = claimUserCount;
+  }
+
+  public int getUnusedCount() {
+    return unusedCount;
+  }
+
+  public void setUnusedCount(int unusedCount) {
+    this.unusedCount = unusedCount;
+  }
+
+  public int getReservedCount() {
+    return reservedCount;
+  }
+
+  public void setReservedCount(int reservedCount) {
+    this.reservedCount = reservedCount;
   }
 
   public LocalDateTime getStartsAt() {

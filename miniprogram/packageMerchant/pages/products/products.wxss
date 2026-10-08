@@ -27,8 +27,8 @@
 .m-search-input {
   min-height: 68rpx;
   padding: 0 56rpx 0 24rpx;
-  background: var(--color-surface);
-  border: 2rpx solid var(--color-line);
+  background: #f4f7f6;
+  border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
   font-size: 26rpx;
   box-sizing: border-box;

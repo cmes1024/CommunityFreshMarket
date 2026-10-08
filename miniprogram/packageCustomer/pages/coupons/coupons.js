@@ -32,9 +32,16 @@ Page({
   },
   mapMine(c) {
     const faceYuan = fenToYuan(c.faceFen);
+    const statusMap = {
+      UNUSED: copy.coupons.statusUnused,
+      RESERVED: copy.coupons.statusReserved,
+      USED: copy.coupons.statusUsed,
+      EXPIRED: copy.coupons.statusExpired,
+    };
     return {
       ...c,
       faceText: format(copy.coupons.face, { yuan: faceYuan }),
+      statusText: statusMap[c.status] || c.status,
     };
   },
   switchTab(e) {

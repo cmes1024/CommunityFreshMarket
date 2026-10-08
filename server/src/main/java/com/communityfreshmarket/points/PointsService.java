@@ -1,27 +1,34 @@
 package com.communityfreshmarket.points;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.communityfreshmarket.auth.UserContext;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.domain.Order;
 import com.communityfreshmarket.domain.PointAccount;
+import com.communityfreshmarket.domain.Product;
 import com.communityfreshmarket.domain.PointLedger;
 import com.communityfreshmarket.domain.PointRedeem;
+import com.communityfreshmarket.domain.PointRedeemItem;
 import com.communityfreshmarket.domain.Store;
 import com.communityfreshmarket.mapper.PointAccountMapper;
 import com.communityfreshmarket.mapper.PointLedgerMapper;
+import com.communityfreshmarket.mapper.PointRedeemItemMapper;
 import com.communityfreshmarket.mapper.PointRedeemMapper;
+import com.communityfreshmarket.mapper.ProductMapper;
 import com.communityfreshmarket.mapper.StoreMapper;
 import com.communityfreshmarket.points.dto.PointLedgerItemResponse;
+import com.communityfreshmarket.points.dto.PointRedeemItemResponse;
+import com.communityfreshmarket.points.dto.PointRedeemItemSaveRequest;
 import com.communityfreshmarket.points.dto.PointRedeemRequest;
 import com.communityfreshmarket.points.dto.PointRedeemResponse;
 import com.communityfreshmarket.points.dto.PointsMeResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
 public class PointsService {
@@ -29,16 +36,22 @@ public class PointsService {
   private final PointAccountMapper accountMapper;
   private final PointLedgerMapper ledgerMapper;
   private final PointRedeemMapper redeemMapper;
+  private final PointRedeemItemMapper itemMapper;
+  private final ProductMapper productMapper;
   private final StoreMapper storeMapper;
 
   public PointsService(
       PointAccountMapper accountMapper,
       PointLedgerMapper ledgerMapper,
       PointRedeemMapper redeemMapper,
+      PointRedeemItemMapper itemMapper,
+      ProductMapper productMapper,
       StoreMapper storeMapper) {
     this.accountMapper = accountMapper;
     this.ledgerMapper = ledgerMapper;
     this.redeemMapper = redeemMapper;
+    this.itemMapper = itemMapper;
+    this.productMapper = productMapper;
     this.storeMapper = storeMapper;
   }
 
@@ -65,7 +78,8 @@ public class PointsService {
         .toList();
     Store store = storeMapper.selectById(storeId);
     int ratio = store == null || store.getPointsPerYuan() == null ? 1 : store.getPointsPerYuan();
-    return new PointsMeResponse(balance, ratio, recent, redeems);
+    List<PointRedeemItemResponse> items = enabledItems(storeId);
+    return new PointsMeResponse(balance, ratio, recent, redeems, items);
   }
 
   @Transactional
@@ -87,7 +101,9 @@ public class PointsService {
     if (ratio <= 0) {
       return;
     }
-    int earn = (order.getTotalAmountFen() / 100) * ratio;
+    int discount = order.getDiscountFen() == null ? 0 : order.getDiscountFen();
+    int payable = Math.max(0, order.getTotalAmountFen() - discount);
+    int earn = (payable / 100) * ratio;
     if (earn <= 0) {
       return;
     }
@@ -123,35 +139,75 @@ public class PointsService {
     applyDelta(userId, storeId, earn, "CASHIER_COMPLETE", "CASHIER", saleId, "到店收银完成");
   }
 
+  public List<PointRedeemItemResponse> merchantItems() {
+    long storeId = UserContext.storeId();
+    return itemMapper.selectList(new LambdaQueryWrapper<PointRedeemItem>()
+            .eq(PointRedeemItem::getStoreId, storeId)
+            .orderByDesc(PointRedeemItem::getId))
+        .stream()
+        .map(PointRedeemItemResponse::from)
+        .toList();
+  }
+
+  @Transactional
+  public PointRedeemItemResponse createItem(PointRedeemItemSaveRequest request) {
+    long storeId = UserContext.storeId();
+    LocalDateTime now = LocalDateTime.now();
+    PointRedeemItem item = new PointRedeemItem();
+    item.setStoreId(storeId);
+    fillItem(item, request, storeId);
+    item.setCreatedAt(now);
+    item.setUpdatedAt(now);
+    itemMapper.insert(item);
+    return PointRedeemItemResponse.from(item);
+  }
+
+  @Transactional
+  public PointRedeemItemResponse updateItem(long id, PointRedeemItemSaveRequest request) {
+    PointRedeemItem item = requireItem(id);
+    fillItem(item, request, item.getStoreId());
+    item.setUpdatedAt(LocalDateTime.now());
+    itemMapper.updateById(item);
+    if (item.getProductId() == null) {
+      itemMapper.update(
+          null,
+          new LambdaUpdateWrapper<PointRedeemItem>()
+              .eq(PointRedeemItem::getId, item.getId())
+              .set(PointRedeemItem::getProductId, null));
+    }
+    return PointRedeemItemResponse.from(item);
+  }
+
+  @Transactional
+  public void deleteItem(long id) {
+    PointRedeemItem item = requireItem(id);
+    itemMapper.deleteById(item.getId());
+  }
+
   @Transactional
   public PointRedeemResponse redeem(PointRedeemRequest request) {
     long userId = UserContext.requireUserId();
     long storeId = UserContext.storeId();
-    if (request == null
-        || request.getCostPoints() == null
-        || request.getCostPoints() <= 0
-        || !StringUtils.hasText(request.getTitle())) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "请填写兑换内容与积分");
+    if (request == null || request.getItemId() == null) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "请选择兑换物");
     }
-    String title = request.getTitle().trim();
-    if (title.length() > 128) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "兑换说明过长");
+    PointRedeemItem item = itemMapper.selectById(request.getItemId());
+    if (item == null || !item.getStoreId().equals(storeId) || !Boolean.TRUE.equals(item.getEnabled())) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "兑换物不可用");
     }
-    applyDelta(
-        userId,
-        storeId,
-        -request.getCostPoints(),
-        "REDEEM",
-        "REDEEM",
-        null,
-        title);
+    int cost = item.getCostPoints() == null ? 0 : item.getCostPoints();
+    if (cost <= 0) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "兑换物不可用");
+    }
+    applyDelta(userId, storeId, -cost, "REDEEM", "REDEEM", null, item.getTitle());
 
     LocalDateTime now = LocalDateTime.now();
     PointRedeem redeem = new PointRedeem();
     redeem.setStoreId(storeId);
     redeem.setUserId(userId);
-    redeem.setCostPoints(request.getCostPoints());
-    redeem.setTitle(title);
+    redeem.setItemId(item.getId());
+    redeem.setCostPoints(cost);
+    redeem.setTitle(item.getTitle());
     redeem.setStatus("PENDING");
     redeem.setCreatedAt(now);
     redeem.setUpdatedAt(now);
@@ -196,6 +252,81 @@ public class PointsService {
     redeem.setUpdatedAt(LocalDateTime.now());
     redeemMapper.updateById(redeem);
     return PointRedeemResponse.from(redeem);
+  }
+
+  @Transactional
+  public PointRedeemResponse cancelRedeem(long id) {
+    long storeId = UserContext.storeId();
+    PointRedeem redeem = redeemMapper.selectById(id);
+    if (redeem == null || !redeem.getStoreId().equals(storeId)) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "兑换单不存在");
+    }
+    if (!"PENDING".equals(redeem.getStatus())) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "兑换单已处理");
+    }
+    redeem.setStatus("CANCELLED");
+    redeem.setUpdatedAt(LocalDateTime.now());
+    redeemMapper.updateById(redeem);
+    applyDelta(
+        redeem.getUserId(),
+        storeId,
+        redeem.getCostPoints(),
+        "CANCEL_REVERSAL",
+        "REDEEM",
+        redeem.getId(),
+        "兑换驳回退回");
+    return PointRedeemResponse.from(redeem);
+  }
+
+  private List<PointRedeemItemResponse> enabledItems(long storeId) {
+    return itemMapper.selectList(new LambdaQueryWrapper<PointRedeemItem>()
+            .eq(PointRedeemItem::getStoreId, storeId)
+            .eq(PointRedeemItem::getEnabled, true)
+            .orderByAsc(PointRedeemItem::getCostPoints)
+            .orderByDesc(PointRedeemItem::getId))
+        .stream()
+        .map(PointRedeemItemResponse::from)
+        .toList();
+  }
+
+  private PointRedeemItem requireItem(long id) {
+    long storeId = UserContext.storeId();
+    PointRedeemItem item = itemMapper.selectById(id);
+    if (item == null || !item.getStoreId().equals(storeId)) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "兑换物不存在");
+    }
+    return item;
+  }
+
+  private void fillItem(PointRedeemItem item, PointRedeemItemSaveRequest request, long storeId) {
+    Long productId = request == null ? null : request.getProductId();
+    String title = request == null || request.getTitle() == null ? "" : request.getTitle().trim();
+    if (productId != null) {
+      Product product = productMapper.selectById(productId);
+      if (product == null || !Objects.equals(product.getStoreId(), storeId)) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "商品不存在");
+      }
+      if (title.isEmpty() && product.getName() != null) {
+        title = product.getName().trim();
+      }
+    }
+    if (title.isEmpty()) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "请填写兑换物名称");
+    }
+    if (title.length() > 128) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "兑换物名称过长");
+    }
+    item.setProductId(productId);
+    item.setTitle(title);
+    item.setCostPoints(requireCost(request));
+    item.setEnabled(request.getEnabled() == null || request.getEnabled());
+  }
+
+  private static int requireCost(PointRedeemItemSaveRequest request) {
+    if (request == null || request.getCostPoints() == null || request.getCostPoints() <= 0) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "所需积分须大于 0");
+    }
+    return request.getCostPoints();
   }
 
   private void applyDelta(

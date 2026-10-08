@@ -70,6 +70,11 @@ module.exports = {
   pointsMe: () => get("/api/v1/points/me"),
   pointsRedeem: (body) => post("/api/v1/points/redeem", body),
 
+  merchantPointItems: () => get("/api/v1/merchant/points/items"),
+  merchantPointItemCreate: (body) => post("/api/v1/merchant/points/items", body),
+  merchantPointItemUpdate: (id, body) => put(`/api/v1/merchant/points/items/${id}`, body),
+  merchantPointItemDelete: (id) => del(`/api/v1/merchant/points/items/${id}`),
+
   livePhotoRequest: (productId) => post(`/api/v1/products/${productId}/live-photo-requests`),
 
   coupons: () => get("/api/v1/coupons"),
@@ -80,17 +85,23 @@ module.exports = {
 
   merchantPointRedeems: () => get("/api/v1/merchant/points/redeems"),
   merchantPointRedeemComplete: (id) => post(`/api/v1/merchant/points/redeems/${id}/complete`),
+  merchantPointRedeemCancel: (id) => post(`/api/v1/merchant/points/redeems/${id}/cancel`),
 
   merchantLivePhotoRequests: () => get("/api/v1/merchant/live-photo-requests"),
 
   merchantCoupons: () => get("/api/v1/merchant/coupons"),
   merchantCouponCreate: (body) => post("/api/v1/merchant/coupons", body),
   merchantCouponUpdate: (id, body) => put(`/api/v1/merchant/coupons/${id}`, body),
+  merchantCouponDelete: (id) => del(`/api/v1/merchant/coupons/${id}`),
+  merchantCouponUnused: (userId, saleId) =>
+    get("/api/v1/merchant/coupons/unused", saleId ? { userId, saleId } : { userId }),
 
   merchantCashierOpen: () => post("/api/v1/merchant/cashier"),
   merchantCashierOpenList: () => get("/api/v1/merchant/cashier"),
   merchantCashier: (id) => get(`/api/v1/merchant/cashier/${id}`),
   merchantCashierAddItem: (id, body) => post(`/api/v1/merchant/cashier/${id}/items`, body),
+  merchantCashierRemoveItem: (id, itemId) => del(`/api/v1/merchant/cashier/${id}/items/${itemId}`),
+  merchantCashierCoupon: (id, body) => post(`/api/v1/merchant/cashier/${id}/coupon`, body || {}),
   merchantCashierMember: (id, body) => post(`/api/v1/merchant/cashier/${id}/member`, body),
   merchantCashierComplete: (id, body) =>
     post(`/api/v1/merchant/cashier/${id}/complete`, body || {}),

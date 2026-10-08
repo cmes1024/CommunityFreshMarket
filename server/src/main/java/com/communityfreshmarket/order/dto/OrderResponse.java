@@ -22,6 +22,9 @@ public class OrderResponse {
   private Long pickupSlotId;
   private String pickupSlotLabel;
   private int totalAmountFen;
+  private int discountFen;
+  private int payFen;
+  private Long couponClaimId;
   private boolean merchantUnread;
   private LocalDateTime customerArrivedAt;
   private String cancelBy;
@@ -47,6 +50,9 @@ public class OrderResponse {
     r.pickupSlotId = order.getPickupSlotId();
     r.pickupSlotLabel = order.getPickupSlotLabel();
     r.totalAmountFen = order.getTotalAmountFen() == null ? 0 : order.getTotalAmountFen();
+    r.discountFen = order.getDiscountFen() == null ? 0 : order.getDiscountFen();
+    r.payFen = Math.max(0, r.totalAmountFen - r.discountFen);
+    r.couponClaimId = order.getCouponClaimId();
     r.merchantUnread = Boolean.TRUE.equals(order.getMerchantUnread());
     r.customerArrivedAt = order.getCustomerArrivedAt();
     r.cancelBy = order.getCancelBy();
@@ -116,6 +122,18 @@ public class OrderResponse {
 
   public int getTotalAmountFen() {
     return totalAmountFen;
+  }
+
+  public int getDiscountFen() {
+    return discountFen;
+  }
+
+  public int getPayFen() {
+    return payFen;
+  }
+
+  public Long getCouponClaimId() {
+    return couponClaimId;
   }
 
   public boolean isMerchantUnread() {

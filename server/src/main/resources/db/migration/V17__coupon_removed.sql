@@ -1,0 +1,2 @@
+ALTER TABLE coupon
+  ADD COLUMN removed TINYINT(1) NOT NULL DEFAULT 0 AFTER enabled;

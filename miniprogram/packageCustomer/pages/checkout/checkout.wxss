@@ -42,7 +42,8 @@
   width: 100%;
   min-height: 140rpx;
   margin-top: 12rpx;
-  background: var(--color-background);
+  background: #f4f7f6;
+  border: 1rpx solid var(--color-line);
   border-radius: 16rpx;
   padding: 20rpx;
   box-sizing: border-box;

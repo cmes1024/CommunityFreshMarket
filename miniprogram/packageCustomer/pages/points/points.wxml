@@ -7,18 +7,29 @@
     <button class="btn btn-ghost checkin-btn" bind:tap="doCheckin">{{copy.points.quickCheckin}}</button>
   </view>
 
-  <view class="sec-title">{{copy.points.redeemTitle}}</view>
-  <view class="card form-card">
-    <input class="field-input" placeholder="如：兑换鸡蛋一份" value="{{redeemTitle}}" bindinput="onRedeemTitle" />
-    <input class="field-input" type="number" placeholder="{{copy.points.redeemCost}}" value="{{redeemCost}}" bindinput="onRedeemCost" />
-    <button class="btn btn-cta full" bind:tap="submitRedeem">{{copy.points.redeemSubmit}}</button>
+  <view class="sec-title">{{copy.points.catalog}}</view>
+  <view class="muted hint">{{copy.points.redeemHint}}</view>
+  <view class="card">
+    <view class="row" wx:for="{{items}}" wx:key="id">
+      <view class="grow">
+        <view class="row-title">{{item.title}}</view>
+        <view class="muted sm">{{item.costPoints}} 分</view>
+      </view>
+      <button
+        class="btn btn-cta btn-sm"
+        data-id="{{item.id}}"
+        disabled="{{!item.affordable}}"
+        bind:tap="redeemItem"
+      >{{item.affordable ? copy.points.redeemAction : copy.points.notEnough}}</button>
+    </view>
+    <view wx:if="{{!items.length}}" class="empty muted">{{copy.points.emptyCatalog}}</view>
   </view>
 
   <view class="sec-title">{{copy.points.ledger}}</view>
   <view class="card">
     <view class="row" wx:for="{{recent}}" wx:key="id">
       <view class="grow">
-        <view class="row-title">{{item.reason}}{{item.remark ? ' · ' + item.remark : ''}}</view>
+        <view class="row-title">{{item.reasonText}}{{item.remark ? ' · ' + item.remark : ''}}</view>
         <view class="muted sm">{{item.timeText}}</view>
       </view>
       <view class="delta {{item.delta >= 0 ? 'plus' : ''}}">{{item.deltaText}}</view>
@@ -31,7 +42,7 @@
     <view class="row" wx:for="{{redeems}}" wx:key="id">
       <view class="grow">
         <view class="row-title">{{item.title}}</view>
-        <view class="muted sm">{{item.timeText}} · {{item.status}}</view>
+        <view class="muted sm">{{item.timeText}} · {{item.statusText}}</view>
       </view>
       <view class="muted">-{{item.costPoints}}</view>
     </view>

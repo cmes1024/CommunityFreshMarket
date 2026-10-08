@@ -2,6 +2,26 @@ const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { format } = require("../../../utils/copy");
 
+function reasonText(reason) {
+  const map = {
+    ORDER_COMPLETE: copy.points.reasonOrder,
+    CASHIER_COMPLETE: copy.points.reasonCashier,
+    REDEEM: copy.points.reasonRedeem,
+    ADJUST: copy.points.reasonAdjust,
+    CANCEL_REVERSAL: copy.points.reasonReverse,
+  };
+  return map[reason] || reason || "";
+}
+
+function redeemStatus(status) {
+  const map = {
+    PENDING: copy.points.statusPending,
+    DONE: copy.points.statusDone,
+    CANCELLED: copy.points.statusCancelled,
+  };
+  return map[status] || status || "";
+}
+
 function fmtTime(iso) {
   if (!iso) return "";
   const s = String(iso).replace("T", " ");
@@ -15,8 +35,7 @@ Page({
     perYuanText: "",
     recent: [],
     redeems: [],
-    redeemTitle: "",
-    redeemCost: "",
+    items: [],
   },
   async onShow() {
     await this.reload();
@@ -33,33 +52,40 @@ Page({
           ...r,
           timeText: fmtTime(r.createdAt),
           deltaText: r.delta > 0 ? `+${r.delta}` : String(r.delta),
+          reasonText: reasonText(r.reason),
         })),
         redeems: (me.redeems || []).map((r) => ({
           ...r,
           timeText: fmtTime(r.createdAt),
+          statusText: redeemStatus(r.status),
+        })),
+        items: (me.items || []).map((item) => ({
+          ...item,
+          affordable: (me.balance || 0) >= item.costPoints,
         })),
       });
     } catch (e) {}
   },
-  onRedeemTitle(e) {
-    this.setData({ redeemTitle: e.detail.value });
-  },
-  onRedeemCost(e) {
-    this.setData({ redeemCost: e.detail.value });
-  },
-  async submitRedeem() {
-    const title = (this.data.redeemTitle || "").trim();
-    const costPoints = Number(this.data.redeemCost);
-    if (!title || !Number.isFinite(costPoints) || costPoints < 1) {
-      wx.showToast({ title: "请填写说明和积分", icon: "none" });
+  redeemItem(e) {
+    const id = e.currentTarget.dataset.id;
+    const item = (this.data.items || []).find((it) => it.id === id);
+    if (!item) return;
+    if (!item.affordable) {
+      wx.showToast({ title: copy.points.notEnough, icon: "none" });
       return;
     }
-    try {
-      await api.pointsRedeem({ title, costPoints });
-      wx.showToast({ title: copy.points.redeemOk, icon: "none" });
-      this.setData({ redeemTitle: "", redeemCost: "" });
-      await this.reload();
-    } catch (e) {}
+    wx.showModal({
+      title: item.title,
+      content: `使用 ${item.costPoints} 积分。不生成预约单，到店后由店员核销`,
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await api.pointsRedeem({ itemId: id });
+          wx.showToast({ title: copy.points.redeemOk, icon: "none" });
+          await this.reload();
+        } catch (err) {}
+      },
+    });
   },
   async doCheckin() {
     let body = {};

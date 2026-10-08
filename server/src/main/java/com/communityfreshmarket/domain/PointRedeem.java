@@ -12,6 +12,7 @@ public class PointRedeem {
   private Long id;
   private Long storeId;
   private Long userId;
+  private Long itemId;
   private Integer costPoints;
   private String title;
   private String status;
@@ -40,6 +41,14 @@ public class PointRedeem {
 
   public void setUserId(Long userId) {
     this.userId = userId;
+  }
+
+  public Long getItemId() {
+    return itemId;
+  }
+
+  public void setItemId(Long itemId) {
+    this.itemId = itemId;
   }
 
   public Integer getCostPoints() {
