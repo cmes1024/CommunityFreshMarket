@@ -10,14 +10,21 @@
     <view class="muted" wx:else>{{copy.checkout.pickAddress}}</view>
     <view class="muted" wx:if="{{address}}">{{address.phone}} · {{copy.checkout.asap}}</view>
   </view>
-  <view class="card" wx:else>
+  <view class="card slots" wx:else>
+    <view class="muted slot-empty" wx:if="{{!slots.length}}">{{copy.checkout.pickSlot}}</view>
     <view
       class="slot {{item.id === pickupSlotId ? 'on' : ''}}"
       wx:for="{{slots}}"
       wx:key="id"
       data-id="{{item.id}}"
       bind:tap="pickSlot"
-    >{{item.label}}</view>
+    >
+      <view class="slot-main">
+        <text class="slot-day" wx:if="{{item.day}}">{{item.day}}</text>
+        <text class="slot-time">{{item.time}}</text>
+      </view>
+      <view class="radio {{item.id === pickupSlotId ? 'on' : ''}}"></view>
+    </view>
   </view>
   <view class="card">
     <view class="muted">{{copy.checkout.remarkLabel}}</view>
@@ -26,23 +33,73 @@
     </view>
     <textarea class="area" value="{{remark}}" bindinput="onRemark" placeholder="{{copy.checkout.remarkPlaceholder}}" />
   </view>
-  <view class="card" wx:if="{{coupons.length}}">
-    <view class="muted">{{copy.checkout.coupon}}</view>
-    <view class="slot {{couponClaimId === 0 ? 'on' : ''}}" data-id="0" bind:tap="pickCoupon">{{copy.checkout.noCoupon}}</view>
-    <view
-      class="slot {{item.id === couponClaimId ? 'on' : ''}} {{item.eligible ? '' : 'muted'}}"
-      wx:for="{{coupons}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      bind:tap="pickCoupon"
-    >{{item.title}} · 减 ¥{{item.faceYuan}}{{item.eligible ? '' : ' · ' + copy.checkout.belowMin}}</view>
+  <view class="card coupon-entry" wx:if="{{coupons.length}}" bind:tap="openCouponSheet">
+    <view class="grow">
+      <view class="coupon-label">{{copy.checkout.coupon}}</view>
+      <view class="coupon-name" wx:if="{{couponTitle}}">{{couponTitle}}</view>
+    </view>
+    <view class="coupon-entry-side">
+      <text class="coupon-sum {{couponSummaryKind}}">{{couponSummary}}</text>
+      <text class="coupon-arrow">›</text>
+    </view>
   </view>
-  <view class="card">
-    <view class="row space-between"><text>{{copy.checkout.goods}}</text><text class="price">¥{{totalYuan}}</text></view>
-    <view class="row space-between" wx:if="{{couponClaimId}}"><text>{{copy.checkout.couponOff}}</text><text>-¥{{discountYuan}}</text></view>
-    <view class="row space-between" wx:if="{{couponClaimId}}"><text>{{copy.checkout.payable}}</text><text class="price">¥{{payYuan}}</text></view>
-    <view class="muted">{{copy.pay.offlineHint}}</view>
+  <view class="card bill">
+    <view class="bill-row">
+      <text class="bill-label">{{copy.checkout.goods}}</text>
+      <text class="bill-money">¥{{totalYuan}}</text>
+    </view>
+    <view class="bill-row" wx:if="{{couponClaimId}}">
+      <text class="bill-label">{{copy.checkout.couponOff}}</text>
+      <text class="bill-money off">-¥{{discountYuan}}</text>
+    </view>
+    <view class="bill-row pay" wx:if="{{couponClaimId}}">
+      <text class="bill-label">{{copy.checkout.payable}}</text>
+      <text class="bill-money">¥{{payYuan}}</text>
+    </view>
+    <view class="muted bill-hint">{{copy.pay.offlineHint}}</view>
   </view>
   <view class="muted subscribe-hint">{{copy.checkout.subscribeHint}}</view>
   <button class="btn btn-cta" loading="{{submitting}}" disabled="{{submitting}}" bind:tap="submit">{{copy.checkout.submit}}</button>
 </view>
+
+<page-container
+  show="{{couponSheet}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto; max-height: 80vh;"
+  bind:clickoverlay="closeCouponSheet"
+  bind:afterleave="closeCouponSheet"
+>
+  <view class="coupon-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.checkout.couponPick}}</view>
+      <view class="sheet-close" bind:tap="closeCouponSheet">{{copy.checkout.sheetClose}}</view>
+    </view>
+    <view class="coupon-list">
+      <view
+        class="ticket {{item.id === couponClaimId ? 'on' : ''}} {{item.eligible ? '' : 'off'}}"
+        wx:for="{{coupons}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bind:tap="pickCoupon"
+      >
+        <view class="ticket-face">
+          <text class="ticket-yen">¥</text>
+          <text class="ticket-num">{{item.faceYuan}}</text>
+        </view>
+        <view class="ticket-body">
+          <view class="ticket-title">{{item.title}}</view>
+          <view class="ticket-sub">{{item.ruleText}}</view>
+        </view>
+        <view class="radio {{item.id === couponClaimId ? 'on' : ''}}"></view>
+      </view>
+      <view class="opt {{couponClaimId === 0 ? 'on' : ''}}" data-id="0" bind:tap="pickCoupon">
+        <text>{{copy.checkout.noCoupon}}</text>
+        <view class="radio {{couponClaimId === 0 ? 'on' : ''}}"></view>
+      </view>
+    </view>
+  </view>
+</page-container>

@@ -6,6 +6,21 @@ const { requestSubscribe } = require("../../../utils/subscribe");
 
 const PHRASES = ["放门口", "少葱", "称重点", "不要电话"];
 
+function splitSlotLabel(label) {
+  const text = String(label || "").trim();
+  const parts = text.match(/^(\S+)\s+(.+)$/);
+  if (parts && /\d/.test(parts[2]) && /[-–~～]/.test(parts[2])) {
+    return { day: parts[1], time: parts[2] };
+  }
+  return { day: "", time: text };
+}
+
+function faceLabel(fen) {
+  const yuan = (Number(fen) || 0) / 100;
+  if (Number.isInteger(yuan)) return String(yuan);
+  return yuan.toFixed(2).replace(/0$/, "");
+}
+
 Page({
   data: {
     fulfillment: "DELIVERY",
@@ -18,61 +33,120 @@ Page({
     totalYuan: "0.00",
     coupons: [],
     couponClaimId: 0,
+    couponSheet: false,
+    couponTitle: "",
+    couponSummary: "",
+    couponSummaryKind: "none",
     discountYuan: "0.00",
     payYuan: "0.00",
     submitting: false,
   },
+  couponChosen: false,
   async onShow() {
+    const gen = (this._loadGen || 0) + 1;
+    this._loadGen = gen;
     const [cart, addresses, slots, mine] = await Promise.all([
       api.cart(),
       api.addresses(),
       api.pickupSlots(),
       api.couponsMine().catch(() => []),
     ]);
+    if (gen !== this._loadGen) return;
     const picked = getApp().globalData.pickedAddress;
     const address =
       picked || addresses.find((a) => a.isDefault) || addresses[0] || null;
     const totalFen = cart.totalFen || 0;
-    const coupons = (mine || [])
-      .filter((c) => c.status === "UNUSED")
-      .map((c) => ({
-        ...c,
-        faceYuan: fenToYuan(c.faceFen),
-        eligible: totalFen >= (c.minSpendFen || 0),
-      }));
-    const still = coupons.some((c) => c.id === this.data.couponClaimId && c.eligible);
+    const coupons = this.buildCoupons(mine, totalFen);
+    const couponClaimId = this.pickCouponId(coupons);
     this.setData({
       totalFen,
       totalYuan: fenToYuan(totalFen),
       coupons,
-      couponClaimId: still ? this.data.couponClaimId : 0,
+      couponClaimId,
       address,
-      slots,
+      slots: (slots || []).map((s) => ({ ...s, ...splitSlotLabel(s.label) })),
       pickupSlotId: this.data.pickupSlotId || (slots[0] && slots[0].id) || 0,
+      ...this.payView(coupons, couponClaimId, totalFen),
     });
-    this.refreshPay();
   },
-  refreshPay() {
-    const coupon = (this.data.coupons || []).find((c) => c.id === this.data.couponClaimId);
-    let discountFen = 0;
-    if (coupon && coupon.eligible) {
-      discountFen = Math.min(coupon.faceFen || 0, this.data.totalFen || 0);
+  buildCoupons(mine, totalFen) {
+    const coupons = (mine || [])
+      .filter((c) => c.status === "UNUSED")
+      .map((c) => {
+        const minSpendFen = c.minSpendFen || 0;
+        const eligible = totalFen >= minSpendFen;
+        const faceFen = c.faceFen || 0;
+        let ruleText = copy.checkout.noThreshold;
+        if (!eligible) {
+          ruleText = copy.format(copy.checkout.shortfall, { yuan: faceLabel(minSpendFen - totalFen) });
+        } else if (minSpendFen > 0) {
+          ruleText = copy.format(copy.coupons.minSpend, { yuan: faceLabel(minSpendFen) });
+        }
+        return {
+          ...c,
+          faceYuan: faceLabel(faceFen),
+          eligible,
+          discountFen: eligible ? Math.min(faceFen, totalFen) : 0,
+          ruleText,
+        };
+      });
+    coupons.sort((a, b) => {
+      if (a.eligible !== b.eligible) return a.eligible ? -1 : 1;
+      return b.discountFen - a.discountFen || a.id - b.id;
+    });
+    return coupons;
+  },
+  pickCouponId(coupons) {
+    if (this.couponChosen) {
+      const keep = coupons.find((c) => c.id === this.data.couponClaimId && c.eligible);
+      return keep ? this.data.couponClaimId : 0;
     }
-    const payFen = Math.max(0, (this.data.totalFen || 0) - discountFen);
-    this.setData({
-      discountYuan: fenToYuan(discountFen),
-      payYuan: fenToYuan(payFen),
-    });
+    const best = coupons.find((c) => c.eligible);
+    return best ? best.id : 0;
   },
+  payView(coupons, couponClaimId, totalFen) {
+    const coupon = (coupons || []).find((c) => c.id === couponClaimId && c.eligible);
+    const discountFen = coupon ? coupon.discountFen : 0;
+    const eligibleCount = (coupons || []).filter((c) => c.eligible).length;
+    let couponSummary = copy.checkout.noneEligible;
+    let couponSummaryKind = "none";
+    if (coupon) {
+      couponSummary = `-¥${fenToYuan(discountFen)}`;
+      couponSummaryKind = "off";
+    } else if (eligibleCount) {
+      couponSummary = copy.format(copy.checkout.available, { n: eligibleCount });
+      couponSummaryKind = "avail";
+    }
+    return {
+      discountYuan: fenToYuan(discountFen),
+      payYuan: fenToYuan(Math.max(0, (totalFen || 0) - discountFen)),
+      couponTitle: coupon ? coupon.title : "",
+      couponSummary,
+      couponSummaryKind,
+    };
+  },
+  openCouponSheet() {
+    if (!(this.data.coupons || []).length) return;
+    this.setData({ couponSheet: true });
+  },
+  closeCouponSheet() {
+    if (!this.data.couponSheet) return;
+    this.setData({ couponSheet: false });
+  },
+  noop() {},
   pickCoupon(e) {
     const id = Number(e.currentTarget.dataset.id) || 0;
     const coupon = (this.data.coupons || []).find((c) => c.id === id);
     if (id && coupon && !coupon.eligible) {
-      wx.showToast({ title: copy.checkout.belowMin, icon: "none" });
+      wx.showToast({ title: coupon.ruleText || copy.checkout.belowMin, icon: "none" });
       return;
     }
-    this.setData({ couponClaimId: id });
-    this.refreshPay();
+    this.couponChosen = true;
+    this.setData({
+      couponClaimId: id,
+      couponSheet: false,
+      ...this.payView(this.data.coupons, id, this.data.totalFen),
+    });
   },
   switchF(e) {
     this.setData({ fulfillment: e.currentTarget.dataset.v });
@@ -81,7 +155,7 @@ Page({
     wx.navigateTo({ url: "/packageCustomer/pages/address-list/address-list?pick=1" });
   },
   pickSlot(e) {
-    this.setData({ pickupSlotId: e.currentTarget.dataset.id });
+    this.setData({ pickupSlotId: Number(e.currentTarget.dataset.id) || 0 });
   },
   togglePhrase(e) {
     const text = e.currentTarget.dataset.text;

@@ -1,11 +1,33 @@
 const api = require("../../../utils/api");
+const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const { label, steps } = require("../../../utils/orderStatus");
 const { syncCartCount } = require("../../../utils/cartSync");
 const { requestSubscribe } = require("../../../utils/subscribe");
 
+function fmtTime(iso) {
+  if (!iso) return "";
+  const s = String(iso).replace("T", " ").replace(/\.\d+$/, "");
+  return s.length > 16 ? s.slice(0, 16) : s;
+}
+
+function fulfillParts(order) {
+  if (order.fulfillment === "PICKUP") {
+    return {
+      fulfillLabel: copy.checkout.pickup,
+      fulfillText: fmtTime(order.pickupSlotLabel) || "时段待定",
+    };
+  }
+  const addr = order.addressSnapshot || {};
+  const place = [addr.community, addr.building, addr.room].filter(Boolean).join(" ");
+  return {
+    fulfillLabel: copy.checkout.delivery,
+    fulfillText: place ? `${copy.checkout.asap} · ${place}` : copy.checkout.asap,
+  };
+}
+
 Page({
-  data: { order: {}, stepList: [] },
+  data: { order: {}, stepList: [], fulfillLabel: "", fulfillText: "" },
   async onLoad(query) {
     this.id = Number(query.id);
     await this.refresh();
@@ -14,6 +36,8 @@ Page({
     const order = await api.order(this.id);
     const codes = steps(order.fulfillment);
     const idx = codes.indexOf(order.status);
+    const cancelled = order.status === "CANCELLED";
+    const completed = order.status === "COMPLETED";
     this.setData({
       order: {
         ...order,
@@ -24,8 +48,11 @@ Page({
       stepList: codes.map((code, i) => ({
         code,
         label: label(code),
-        done: order.status === "CANCELLED" ? false : i <= idx,
+        done: !cancelled && (completed || i < idx),
+        current: !cancelled && !completed && i === idx,
+        reached: !cancelled && i > 0 && (completed || i <= idx),
       })),
+      ...fulfillParts(order),
     });
   },
   async cancel() {

@@ -24,14 +24,58 @@
   color: #fff;
   font-weight: 600;
 }
+.slots {
+  padding: 12rpx;
+}
+.slot-empty {
+  padding: 20rpx 16rpx;
+}
 .slot {
-  padding: 28rpx 0;
-  border-bottom: 1rpx solid var(--color-line);
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
   min-height: 88rpx;
+  margin: 0;
+  padding: 16rpx 18rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  box-sizing: border-box;
+}
+.slot + .slot {
+  margin-top: 4rpx;
 }
 .slot.on {
+  background: var(--color-mist);
+  border-color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 400;
+}
+.slot-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 16rpx;
+}
+.slot-day {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-muted);
+}
+.slot.on .slot-day {
   color: var(--color-primary);
+}
+.slot-time {
+  font-size: 32rpx;
   font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+.slot.on .slot-time {
+  color: var(--color-primary);
 }
 .phrases {
   display: flex;
@@ -52,4 +96,229 @@
   margin: 8rpx 0 16rpx;
   font-size: 22rpx;
   line-height: 1.4;
+}
+.coupon-entry {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.coupon-label {
+  font-size: 28rpx;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--color-text);
+}
+.coupon-name {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.coupon-entry-side {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  flex-shrink: 0;
+}
+.coupon-sum {
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.coupon-sum.off {
+  color: var(--color-price);
+  font-size: 34rpx;
+  font-weight: 700;
+}
+.coupon-sum.avail {
+  color: var(--color-primary);
+  font-size: 26rpx;
+  font-weight: 600;
+}
+.coupon-sum.none {
+  color: var(--color-muted);
+  font-size: 24rpx;
+  font-weight: 400;
+}
+.coupon-arrow {
+  color: #8aada8;
+  font-size: 26rpx;
+  font-weight: 400;
+  line-height: 1;
+}
+.bill-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.bill-row + .bill-row {
+  margin-top: 10rpx;
+}
+.bill-label {
+  font-size: 26rpx;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+.bill-money {
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-price);
+  font-variant-numeric: tabular-nums;
+}
+.bill-money.off {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.bill-row.pay {
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid var(--color-line);
+}
+.bill-row.pay .bill-label {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.bill-row.pay .bill-money {
+  font-size: 36rpx;
+  font-weight: 700;
+}
+.bill-hint {
+  margin-top: 14rpx;
+  line-height: 1.45;
+}
+.coupon-sheet {
+  background: var(--color-background);
+  border-radius: 28rpx 28rpx 0 0;
+  padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
+}
+.grab {
+  width: 64rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: var(--color-line);
+  margin: 16rpx auto 8rpx;
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8rpx 32rpx 16rpx;
+}
+.sheet-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.sheet-close {
+  font-size: 26rpx;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-muted);
+  padding: 8rpx 0 8rpx 24rpx;
+}
+.coupon-list {
+  max-height: 56vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.ticket {
+  display: flex;
+  align-items: center;
+  margin: 0 32rpx 16rpx;
+  background: var(--color-surface);
+  border: 2rpx solid var(--color-line);
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+.ticket.on {
+  border-color: var(--color-primary);
+  background: #f0fdfa;
+}
+.ticket.off {
+  opacity: 0.72;
+}
+.ticket-face {
+  width: 168rpx;
+  align-self: stretch;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2rpx;
+  padding: 28rpx 8rpx;
+  background: var(--color-mist);
+  color: var(--color-price);
+  border-right: 2rpx dashed var(--color-line);
+  font-weight: 700;
+  box-sizing: border-box;
+}
+.ticket-yen {
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 1;
+}
+.ticket-num {
+  font-size: 44rpx;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.ticket-body {
+  flex: 1;
+  min-width: 0;
+  padding: 24rpx 16rpx;
+}
+.ticket-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ticket-sub {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--color-muted);
+}
+.radio {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 2rpx solid var(--color-line);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  background: #fff;
+}
+.ticket .radio,
+.opt .radio {
+  margin-right: 24rpx;
+}
+.radio.on {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 6rpx #fff;
+}
+.opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 32rpx 16rpx;
+  padding: 28rpx 0 28rpx 28rpx;
+  background: var(--color-surface);
+  border: 2rpx solid var(--color-line);
+  border-radius: 20rpx;
+  color: var(--color-text);
+  font-size: 28rpx;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.opt.on {
+  border-color: var(--color-primary);
 }
