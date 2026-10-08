@@ -92,6 +92,8 @@ const copy = {
     shortfall: "还差 ¥{yuan}",
     sheetClose: "关闭",
     submit: "提交预约",
+    closedTitle: "门店已打烊",
+    closedHint: "仍可提交预约，店员营业后再处理",
     submittedToast: "预约已提交",
     subscribeHint: "点提交时会弹出消息订阅，允许后店员取消等变更可通知你",
   },

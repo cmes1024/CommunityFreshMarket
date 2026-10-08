@@ -62,6 +62,7 @@ Page({
     deliveryMinText: "",
     deliveryShortText: "",
     deliveryBlocked: false,
+    storeClosed: false,
     submitting: false,
   },
   couponChosen: false,
@@ -93,6 +94,8 @@ Page({
       pickupSlotId: this.data.pickupSlotId || (slots[0] && slots[0].id) || 0,
       ...this.payView(coupons, couponClaimId, totalFen),
       ...deliveryView(this.data.fulfillment, totalFen, minDeliveryFen),
+      storeClosed:
+        String((store && store.homeKicker) || "").trim() === copy.settings.kickerClosed,
     });
   },
   buildCoupons(mine, totalFen) {

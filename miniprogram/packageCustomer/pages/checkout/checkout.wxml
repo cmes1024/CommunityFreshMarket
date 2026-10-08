@@ -71,6 +71,10 @@
     <view class="muted bill-hint">{{copy.pay.offlineHint}}</view>
   </view>
   <view class="muted subscribe-hint">{{copy.checkout.subscribeHint}}</view>
+  <view class="closed" wx:if="{{storeClosed}}">
+    <view class="closed-title">{{copy.checkout.closedTitle}}</view>
+    <view class="closed-sub">{{copy.checkout.closedHint}}</view>
+  </view>
   <button
     class="btn {{deliveryBlocked ? 'btn-short' : 'btn-cta'}}"
     loading="{{submitting}}"
