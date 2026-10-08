@@ -35,7 +35,6 @@
   align-items: flex-end;
   flex-shrink: 0;
   gap: 20rpx;
-  margin: -8rpx -16rpx -12rpx 0;
 }
 
 .thumb {
@@ -76,7 +75,6 @@
 }
 .remove {
   min-width: 140rpx;
-  min-height: 60rpx;
   padding: 0rpx 16rpx 0rpx 28rpx;
   box-sizing: border-box;
   display: flex;
