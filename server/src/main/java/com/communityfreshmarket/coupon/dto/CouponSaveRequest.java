@@ -24,6 +24,7 @@ public class CouponSaveRequest {
   private Integer totalLimit;
   private Integer perUserLimit;
   private LocalDateTime startsAt;
+  private LocalDateTime claimEndsAt;
   private LocalDateTime endsAt;
   private Boolean enabled;
 
@@ -81,6 +82,14 @@ public class CouponSaveRequest {
 
   public void setStartsAt(LocalDateTime startsAt) {
     this.startsAt = startsAt;
+  }
+
+  public LocalDateTime getClaimEndsAt() {
+    return claimEndsAt;
+  }
+
+  public void setClaimEndsAt(LocalDateTime claimEndsAt) {
+    this.claimEndsAt = claimEndsAt;
   }
 
   public LocalDateTime getEndsAt() {

@@ -13,6 +13,15 @@ function expireText(endsAt) {
   return String(endsAt).replace("T", " ").slice(0, 10);
 }
 
+function claimWindowText(startsAt, claimEndsAt) {
+  const start = expireText(startsAt);
+  const end = expireText(claimEndsAt);
+  if (start && end) return "领 " + start + " 至 " + end;
+  if (start) return "领自 " + start;
+  if (end) return "领至 " + end;
+  return "";
+}
+
 function isExpired(endsAt) {
   if (!endsAt) return false;
   const t = Date.parse(String(endsAt).replace(" ", "T"));
@@ -38,6 +47,9 @@ Page({
     faceYuan: "",
     minSpendYuan: "0",
     expireDate: "",
+    startsDate: "",
+    claimEndDate: "",
+    totalLimit: "",
     today: todayStr(),
     list: [],
     sheetOpen: false,
@@ -55,6 +67,8 @@ Page({
           minYuan: fenToYuan(c.minSpendFen),
           offerText: offerText(c),
           expireText: expireText(c.endsAt),
+          claimWindowText: claimWindowText(c.startsAt, c.claimEndsAt),
+          limitText: c.totalLimit ? "限 " + c.totalLimit + " 张" : "",
           expired: isExpired(c.endsAt) || false,
           claimUserCount: c.claimUserCount || 0,
           unusedCount: c.unusedCount || 0,
@@ -82,8 +96,23 @@ Page({
   onExpire(e) {
     this.setData({ expireDate: e.detail.value || "" });
   },
+  onStart(e) {
+    this.setData({ startsDate: e.detail.value || "" });
+  },
+  onClaimEnd(e) {
+    this.setData({ claimEndDate: e.detail.value || "" });
+  },
+  onTotal(e) {
+    this.setData({ totalLimit: e.detail.value });
+  },
   clearExpire() {
     this.setData({ expireDate: "" });
+  },
+  clearStart() {
+    this.setData({ startsDate: "" });
+  },
+  clearClaimEnd() {
+    this.setData({ claimEndDate: "" });
   },
   async toggle(e) {
     const id = e.currentTarget.dataset.id;
@@ -116,6 +145,7 @@ Page({
         totalLimit: item.totalLimit,
         perUserLimit: item.perUserLimit,
         startsAt: item.startsAt,
+        claimEndsAt: item.claimEndsAt,
         endsAt: item.endsAt,
         enabled,
       });
@@ -152,17 +182,50 @@ Page({
       wx.showToast({ title: "请填写名称和面额", icon: "none" });
       return;
     }
+    const totalText = String(this.data.totalLimit || "").trim();
+    let totalLimit = null;
+    if (totalText) {
+      if (!/^\d+$/.test(totalText) || Number(totalText) < 1) {
+        wx.showToast({ title: copy.merchantCouponForm.totalLimitInvalid, icon: "none" });
+        return;
+      }
+      totalLimit = Number(totalText);
+    }
+    if (this.data.startsDate && this.data.claimEndDate && this.data.startsDate > this.data.claimEndDate) {
+      wx.showToast({ title: copy.merchantCouponForm.startAfterClaimEnd, icon: "none" });
+      return;
+    }
+    if (this.data.startsDate && this.data.expireDate && this.data.startsDate > this.data.expireDate) {
+      wx.showToast({ title: copy.merchantCouponForm.startAfterEnd, icon: "none" });
+      return;
+    }
+    if (this.data.claimEndDate && this.data.expireDate && this.data.claimEndDate > this.data.expireDate) {
+      wx.showToast({ title: copy.merchantCouponForm.claimEndAfterUse, icon: "none" });
+      return;
+    }
     try {
       await api.merchantCouponCreate({
         title,
         type: "FIXED",
         faceFen,
         minSpendFen,
+        totalLimit,
+        startsAt: this.data.startsDate ? this.data.startsDate + "T00:00:00" : null,
+        claimEndsAt: this.data.claimEndDate ? this.data.claimEndDate + "T23:59:59" : null,
         endsAt: this.data.expireDate ? this.data.expireDate + "T23:59:59" : null,
         enabled: true,
       });
       wx.showToast({ title: copy.merchantCouponForm.created, icon: "none" });
-      this.setData({ title: "", faceYuan: "", minSpendYuan: "0", expireDate: "", sheetOpen: false });
+      this.setData({
+        title: "",
+        faceYuan: "",
+        minSpendYuan: "0",
+        expireDate: "",
+        startsDate: "",
+        claimEndDate: "",
+        totalLimit: "",
+        sheetOpen: false,
+      });
       await this.reload();
     } catch (e) {}
   },

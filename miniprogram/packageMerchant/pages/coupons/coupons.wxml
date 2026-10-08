@@ -6,7 +6,7 @@
   <view class="row-item" wx:for="{{list}}" wx:key="id">
     <view class="grow">
       <view class="title">{{item.title}}</view>
-      <view class="muted sm">{{item.offerText}}{{item.expireText ? ' · 至 ' + item.expireText : ''}} · 已领 {{item.claimUserCount}} 人 · {{item.expired ? copy.merchantCouponForm.expired : (item.enabled ? '启用' : '停用')}}</view>
+      <view class="muted sm">{{item.offerText}}{{item.claimWindowText ? ' · ' + item.claimWindowText : ''}}{{item.expireText ? ' · 用至 ' + item.expireText : ''}}{{item.limitText ? ' · ' + item.limitText : ''}} · 已领 {{item.claimUserCount}} 人 · {{item.expired ? copy.merchantCouponForm.expired : (item.enabled ? '启用' : '停用')}}</view>
     </view>
     <view class="row-actions">
       <button wx:if="{{!item.expired}}" class="btn btn-ghost btn-sm" data-id="{{item.id}}" bind:tap="toggle">{{item.enabled ? copy.merchantCouponForm.disable : copy.merchantCouponForm.enable}}</button>
@@ -22,7 +22,7 @@
   overlay="{{true}}"
   position="bottom"
   close-on-slide-down="{{true}}"
-  custom-style="height: auto; max-height: 70vh;"
+  custom-style="height: auto; max-height: 88vh;"
   bind:clickoverlay="closeSheet"
   bind:afterleave="closeSheet"
 >
@@ -43,12 +43,36 @@
         <view class="label">{{copy.merchantCouponForm.minSpendShort}}</view>
         <input class="field-input" type="digit" placeholder="{{copy.merchantCouponForm.minSpendPh}}" value="{{minSpendYuan}}" bindinput="onMin" />
       </view>
+      <view class="field-col">
+        <view class="label">{{copy.merchantCouponForm.totalLimit}}</view>
+        <input class="field-input" type="number" placeholder="{{copy.merchantCouponForm.totalLimitPh}}" value="{{totalLimit}}" bindinput="onTotal" />
+      </view>
+    </view>
+    <view class="field-row">
+      <view class="field-col">
+        <view class="label-row">
+          <view class="label">{{copy.merchantCouponForm.start}}</view>
+          <view wx:if="{{startsDate}}" class="pick-clear" bind:tap="clearStart">清除</view>
+        </view>
+        <picker mode="date" value="{{startsDate}}" start="{{today}}" end="{{claimEndDate || expireDate}}" bindchange="onStart">
+          <view class="field-input {{startsDate ? '' : 'ph'}}">{{startsDate || copy.merchantCouponForm.startPh}}</view>
+        </picker>
+      </view>
+      <view class="field-col">
+        <view class="label-row">
+          <view class="label">{{copy.merchantCouponForm.claimEnd}}</view>
+          <view wx:if="{{claimEndDate}}" class="pick-clear" bind:tap="clearClaimEnd">清除</view>
+        </view>
+        <picker mode="date" value="{{claimEndDate}}" start="{{startsDate || today}}" end="{{expireDate}}" bindchange="onClaimEnd">
+          <view class="field-input {{claimEndDate ? '' : 'ph'}}">{{claimEndDate || copy.merchantCouponForm.claimEndPh}}</view>
+        </picker>
+      </view>
     </view>
     <view class="label-row">
       <view class="label">{{copy.merchantCouponForm.expire}}</view>
       <view wx:if="{{expireDate}}" class="pick-clear" bind:tap="clearExpire">清除</view>
     </view>
-    <picker mode="date" value="{{expireDate}}" start="{{today}}" bindchange="onExpire">
+    <picker mode="date" value="{{expireDate}}" start="{{startsDate || claimEndDate || today}}" bindchange="onExpire">
       <view class="field-input {{expireDate ? '' : 'ph'}}">{{expireDate || copy.merchantCouponForm.expirePh}}</view>
     </picker>
     <button class="btn btn-cta add-btn" bind:tap="create">{{copy.merchantCouponForm.create}}</button>

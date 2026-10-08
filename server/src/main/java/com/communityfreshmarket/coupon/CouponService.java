@@ -43,8 +43,7 @@ public class CouponService {
         .eq(Coupon::getRemoved, false)
             .orderByDesc(Coupon::getId))
         .stream()
-        .filter(c -> (c.getStartsAt() == null || !c.getStartsAt().isAfter(now))
-            && (c.getEndsAt() == null || !c.getEndsAt().isBefore(now)))
+        .filter(c -> inClaimWindow(c, now))
         .map(CouponResponse::from)
         .toList();
   }
@@ -69,7 +68,10 @@ public class CouponService {
     validate(request);
     LocalDateTime now = LocalDateTime.now();
     if (request.getEndsAt() != null && !request.getEndsAt().isAfter(now)) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "过期时间须晚于现在");
+      throw new BizException(ErrorCodes.BAD_REQUEST, "使用截止须晚于现在");
+    }
+    if (request.getClaimEndsAt() != null && !request.getClaimEndsAt().isAfter(now)) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "领取截止须晚于现在");
     }
     Coupon c = new Coupon();
     c.setStoreId(storeId);
@@ -123,13 +125,16 @@ public class CouponService {
     Coupon coupon = requireOwned(couponId);
     LocalDateTime now = LocalDateTime.now();
     if (coupon.getEndsAt() != null && coupon.getEndsAt().isBefore(now)) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "优惠券已结束");
+      throw new BizException(ErrorCodes.BAD_REQUEST, "优惠券已过期");
     }
     if (!Boolean.TRUE.equals(coupon.getEnabled())) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "优惠券不可用");
     }
     if (coupon.getStartsAt() != null && coupon.getStartsAt().isAfter(now)) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "优惠券未开始");
+      throw new BizException(ErrorCodes.BAD_REQUEST, "领取未开始");
+    }
+    if (coupon.getClaimEndsAt() != null && coupon.getClaimEndsAt().isBefore(now)) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "领取已结束");
     }
     if (coupon.getTotalLimit() != null
         && coupon.getClaimedCount() != null
@@ -324,13 +329,10 @@ public class CouponService {
     Coupon coupon = couponMapper.selectById(couponId);
     LocalDateTime now = LocalDateTime.now();
     if (coupon != null && coupon.getEndsAt() != null && coupon.getEndsAt().isBefore(now)) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "优惠券已结束");
+      throw new BizException(ErrorCodes.BAD_REQUEST, "优惠券已过期");
     }
     if (coupon == null || !coupon.getStoreId().equals(storeId) || Boolean.TRUE.equals(coupon.getRemoved())) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "优惠券不可用");
-    }
-    if (coupon.getStartsAt() != null && coupon.getStartsAt().isAfter(now)) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "优惠券未开始");
     }
     return coupon;
   }
@@ -428,6 +430,35 @@ public class CouponService {
     if (request.getFaceFen() <= 0) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "面额须大于 0");
     }
+    if (request.getTotalLimit() != null && request.getTotalLimit() < 1) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "发放张数须大于 0");
+    }
+    if (request.getStartsAt() != null
+        && request.getClaimEndsAt() != null
+        && request.getStartsAt().isAfter(request.getClaimEndsAt())) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "领取开始不能晚于领取截止");
+    }
+    if (request.getStartsAt() != null
+        && request.getEndsAt() != null
+        && request.getStartsAt().isAfter(request.getEndsAt())) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "领取开始不能晚于使用截止");
+    }
+    if (request.getClaimEndsAt() != null
+        && request.getEndsAt() != null
+        && request.getClaimEndsAt().isAfter(request.getEndsAt())) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "领取截止不能晚于使用截止");
+    }
+  }
+
+  /** 领取窗口：未到开始、已过领取截止、或已过使用截止，都不能再领。 */
+  private static boolean inClaimWindow(Coupon c, LocalDateTime now) {
+    if (c.getStartsAt() != null && c.getStartsAt().isAfter(now)) {
+      return false;
+    }
+    if (c.getClaimEndsAt() != null && c.getClaimEndsAt().isBefore(now)) {
+      return false;
+    }
+    return c.getEndsAt() == null || !c.getEndsAt().isBefore(now);
   }
 
   private static void apply(Coupon c, CouponSaveRequest request) {
@@ -438,6 +469,7 @@ public class CouponService {
     c.setTotalLimit(request.getTotalLimit());
     c.setPerUserLimit(request.getPerUserLimit() == null ? 1 : request.getPerUserLimit());
     c.setStartsAt(request.getStartsAt());
+    c.setClaimEndsAt(request.getClaimEndsAt());
     c.setEndsAt(request.getEndsAt());
     c.setEnabled(request.getEnabled() == null || request.getEnabled());
   }

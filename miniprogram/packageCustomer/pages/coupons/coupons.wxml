@@ -11,7 +11,7 @@
         <view class="coupon-title">{{item.title}}</view>
         <view class="coupon-sub">{{item.faceText}}<text wx:if="{{item.minText}}"> · {{item.minText}}</text></view>
       </view>
-      <button class="btn btn-cta btn-sm" data-id="{{item.id}}" bind:tap="claim">{{copy.coupons.claim}}</button>
+      <button class="btn btn-cta btn-sm" data-id="{{item.id}}" disabled="{{!item.claimable}}" bind:tap="claim">{{item.actionText}}</button>
     </view>
     <view wx:if="{{!claimList.length}}" class="empty muted">{{copy.coupons.emptyClaim}}</view>
   </block>

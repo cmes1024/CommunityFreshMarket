@@ -17,6 +17,7 @@ public class CouponResponse {
   private int unusedCount;
   private int reservedCount;
   private LocalDateTime startsAt;
+  private LocalDateTime claimEndsAt;
   private LocalDateTime endsAt;
   private boolean enabled;
 
@@ -31,6 +32,7 @@ public class CouponResponse {
     r.perUserLimit = c.getPerUserLimit() == null ? 1 : c.getPerUserLimit();
     r.claimedCount = c.getClaimedCount() == null ? 0 : c.getClaimedCount();
     r.startsAt = c.getStartsAt();
+    r.claimEndsAt = c.getClaimEndsAt();
     r.endsAt = c.getEndsAt();
     r.enabled = Boolean.TRUE.equals(c.getEnabled());
     return r;
@@ -94,6 +96,10 @@ public class CouponResponse {
 
   public LocalDateTime getStartsAt() {
     return startsAt;
+  }
+
+  public LocalDateTime getClaimEndsAt() {
+    return claimEndsAt;
   }
 
   public LocalDateTime getEndsAt() {
