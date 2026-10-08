@@ -69,26 +69,50 @@ public class CheckinService {
         .toList();
   }
 
+  public long activeUserId(long checkinId, long storeId) {
+    return requireActive(checkinId, storeId).getUserId();
+  }
+
   @Transactional
   public long consume(long checkinId, long storeId) {
-    MemberCheckin checkin = checkinMapper.selectById(checkinId);
-    if (checkin == null || !checkin.getStoreId().equals(storeId)) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "报到不存在");
-    }
-    if (checkin.getConsumedAt() != null) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "报到已被使用");
-    }
-    if (checkin.getExpiresAt().isBefore(LocalDateTime.now())) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "报到已过期");
-    }
+    MemberCheckin checkin = requireActive(checkinId, storeId);
     checkin.setConsumedAt(LocalDateTime.now());
     checkinMapper.updateById(checkin);
     return checkin.getUserId();
   }
 
+  @Transactional
+  public void consumeActiveForUser(long storeId, long userId) {
+    LocalDateTime now = LocalDateTime.now();
+    List<MemberCheckin> active = checkinMapper.selectList(new LambdaQueryWrapper<MemberCheckin>()
+        .eq(MemberCheckin::getStoreId, storeId)
+        .eq(MemberCheckin::getUserId, userId)
+        .isNull(MemberCheckin::getConsumedAt)
+        .gt(MemberCheckin::getExpiresAt, now));
+    for (MemberCheckin checkin : active) {
+      checkin.setConsumedAt(now);
+      checkinMapper.updateById(checkin);
+    }
+  }
+
+  private MemberCheckin requireActive(long checkinId, long storeId) {
+    MemberCheckin checkin = checkinMapper.selectById(checkinId);
+    if (checkin == null || !checkin.getStoreId().equals(storeId)) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "冒泡不存在");
+    }
+    if (checkin.getConsumedAt() != null) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "这次冒泡已经用过");
+    }
+    if (checkin.getExpiresAt().isBefore(LocalDateTime.now())) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "冒泡已过期，请让顾客再点一次");
+    }
+    return checkin;
+  }
+
   private CheckinResponse toResponse(MemberCheckin checkin) {
     User user = userMapper.selectById(checkin.getUserId());
     String nick = user == null ? null : user.getNickname();
-    return CheckinResponse.from(checkin, nick);
+    String avatar = user == null ? null : user.getAvatarUrl();
+    return CheckinResponse.from(checkin, nick, avatar);
   }
 }

@@ -6,6 +6,7 @@ function reasonText(reason) {
   const map = {
     ORDER_COMPLETE: copy.points.reasonOrder,
     CASHIER_COMPLETE: copy.points.reasonCashier,
+    COUNTER_SPEND: copy.points.reasonCounter,
     REDEEM: copy.points.reasonRedeem,
     ADJUST: copy.points.reasonAdjust,
     CANCEL_REVERSAL: copy.points.reasonReverse,
@@ -86,20 +87,5 @@ Page({
         } catch (err) {}
       },
     });
-  },
-  async doCheckin() {
-    let body = {};
-    try {
-      const loc = await new Promise((resolve, reject) => {
-        wx.getLocation({ type: "gcj02", success: resolve, fail: reject });
-      });
-      body = { lat: loc.latitude, lng: loc.longitude };
-    } catch (e) {}
-    try {
-      await api.checkin(body);
-      wx.showToast({ title: copy.profile.checkinDone, icon: "none" });
-    } catch (e) {
-      wx.showToast({ title: copy.profile.checkinFail, icon: "none" });
-    }
   },
 });

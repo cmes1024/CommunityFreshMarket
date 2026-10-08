@@ -1,12 +1,14 @@
 package com.communityfreshmarket.auth;
 
 import com.communityfreshmarket.auth.dto.LoginResponse;
+import com.communityfreshmarket.auth.dto.ProfileUpdateRequest;
 import com.communityfreshmarket.auth.dto.UserProfileResponse;
 import com.communityfreshmarket.auth.dto.WechatLoginRequest;
 import com.communityfreshmarket.common.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,5 +31,10 @@ public class AuthController {
   @GetMapping("/me")
   public ApiResponse<UserProfileResponse> me() {
     return ApiResponse.ok(authService.currentProfile());
+  }
+
+  @PutMapping("/me")
+  public ApiResponse<UserProfileResponse> updateMe(@RequestBody ProfileUpdateRequest request) {
+    return ApiResponse.ok(authService.updateProfile(request));
   }
 }

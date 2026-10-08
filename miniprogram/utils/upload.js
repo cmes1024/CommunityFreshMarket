@@ -130,4 +130,11 @@ function chooseLivePhoto() {
   });
 }
 
-module.exports = { uploadImage, chooseAndUpload, chooseLivePhoto };
+function absUrl(url) {
+  if (!url) return "";
+  const s = String(url);
+  if (/^(https?:|wxfile:|data:|cloud:)/.test(s)) return s;
+  return `${config.apiHost}${s.startsWith("/") ? s : `/${s}`}`;
+}
+
+module.exports = { uploadImage, chooseAndUpload, chooseLivePhoto, absUrl };

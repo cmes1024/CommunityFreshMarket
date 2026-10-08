@@ -1,0 +1,16 @@
+<Header pageName="{{copy.titles.memberCode}}" back="{{true}}" />
+<view class="page-body no-tab code-page">
+  <view class="card">
+    <view class="hint">{{copy.memberCode.hint}}</view>
+    <image
+      wx:if="{{qrSrc}}"
+      class="qr"
+      src="{{qrSrc}}"
+      mode="aspectFit"
+      show-menu-by-longpress="{{false}}"
+    />
+    <view wx:else class="qr-empty muted">{{copy.memberCode.qrFail}}</view>
+    <view class="nick" wx:if="{{nickname}}">{{nickname}}</view>
+    <button class="btn btn-cta bubble" bind:tap="bubble">{{copy.memberCode.bubble}}</button>
+  </view>
+</view>

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.communityfreshmarket.auth.UserContext;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
+import com.communityfreshmarket.checkin.CheckinService;
 import com.communityfreshmarket.domain.Order;
 import com.communityfreshmarket.domain.PointAccount;
 import com.communityfreshmarket.domain.Product;
@@ -12,12 +13,16 @@ import com.communityfreshmarket.domain.PointLedger;
 import com.communityfreshmarket.domain.PointRedeem;
 import com.communityfreshmarket.domain.PointRedeemItem;
 import com.communityfreshmarket.domain.Store;
+import com.communityfreshmarket.domain.User;
 import com.communityfreshmarket.mapper.PointAccountMapper;
 import com.communityfreshmarket.mapper.PointLedgerMapper;
 import com.communityfreshmarket.mapper.PointRedeemItemMapper;
 import com.communityfreshmarket.mapper.PointRedeemMapper;
 import com.communityfreshmarket.mapper.ProductMapper;
 import com.communityfreshmarket.mapper.StoreMapper;
+import com.communityfreshmarket.mapper.UserMapper;
+import com.communityfreshmarket.points.dto.CounterPointRequest;
+import com.communityfreshmarket.points.dto.CounterPointResponse;
 import com.communityfreshmarket.points.dto.PointLedgerItemResponse;
 import com.communityfreshmarket.points.dto.PointRedeemItemResponse;
 import com.communityfreshmarket.points.dto.PointRedeemItemSaveRequest;
@@ -26,6 +31,7 @@ import com.communityfreshmarket.points.dto.PointRedeemResponse;
 import com.communityfreshmarket.points.dto.PointsMeResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +45,9 @@ public class PointsService {
   private final PointRedeemItemMapper itemMapper;
   private final ProductMapper productMapper;
   private final StoreMapper storeMapper;
+  private final UserMapper userMapper;
+  private final CheckinService checkinService;
+  private final MemberCodeService memberCodeService;
 
   public PointsService(
       PointAccountMapper accountMapper,
@@ -46,13 +55,19 @@ public class PointsService {
       PointRedeemMapper redeemMapper,
       PointRedeemItemMapper itemMapper,
       ProductMapper productMapper,
-      StoreMapper storeMapper) {
+      StoreMapper storeMapper,
+      UserMapper userMapper,
+      CheckinService checkinService,
+      MemberCodeService memberCodeService) {
     this.accountMapper = accountMapper;
     this.ledgerMapper = ledgerMapper;
     this.redeemMapper = redeemMapper;
     this.itemMapper = itemMapper;
     this.productMapper = productMapper;
     this.storeMapper = storeMapper;
+    this.userMapper = userMapper;
+    this.checkinService = checkinService;
+    this.memberCodeService = memberCodeService;
   }
 
   public PointsMeResponse me() {
@@ -137,6 +152,54 @@ public class PointsService {
       return;
     }
     applyDelta(userId, storeId, earn, "CASHIER_COMPLETE", "CASHIER", saleId, "到店收银完成");
+  }
+
+  @Transactional
+  public CounterPointResponse awardCounter(CounterPointRequest request) {
+    long storeId = UserContext.storeId();
+    if (request == null || request.getAmountFen() == null || request.getAmountFen() <= 0) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "请填写消费金额");
+    }
+    int amountFen = request.getAmountFen();
+    if (amountFen > 100_000_000) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "金额过大");
+    }
+    Long checkinId = request.getCheckinId();
+    long userId;
+    if (checkinId != null) {
+      userId = checkinService.activeUserId(checkinId, storeId);
+    } else {
+      userId = memberCodeService.parseUserId(request.getCode(), storeId);
+    }
+    User user = userMapper.selectById(userId);
+    if (user == null) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "会员不存在");
+    }
+    Store store = storeMapper.selectById(storeId);
+    int ratio = store == null || store.getPointsPerYuan() == null ? 1 : store.getPointsPerYuan();
+    if (ratio <= 0) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "店铺未开启积分");
+    }
+    int earn = (amountFen / 100) * ratio;
+    if (earn <= 0) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "不满 1 元，记不到积分");
+    }
+    if (checkinId != null) {
+      checkinService.consume(checkinId, storeId);
+    } else {
+      checkinService.consumeActiveForUser(storeId, userId);
+    }
+    String yuan = String.format(Locale.CHINA, "%.2f", amountFen / 100.0);
+    applyDelta(userId, storeId, earn, "COUNTER_SPEND", "COUNTER", checkinId, "¥" + yuan);
+    PointAccount account = findAccount(userId, storeId);
+    int balance = account == null || account.getBalance() == null ? 0 : account.getBalance();
+    CounterPointResponse response = new CounterPointResponse();
+    response.setUserId(userId);
+    response.setNickname(user.getNickname());
+    response.setAmountFen(amountFen);
+    response.setPoints(earn);
+    response.setBalance(balance);
+    return response;
   }
 
   public List<PointRedeemItemResponse> merchantItems() {

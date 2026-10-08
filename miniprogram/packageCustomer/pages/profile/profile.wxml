@@ -1,11 +1,15 @@
 <Header pageName="{{copy.titles.profile}}" back="{{false}}" />
 <view class="profile-page">
   <view class="profile-head">
-    <view class="avatar">{{avatarText}}</view>
+    <view class="avatar">
+      <image wx:if="{{avatarSrc}}" class="avatar-img" src="{{avatarSrc}}" mode="aspectFill" />
+      <block wx:else>{{avatarText}}</block>
+    </view>
     <view class="meta">
       <view class="name">{{user.nickname || copy.profile.defaultNickname}}</view>
       <view class="sub">{{user.storeMember ? copy.profile.memberHint : copy.profile.guestHint}}</view>
     </view>
+    <view class="edit" hover-class="edit-on" bind:tap="openProfileSheet">{{copy.profile.edit}}</view>
   </view>
 
   <view class="shortcut-grid">
@@ -37,11 +41,11 @@
         <view class="shortcut-sub">{{copy.profile.couponsSub}}</view>
       </view>
     </view>
-    <view class="shortcut" hover-class="shortcut-on" bind:tap="doCheckin">
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="goMemberCode">
       <view class="mark mark-green"><image src="/images/profile-checkin.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">
-        <view class="shortcut-title">{{copy.profile.checkin}}</view>
-        <view class="shortcut-sub">{{copy.profile.checkinSub}}</view>
+        <view class="shortcut-title">{{copy.profile.memberCode}}</view>
+        <view class="shortcut-sub">{{copy.profile.memberCodeSub}}</view>
       </view>
     </view>
     <view class="shortcut" hover-class="shortcut-on" bind:tap="openContactSheet">
@@ -58,6 +62,52 @@
     <view class="me-sub">{{copy.profile.merchantEntrySub}}</view>
   </view>
 </view>
+
+<page-container
+  show="{{profileSheetShow}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto;"
+  bind:clickoverlay="closeProfileSheet"
+  bind:afterleave="closeProfileSheet"
+>
+  <view class="contact-sheet profile-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.profile.editSheetTitle}}</view>
+      <view class="sheet-close" bind:tap="closeProfileSheet">关闭</view>
+    </view>
+    <view class="avatar-slot">
+      <view class="avatar avatar-sheet">
+        <image wx:if="{{draftAvatarSrc}}" class="avatar-img" src="{{draftAvatarSrc}}" mode="aspectFill" />
+        <block wx:else>{{draftInitial}}</block>
+      </view>
+      <button
+        class="avatar-hit"
+        plain
+        hover-class="none"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+      ></button>
+    </view>
+    <view class="avatar-hint">{{copy.profile.avatarHint}}</view>
+    <input
+      class="nick-input"
+      type="nickname"
+      maxlength="64"
+      placeholder="{{copy.profile.nicknamePh}}"
+      placeholder-class="nick-ph"
+      value="{{nicknameInput}}"
+      bindinput="onNickInput"
+      bindblur="onNickInput"
+    />
+    <button class="btn btn-cta profile-save" disabled="{{profileSaving}}" bind:tap="saveProfile">
+      {{copy.profile.profileSave}}
+    </button>
+  </view>
+</page-container>
 
 <page-container
   show="{{contactSheetShow}}"

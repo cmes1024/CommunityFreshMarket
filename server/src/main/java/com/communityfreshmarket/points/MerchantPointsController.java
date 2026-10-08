@@ -1,6 +1,8 @@
 package com.communityfreshmarket.points;
 
 import com.communityfreshmarket.common.ApiResponse;
+import com.communityfreshmarket.points.dto.CounterPointRequest;
+import com.communityfreshmarket.points.dto.CounterPointResponse;
 import com.communityfreshmarket.points.dto.PointRedeemItemResponse;
 import com.communityfreshmarket.points.dto.PointRedeemItemSaveRequest;
 import com.communityfreshmarket.points.dto.PointRedeemResponse;
@@ -59,5 +61,10 @@ public class MerchantPointsController {
   @PostMapping("/redeems/{id}/cancel")
   public ApiResponse<PointRedeemResponse> cancel(@PathVariable long id) {
     return ApiResponse.ok(pointsService.cancelRedeem(id));
+  }
+
+  @PostMapping("/counter")
+  public ApiResponse<CounterPointResponse> counter(@RequestBody CounterPointRequest request) {
+    return ApiResponse.ok(pointsService.awardCounter(request));
   }
 }

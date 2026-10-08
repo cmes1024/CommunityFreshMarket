@@ -20,9 +20,6 @@
 .sub {
   font-size: 24rpx;
 }
-.checkin-btn {
-  margin-top: 20rpx;
-}
 .sec-title {
   font-size: 26rpx;
   font-weight: 600;

@@ -2,6 +2,7 @@ const { get, post, put, del } = require("./request");
 
 module.exports = {
   me: () => get("/api/v1/me"),
+  updateMe: (body) => put("/api/v1/me", body),
   units: () => get("/api/v1/meta/units"),
   store: () => get("/api/v1/store"),
   categories: () => get("/api/v1/categories"),
@@ -69,6 +70,7 @@ module.exports = {
 
   pointsMe: () => get("/api/v1/points/me"),
   pointsRedeem: (body) => post("/api/v1/points/redeem", body),
+  memberCode: () => get("/api/v1/member-code"),
 
   merchantPointItems: () => get("/api/v1/merchant/points/items"),
   merchantPointItemCreate: (body) => post("/api/v1/merchant/points/items", body),
@@ -96,17 +98,7 @@ module.exports = {
   merchantCouponUnused: (userId, saleId) =>
     get("/api/v1/merchant/coupons/unused", saleId ? { userId, saleId } : { userId }),
 
-  merchantCashierOpen: () => post("/api/v1/merchant/cashier"),
-  merchantCashierOpenList: () => get("/api/v1/merchant/cashier"),
-  merchantCashier: (id) => get(`/api/v1/merchant/cashier/${id}`),
-  merchantCashierAddItem: (id, body) => post(`/api/v1/merchant/cashier/${id}/items`, body),
-  merchantCashierRemoveItem: (id, itemId) => del(`/api/v1/merchant/cashier/${id}/items/${itemId}`),
-  merchantCashierCoupon: (id, body) => post(`/api/v1/merchant/cashier/${id}/coupon`, body || {}),
-  merchantCashierMember: (id, body) => post(`/api/v1/merchant/cashier/${id}/member`, body),
-  merchantCashierComplete: (id, body) =>
-    post(`/api/v1/merchant/cashier/${id}/complete`, body || {}),
-  merchantCashierCancel: (id) => post(`/api/v1/merchant/cashier/${id}/cancel`),
-
+  merchantCounterPoints: (body) => post("/api/v1/merchant/points/counter", body),
   merchantCheckinsActive: () => get("/api/v1/merchant/checkins/active"),
 };
 

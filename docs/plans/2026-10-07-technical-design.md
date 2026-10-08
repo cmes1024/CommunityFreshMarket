@@ -232,7 +232,7 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 ## 6. 第一波明确不做（工程侧）
 
 在线支付、Redis、OSS 必选、店员细权限、PC 端、小程序账密、云函数主业务。  
-第二/三波（库存扣减、起购限购、积分、图像选品、券、收银、快速报到）见 `docs/plans/2026-10-07-wave2-wave3-design.md`。
+第二/三波（库存扣减、起购限购、积分、图像选品、券、到店补记积分）见 `docs/plans/2026-10-07-wave2-wave3-design.md`。
 
 ---
 

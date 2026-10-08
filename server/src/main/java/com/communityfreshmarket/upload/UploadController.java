@@ -39,6 +39,9 @@ public class UploadController {
     String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
     String ext = extension(original);
     if (!ALLOWED.contains(ext)) {
+      ext = extensionFromContentType(file.getContentType());
+    }
+    if (!ALLOWED.contains(ext)) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "仅支持 jpg/png/webp/gif");
     }
     if (file.getSize() > 5 * 1024 * 1024L) {
@@ -57,6 +60,24 @@ public class UploadController {
 
     String url = appProperties.getUploadPublicBase() + "/" + filename;
     return ApiResponse.ok(Map.of("url", url));
+  }
+
+  private static String extensionFromContentType(String contentType) {
+    if (contentType == null) {
+      return "";
+    }
+    String type = contentType.toLowerCase(Locale.ROOT);
+    int semi = type.indexOf(';');
+    if (semi >= 0) {
+      type = type.substring(0, semi).trim();
+    }
+    return switch (type) {
+      case "image/jpeg", "image/jpg" -> "jpg";
+      case "image/png" -> "png";
+      case "image/webp" -> "webp";
+      case "image/gif" -> "gif";
+      default -> "";
+    };
   }
 
   private static String extension(String name) {

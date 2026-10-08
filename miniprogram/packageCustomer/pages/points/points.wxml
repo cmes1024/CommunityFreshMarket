@@ -4,7 +4,6 @@
     <view class="label">{{copy.points.balance}}</view>
     <view class="balance-num">{{balance}}</view>
     <view class="muted sub">{{perYuanText}}</view>
-    <button class="btn btn-ghost checkin-btn" bind:tap="doCheckin">{{copy.points.quickCheckin}}</button>
   </view>
 
   <view class="sec-title">{{copy.points.catalog}}</view>

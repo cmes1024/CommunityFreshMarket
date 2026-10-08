@@ -6,12 +6,15 @@ import com.communityfreshmarket.auth.dto.UserProfileResponse;
 import com.communityfreshmarket.auth.dto.WechatLoginRequest;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
+import com.communityfreshmarket.auth.dto.ProfileUpdateRequest;
 import com.communityfreshmarket.config.AppProperties;
 import com.communityfreshmarket.domain.StoreMember;
 import com.communityfreshmarket.domain.User;
 import com.communityfreshmarket.mapper.StoreMemberMapper;
 import com.communityfreshmarket.mapper.UserMapper;
+import com.communityfreshmarket.upload.UploadCleanup;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ public class AuthService {
   private final JwtService jwtService;
   private final UserMapper userMapper;
   private final StoreMemberMapper storeMemberMapper;
+  private final UploadCleanup uploadCleanup;
   private final TransactionTemplate transactionTemplate;
 
   public AuthService(
@@ -37,12 +41,14 @@ public class AuthService {
       JwtService jwtService,
       UserMapper userMapper,
       StoreMemberMapper storeMemberMapper,
+      UploadCleanup uploadCleanup,
       PlatformTransactionManager transactionManager) {
     this.appProperties = appProperties;
     this.wechatClient = wechatClient;
     this.jwtService = jwtService;
     this.userMapper = userMapper;
     this.storeMemberMapper = storeMemberMapper;
+    this.uploadCleanup = uploadCleanup;
     this.transactionTemplate = new TransactionTemplate(transactionManager);
   }
 
@@ -77,6 +83,45 @@ public class AuthService {
 
     String token = jwtService.issue(user.getId());
     return new LoginResponse(token, jwtService.expireSeconds(), toProfile(user));
+  }
+
+  @org.springframework.transaction.annotation.Transactional
+  public UserProfileResponse updateProfile(ProfileUpdateRequest request) {
+    long userId = UserContext.requireUserId();
+    User user = userMapper.selectById(userId);
+    if (user == null) {
+      throw new BizException(ErrorCodes.UNAUTHORIZED, "用户不存在");
+    }
+    boolean changed = false;
+    if (request != null && request.getNickname() != null) {
+      String nick = request.getNickname().trim();
+      if (nick.isEmpty()) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "请填写昵称");
+      }
+      if (nick.length() > 64) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "昵称过长");
+      }
+      user.setNickname(nick);
+      changed = true;
+    }
+    if (request != null && request.getAvatarUrl() != null) {
+      String url = request.getAvatarUrl().trim();
+      if (!isOwnUpload(url)) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "头像无效");
+      }
+      String previous = user.getAvatarUrl();
+      user.setAvatarUrl(url);
+      changed = true;
+      if (StringUtils.hasText(previous) && !previous.equals(url)) {
+        uploadCleanup.release(List.of(previous));
+      }
+    }
+    if (!changed) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "没有要保存的内容");
+    }
+    user.setUpdatedAt(LocalDateTime.now());
+    userMapper.updateById(user);
+    return toProfile(user);
   }
 
   public UserProfileResponse currentProfile() {
@@ -176,6 +221,19 @@ public class AuthService {
       profile.setManageStoreId(null);
     }
     return profile;
+  }
+
+  private boolean isOwnUpload(String url) {
+    String base = appProperties.getUploadPublicBase();
+    if (!StringUtils.hasText(url) || !StringUtils.hasText(base)) {
+      return false;
+    }
+    String prefix = base.endsWith("/") ? base : base + "/";
+    if (!url.startsWith(prefix) || url.contains("..") || url.indexOf('\\') >= 0) {
+      return false;
+    }
+    String name = url.substring(prefix.length());
+    return !name.isEmpty() && name.indexOf('/') < 0;
   }
 
   private static String blankToNull(String value) {

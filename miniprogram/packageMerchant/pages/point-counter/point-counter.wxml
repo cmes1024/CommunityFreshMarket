@@ -1,0 +1,54 @@
+<Header pageName="{{copy.titles.merchantCounter}}" back="{{true}}" />
+<view class="page-body no-tab counter-page">
+  <view class="block">
+    <view class="block-title">{{copy.merchantCounter.who}}</view>
+    <view class="who" wx:if="{{selected}}">
+      <image wx:if="{{selected.avatarSrc}}" class="who-avatar" src="{{selected.avatarSrc}}" mode="aspectFill" />
+      <view wx:elif="{{selected.initial}}" class="who-fallback">{{selected.initial}}</view>
+      <view class="who-meta">
+        <view class="who-name">{{selected.name}}</view>
+        <view class="who-from" wx:if="{{selected.fromText}}">{{selected.fromText}}</view>
+      </view>
+    </view>
+    <view wx:else class="who-empty">{{copy.merchantCounter.whoEmpty}}</view>
+
+    <view class="subhead">{{copy.merchantCounter.bubbles}}</view>
+    <view class="bubble-row" wx:if="{{bubbles.length}}">
+      <view
+        class="person {{checkinId == item.id ? 'on' : ''}}"
+        wx:for="{{bubbles}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bind:tap="pickBubble"
+      >
+        <image wx:if="{{item.avatarSrc}}" class="person-avatar" src="{{item.avatarSrc}}" mode="aspectFill" />
+        <view wx:else class="person-fallback">{{item.initial}}</view>
+        <text class="person-name">{{item.displayName}}</text>
+      </view>
+    </view>
+    <view wx:else class="hint">{{copy.merchantCounter.emptyBubbles}}</view>
+
+    <button class="btn btn-ghost scan-btn" bind:tap="scan">{{copy.merchantCounter.scan}}</button>
+  </view>
+
+  <view class="block">
+    <view class="block-title">{{copy.merchantCounter.amount}}</view>
+    <view class="amount">
+      <text class="yen">¥</text>
+      <input
+        class="amount-input"
+        type="digit"
+        placeholder="{{copy.merchantCounter.amountPh}}"
+        placeholder-class="amount-ph"
+        value="{{amountYuan}}"
+        bindinput="onAmount"
+      />
+    </view>
+    <view class="preview" wx:if="{{previewText}}">{{previewText}}</view>
+    <view class="hint" wx:if="{{!pointsPerYuan}}">{{copy.merchantCounter.pointsOff}}</view>
+  </view>
+
+  <button class="btn btn-cta submit" disabled="{{submitting || !pointsPerYuan}}" bind:tap="submit">
+    {{copy.merchantCounter.submit}}
+  </button>
+</view>

@@ -17,11 +17,12 @@
         <view class="shortcut-sub {{inboxCount ? 'alert' : ''}}">{{inboxCount ? '有人申请更新图片' : copy.merchant.inboxSub}}</view>
       </view>
     </view>
-    <view class="shortcut" hover-class="shortcut-on" bind:tap="goCashier">
-      <view class="mark mark-green"><image src="/images/profile-cashier.svg" mode="aspectFit" /></view>
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="goCounter">
+      <view wx:if="{{bubbleCount}}" class="inbox-badge">{{bubbleCount > 99 ? '99+' : bubbleCount}}</view>
+      <view class="mark mark-green"><image src="/images/profile-points.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">
-        <view class="shortcut-title">{{copy.merchant.cashier}}</view>
-        <view class="shortcut-sub">{{copy.merchant.cashierSub}}</view>
+        <view class="shortcut-title">{{copy.merchant.counterPoints}}</view>
+        <view class="shortcut-sub">{{copy.merchant.counterPointsSub}}</view>
       </view>
     </view>
     <view class="shortcut" hover-class="shortcut-on" bind:tap="goCoupons">

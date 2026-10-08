@@ -19,8 +19,36 @@ Page({
     inviteUrl: "",
     inviteQrSrc: "",
     inboxCount: 0,
+    bubbleCount: 0,
   },
-  async onShow() {
+  onShow() {
+    this.loadProfile();
+    this.startBubbleWatch();
+  },
+  onHide() {
+    this.stopBubbleWatch();
+  },
+  onUnload() {
+    this.stopBubbleWatch();
+  },
+  startBubbleWatch() {
+    this.stopBubbleWatch();
+    this.refreshBubbles();
+    this._bubbleTimer = setInterval(() => this.refreshBubbles(), 5000);
+  },
+  stopBubbleWatch() {
+    if (this._bubbleTimer) {
+      clearInterval(this._bubbleTimer);
+      this._bubbleTimer = null;
+    }
+  },
+  async refreshBubbles() {
+    try {
+      const list = await api.merchantCheckinsActive();
+      this.setData({ bubbleCount: (list || []).length });
+    } catch (e) {}
+  },
+  async loadProfile() {
     try {
       const [user, store, requests] = await Promise.all([
         api.me(),
@@ -69,8 +97,8 @@ Page({
   goInbox() {
     wx.navigateTo({ url: "/packageMerchant/pages/live-photos/live-photos" });
   },
-  goCashier() {
-    wx.navigateTo({ url: "/packageMerchant/pages/cashier/cashier" });
+  goCounter() {
+    wx.navigateTo({ url: "/packageMerchant/pages/point-counter/point-counter" });
   },
   goCoupons() {
     wx.navigateTo({ url: "/packageMerchant/pages/coupons/coupons" });
