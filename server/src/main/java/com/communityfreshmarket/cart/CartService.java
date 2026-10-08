@@ -139,7 +139,14 @@ public class CartService {
     return getCart();
   }
 
+  /** 商品删除后，本店所有顾客商品篮去掉该商品。 */
   @Transactional
+  public void purgeStoreProduct(long storeId, long productId) {
+    cartItemMapper.delete(new LambdaQueryWrapper<CartItem>()
+        .eq(CartItem::getStoreId, storeId)
+        .eq(CartItem::getProductId, productId));
+  }
+
   public void removeProducts(List<Long> productIds) {
     if (productIds == null || productIds.isEmpty()) {
       return;
@@ -167,7 +174,10 @@ public class CartService {
   @Transactional
   public void addForUser(long userId, long storeId, long productId, BigDecimal qty) {
     Product product = productMapper.selectById(productId);
-    if (product == null || !product.getStoreId().equals(storeId) || !Boolean.TRUE.equals(product.getOnShelf())) {
+    if (product == null
+        || !product.getStoreId().equals(storeId)
+        || product.getDeletedAt() != null
+        || !Boolean.TRUE.equals(product.getOnShelf())) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "商品不可用");
     }
     if (!Boolean.TRUE.equals(product.getInStock())) {
@@ -197,7 +207,10 @@ public class CartService {
   private Product requirePurchasable(long productId) {
     long storeId = UserContext.storeId();
     Product product = productMapper.selectById(productId);
-    if (product == null || !product.getStoreId().equals(storeId) || !Boolean.TRUE.equals(product.getOnShelf())) {
+    if (product == null
+        || !product.getStoreId().equals(storeId)
+        || product.getDeletedAt() != null
+        || !Boolean.TRUE.equals(product.getOnShelf())) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "商品不可用");
     }
     if (!Boolean.TRUE.equals(product.getInStock())) {
@@ -234,7 +247,9 @@ public class CartService {
     line.setProductId(item.getProductId());
     line.setQty(item.getQty());
 
-    if (product == null || !Objects.equals(product.getStoreId(), item.getStoreId())) {
+    if (product == null
+        || !Objects.equals(product.getStoreId(), item.getStoreId())
+        || product.getDeletedAt() != null) {
       line.setName("已失效商品");
       line.setAvailable(false);
       line.setUnavailableReason("商品不存在");

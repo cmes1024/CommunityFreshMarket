@@ -1,8 +1,15 @@
 <Header pageName="{{copy.titles.merchantProducts}}" back="{{false}}" toCustomer="{{true}}" />
-<view class="page-body products-page">
+<view class="page-body products-page {{selecting ? 'is-selecting' : ''}}">
   <view class="m-toolbar">
-    <button class="btn btn-ghost btn-sm" bind:tap="goCats">{{copy.merchant.catManage}}</button>
-    <button class="btn btn-cta btn-sm" bind:tap="create">{{copy.merchant.addProduct}}</button>
+    <block wx:if="{{selecting}}">
+      <button class="btn btn-ghost btn-sm" bind:tap="toggleSelectMode">{{copy.merchant.batchDone}}</button>
+      <button class="btn btn-ghost btn-sm" bind:tap="toggleSelectAll">{{allVisibleSelected ? copy.merchant.batchClear : copy.merchant.batchAll}}</button>
+    </block>
+    <block wx:else>
+      <button class="btn btn-ghost btn-sm" bind:tap="goCats">{{copy.merchant.catManage}}</button>
+      <button class="btn btn-ghost btn-sm" bind:tap="toggleSelectMode">{{copy.merchant.batch}}</button>
+      <button class="btn btn-cta btn-sm" bind:tap="create">{{copy.merchant.addProduct}}</button>
+    </block>
   </view>
 
   <view class="m-filters">
@@ -75,17 +82,18 @@
   </view>
 
   <view class="m-grid">
-    <view class="m-card {{item.coverUrl ? 'has-cover' : ''}} {{item.onShelf ? '' : 'is-off'}}" wx:for="{{list}}" wx:key="id">
+    <view class="m-card {{item.coverUrl ? 'has-cover' : ''}} {{item.onShelf ? '' : 'is-off'}} {{selecting && item.selected ? 'is-selected' : ''}}" wx:for="{{list}}" wx:key="id">
       <image wx:if="{{item.coverUrl}}" class="m-bg" src="{{item.coverUrl}}" mode="aspectFill" />
       <view wx:if="{{item.coverUrl}}" class="m-bg-mask"></view>
-      <view class="m-card-hit" data-id="{{item.id}}" bind:tap="edit">
+      <view class="m-card-hit" data-id="{{item.id}}" bind:tap="onCard">
+        <view wx:if="{{selecting}}" class="m-check {{item.selected ? 'on' : ''}}">{{item.selected ? '✓' : ''}}</view>
         <view class="m-meta">
           <view class="name">{{item.name}}</view>
           <view class="price">¥{{item.priceYuan}}<text class="unit"> / {{item.unitLabel}}</text></view>
           <view wx:if="{{item.specNote}}" class="spec">{{item.specNote}}</view>
         </view>
       </view>
-      <view class="m-actions">
+      <view wx:if="{{!selecting}}" class="m-actions">
         <view
           class="m-act {{item.onShelf ? 'on' : ''}}"
           data-id="{{item.id}}"
@@ -109,5 +117,19 @@
   </view>
 
   <view wx:if="{{!list.length}}" class="empty">{{emptyText}}</view>
+</view>
+<view wx:if="{{selecting}}" class="batch-bar">
+  <view class="batch-count">{{selectedLabel}}</view>
+  <scroll-view scroll-x class="batch-scroll" enhanced show-scrollbar="{{false}}">
+    <view class="batch-track">
+      <view class="batch-chip" data-op="ON_SHELF" bind:tap="runBatch">{{copy.merchant.shelfOn}}</view>
+      <view class="batch-chip" data-op="OFF_SHELF" bind:tap="runBatch">{{copy.merchant.shelfOff}}</view>
+      <view class="batch-chip" data-op="IN_STOCK" bind:tap="runBatch">{{copy.merchant.stockOn}}</view>
+      <view class="batch-chip" data-op="SOLD_OUT" bind:tap="runBatch">{{copy.merchant.stockOff}}</view>
+      <view class="batch-chip" data-op="RECOMMEND" bind:tap="runBatch">{{copy.merchant.homeRecoShort}}</view>
+      <view class="batch-chip" data-op="UNRECOMMEND" bind:tap="runBatch">{{copy.merchant.unrecommend}}</view>
+      <view class="batch-chip danger" data-op="DELETE" bind:tap="runBatch">删除</view>
+    </view>
+  </scroll-view>
 </view>
 <TabBar current="products" mode="merchant" />

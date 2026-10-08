@@ -205,4 +205,23 @@ Page({
     else await api.merchantProductCreate(payload);
     wx.navigateBack();
   },
+  remove() {
+    if (!this.data.id || this._removing) return;
+    wx.showModal({
+      title: copy.merchant.removeProduct,
+      content: copy.merchant.removeProductConfirm,
+      confirmText: "删除",
+      confirmColor: "#b91c1c",
+      success: async (res) => {
+        if (!res.confirm) return;
+        this._removing = true;
+        try {
+          await api.merchantProductDelete(this.data.id);
+          wx.navigateBack();
+        } catch (err) {
+          this._removing = false;
+        }
+      },
+    });
+  },
 });

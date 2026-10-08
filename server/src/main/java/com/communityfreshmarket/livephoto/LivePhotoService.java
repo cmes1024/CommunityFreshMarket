@@ -105,7 +105,10 @@ public class LivePhotoService {
     long userId = UserContext.requireUserId();
     long storeId = UserContext.storeId();
     Product product = productMapper.selectById(productId);
-    if (product == null || !product.getStoreId().equals(storeId) || !Boolean.TRUE.equals(product.getOnShelf())) {
+    if (product == null
+        || !product.getStoreId().equals(storeId)
+        || product.getDeletedAt() != null
+        || !Boolean.TRUE.equals(product.getOnShelf())) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "商品不存在");
     }
     if (!Boolean.TRUE.equals(product.getLivePhotoEnabled())) {

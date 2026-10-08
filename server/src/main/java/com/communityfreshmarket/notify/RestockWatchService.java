@@ -44,7 +44,10 @@ public class RestockWatchService {
     long userId = UserContext.requireUserId();
     long storeId = UserContext.storeId();
     Product product = productMapper.selectById(productId);
-    if (product == null || !product.getStoreId().equals(storeId) || !Boolean.TRUE.equals(product.getOnShelf())) {
+    if (product == null
+        || !product.getStoreId().equals(storeId)
+        || product.getDeletedAt() != null
+        || !Boolean.TRUE.equals(product.getOnShelf())) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "商品不可用");
     }
     if (Boolean.TRUE.equals(product.getInStock())) {
@@ -96,6 +99,17 @@ public class RestockWatchService {
     if (existing != null) {
       existing.setStatus("CANCELLED");
       restockWatchMapper.updateById(existing);
+    }
+  }
+
+  @Transactional
+  public void cancelProduct(long productId) {
+    List<RestockWatch> rows = restockWatchMapper.selectList(new LambdaQueryWrapper<RestockWatch>()
+        .eq(RestockWatch::getProductId, productId)
+        .eq(RestockWatch::getStatus, "WATCHING"));
+    for (RestockWatch watch : rows) {
+      watch.setStatus("CANCELLED");
+      restockWatchMapper.updateById(watch);
     }
   }
 

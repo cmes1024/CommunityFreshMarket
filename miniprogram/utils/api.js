@@ -59,6 +59,8 @@ module.exports = {
   merchantInStock: (id, value) => put(`/api/v1/merchant/products/${id}/in-stock`, { value }),
   merchantHomeRecommended: (id, value) =>
     put(`/api/v1/merchant/products/${id}/home-recommended`, { value }),
+  merchantProductDelete: (id) => del(`/api/v1/merchant/products/${id}`),
+  merchantProductBatch: (body) => post("/api/v1/merchant/products/batch", body),
   merchantUpdateStore: (body) => put("/api/v1/merchant/store", body),
   merchantPickupSlots: () => get("/api/v1/merchant/pickup-slots"),
   merchantPickupSlotCreate: (body) => post("/api/v1/merchant/pickup-slots", body),

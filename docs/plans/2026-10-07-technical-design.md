@@ -117,6 +117,8 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 **商家**（路径建议 `/api/v1/merchant/...`，须为该店 `store_member`）：订单列表与状态推进、取消；**分类 CRUD**；商品 CRUD、有货售罄、上下架、首页推荐开关（有货变更时异步通知 `restock_watch`）；自提时段；店铺联系方式与**首页展示**；订单台「马上处理」；**邀请店员** `GET /merchant/invite`（返回 `code` + `inviteUrl` + 普通链接二维码 PNG；链接=`{INVITE_LINK_BASE}?code=`；本地 ZXing 生成，**非**微信太阳码）。公众平台配置「扫普通链接二维码打开小程序」：落地页 `packageCustomer/pages/join-store/join-store`，参数名 `code`。加入页无常规入口、禁分享；`POST /invites/accept`。冷启动 `BOOTSTRAP_OWNER_OPENID` 仍保留。
 
+商品删除是软删除（`product.deleted_at`）。`DELETE /merchant/products/{id}` 删除一个；`POST /merchant/products/batch` 的 body 为 `{ ids, op }`，`op` 取 `ON_SHELF`、`OFF_SHELF`、`IN_STOCK`、`SOLD_OUT`、`RECOMMEND`、`UNRECOMMEND`、`DELETE`，一次最多 100 个。删除后商家列表和顾客在售不再返回该商品，本店商品篮去掉它，未发出的到货订阅取消，未处理的实景申请清掉。订单明细仍保留下单时的名称和价格。
+
 **订阅消息**（模板 ID 详见 `deploy/.env.example` 与 `miniprogram/utils/config.js`；未配置只记日志）：
 
 硬约束：微信**不能**向未授权用户推送；授权须**用户点击**触发（勿依赖 `onShow`）。普通**一次性订阅**≈授权一次可发一条，发出后须再点「开启订单通知」；长期订阅须公众平台类目许可，本项目第一波不依赖。未授权/额度用尽时以**订单台红点**为主通道。
@@ -268,3 +270,4 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 | 2026-10-07 | `product.image_urls`（≤3）+ 封面 `image_url` 同步；详情轮播 |
 | 2026-10-07 | `product.home_recommended`；顾客 `?homeRecommended=`；商家快捷开关 |
 | 2026-10-07 | 第二/三波：指向 wave2-wave3-design；商品数量字段启用 |
+| 2026-10-08 | 商品软删除与批量操作：`DELETE /merchant/products/{id}`、`POST /merchant/products/batch` |

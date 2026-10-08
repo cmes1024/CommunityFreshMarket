@@ -3,6 +3,7 @@ package com.communityfreshmarket.catalog;
 import com.communityfreshmarket.catalog.dto.BooleanFlagRequest;
 import com.communityfreshmarket.catalog.dto.CategoryResponse;
 import com.communityfreshmarket.catalog.dto.CategorySaveRequest;
+import com.communityfreshmarket.catalog.dto.ProductBatchRequest;
 import com.communityfreshmarket.catalog.dto.ProductResponse;
 import com.communityfreshmarket.catalog.dto.ProductSaveRequest;
 import com.communityfreshmarket.common.ApiResponse;
@@ -90,5 +91,17 @@ public class MerchantCatalogController {
   public ApiResponse<ProductResponse> setHomeRecommended(
       @PathVariable long id, @Valid @RequestBody BooleanFlagRequest request) {
     return ApiResponse.ok(productService.setHomeRecommended(id, request.getValue()));
+  }
+
+  @DeleteMapping("/products/{id}")
+  public ApiResponse<Void> deleteProduct(@PathVariable long id) {
+    productService.delete(id);
+    return ApiResponse.ok(null);
+  }
+
+  @PostMapping("/products/batch")
+  public ApiResponse<List<ProductResponse>> batchProducts(
+      @Valid @RequestBody ProductBatchRequest request) {
+    return ApiResponse.ok(productService.batch(request.getIds(), request.getOp()));
   }
 }

@@ -44,6 +44,7 @@ public class Product {
   private LocalDateTime livePhotoTakenAt;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private LocalDateTime deletedAt;
 
   public Long getId() {
     return id;
@@ -203,5 +204,13 @@ public class Product {
 
   public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
+  }
+
+  public LocalDateTime getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(LocalDateTime deletedAt) {
+    this.deletedAt = deletedAt;
   }
 }

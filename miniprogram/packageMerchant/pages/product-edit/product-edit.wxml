@@ -101,4 +101,5 @@
   </view>
 
   <button class="btn btn-cta full" bind:tap="save">{{copy.merchant.save}}</button>
+  <button wx:if="{{id}}" class="btn btn-danger full" bind:tap="remove">{{copy.merchant.removeProduct}}</button>
 </view>

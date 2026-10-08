@@ -105,7 +105,7 @@ public class OrderService {
     // 二次校验：下单瞬间仍须上架有货，且数量符合起购/限购/库存
     for (CartLineResponse line : available) {
       Product product = productMapper.selectById(line.getProductId());
-      if (product == null || !Objects.equals(product.getStoreId(), storeId)) {
+      if (product == null || !Objects.equals(product.getStoreId(), storeId) || product.getDeletedAt() != null) {
         throw new BizException(ErrorCodes.BAD_REQUEST, line.getName() + " 已不可购买，请调整商品篮");
       }
       if (!Boolean.TRUE.equals(product.getOnShelf())) {

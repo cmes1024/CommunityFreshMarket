@@ -97,7 +97,7 @@ public class CashierService {
       throw new BizException(ErrorCodes.BAD_REQUEST, "请选择商品");
     }
     Product product = productMapper.selectById(request.getProductId());
-    if (product == null || !product.getStoreId().equals(sale.getStoreId())) {
+    if (product == null || !product.getStoreId().equals(sale.getStoreId()) || product.getDeletedAt() != null) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "商品不存在");
     }
     BigDecimal qty = request.getQty() == null ? BigDecimal.ONE : request.getQty();

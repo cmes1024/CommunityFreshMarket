@@ -84,7 +84,8 @@ public class CategoryService {
     Category category = requireOwned(id);
     Long productCount = productMapper.selectCount(new LambdaQueryWrapper<Product>()
         .eq(Product::getStoreId, category.getStoreId())
-        .eq(Product::getCategoryId, id));
+        .eq(Product::getCategoryId, id)
+        .isNull(Product::getDeletedAt));
     if (productCount != null && productCount > 0) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "分类下仍有商品，请先停用或移走商品");
     }

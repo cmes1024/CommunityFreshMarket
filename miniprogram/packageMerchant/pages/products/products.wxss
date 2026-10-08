@@ -2,6 +2,10 @@
   padding-top: 16rpx;
 }
 
+.products-page.is-selecting {
+  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 168rpx);
+}
+
 .m-toolbar {
   display: flex;
   gap: 16rpx;
@@ -222,6 +226,88 @@
 .m-card.is-off .name,
 .m-card.is-off .price {
   opacity: 0.55;
+}
+
+.m-card.is-selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2rpx var(--color-primary);
+}
+
+.m-check {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  z-index: 3;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(255, 255, 255, 0.92);
+  background: rgba(19, 78, 74, 0.35);
+  color: #fff;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.m-card:not(.has-cover) .m-check {
+  border-color: var(--color-line);
+  background: #fff;
+  color: var(--color-primary);
+}
+
+.m-check.on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.batch-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  z-index: 19;
+  background: #fff;
+  border-top: 1rpx solid var(--color-line);
+  padding: 12rpx 16rpx 16rpx;
+  box-sizing: border-box;
+}
+
+.batch-count {
+  margin-bottom: 8rpx;
+  font-size: 24rpx;
+  color: var(--color-muted);
+}
+
+.batch-scroll {
+  width: 100%;
+  height: 64rpx;
+  white-space: nowrap;
+}
+
+.batch-track {
+  display: inline-flex;
+  gap: 12rpx;
+  height: 64rpx;
+  align-items: center;
+}
+
+.batch-chip {
+  flex-shrink: 0;
+  height: 56rpx;
+  padding: 0 20rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid var(--color-line);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 24rpx;
+  line-height: 56rpx;
+}
+
+.batch-chip.danger {
+  color: var(--color-danger);
+  border-color: #fecaca;
 }
 
 .m-actions {

@@ -366,7 +366,7 @@ public class PointsService {
     String title = request == null || request.getTitle() == null ? "" : request.getTitle().trim();
     if (productId != null) {
       Product product = productMapper.selectById(productId);
-      if (product == null || !Objects.equals(product.getStoreId(), storeId)) {
+      if (product == null || !Objects.equals(product.getStoreId(), storeId) || product.getDeletedAt() != null) {
         throw new BizException(ErrorCodes.BAD_REQUEST, "商品不存在");
       }
       if (title.isEmpty() && product.getName() != null) {
