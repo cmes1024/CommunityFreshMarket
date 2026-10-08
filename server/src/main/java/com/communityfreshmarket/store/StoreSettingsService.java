@@ -8,6 +8,7 @@ import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.domain.Store;
 import com.communityfreshmarket.mapper.StoreMapper;
+import com.communityfreshmarket.points.PointsRatio;
 import com.communityfreshmarket.store.dto.StoreUpdateRequest;
 import com.communityfreshmarket.upload.UploadCleanup;
 import java.util.List;
@@ -89,7 +90,7 @@ public class StoreSettingsService {
       store.setProductDetailMode(mode);
     }
     if (request.getPointsPerYuan() != null) {
-      store.setPointsPerYuan(request.getPointsPerYuan());
+      store.setPointsPerYuan(PointsRatio.require(request.getPointsPerYuan()));
     }
     if (request.getPickImageTtlMinutes() != null) {
       int ttl = request.getPickImageTtlMinutes();

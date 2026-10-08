@@ -1,5 +1,7 @@
 package com.communityfreshmarket.catalog;
 
+import java.math.BigDecimal;
+
 public class StoreSummaryResponse {
 
   private long id;
@@ -14,7 +16,7 @@ public class StoreSummaryResponse {
   private String homeSubtitle;
   private int homeProductCols = 2;
   private String productDetailMode = "SHEET";
-  private int pointsPerYuan = 1;
+  private BigDecimal pointsPerYuan = BigDecimal.ONE;
   private int pickImageTtlMinutes = 15;
 
   public long getId() {
@@ -105,11 +107,11 @@ public class StoreSummaryResponse {
     this.productDetailMode = productDetailMode;
   }
 
-  public int getPointsPerYuan() {
+  public BigDecimal getPointsPerYuan() {
     return pointsPerYuan;
   }
 
-  public void setPointsPerYuan(int pointsPerYuan) {
+  public void setPointsPerYuan(BigDecimal pointsPerYuan) {
     this.pointsPerYuan = pointsPerYuan;
   }
 

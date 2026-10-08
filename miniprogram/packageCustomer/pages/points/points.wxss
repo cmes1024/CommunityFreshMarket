@@ -10,15 +10,93 @@
 }
 .balance-card {
   text-align: center;
+  padding-top: 16rpx;
+  padding-bottom: 16rpx;
+}
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+.rate-tip {
+  width: 24rpx;
+  height: 24rpx;
+  border: 2rpx solid var(--color-muted);
+  border-radius: 50%;
+  color: var(--color-muted);
+  font-size: 16rpx;
+  font-weight: 600;
+  text-align: center;
+  box-sizing: border-box;
 }
 .balance-num {
   font-size: 56rpx;
   font-weight: 700;
   color: var(--color-cta);
-  margin: 8rpx 0;
+  margin: 4rpx 0 0;
+  line-height: 1.1;
 }
-.sub {
-  font-size: 24rpx;
+.entry-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+.entry-link {
+  flex: none;
+  font-size: 26rpx;
+  line-height: 1.4;
+  color: var(--color-cta);
+  white-space: nowrap;
+}
+.entry-sep {
+  flex: none;
+  font-size: 26rpx;
+  line-height: 1.4;
+  color: var(--color-line);
+}
+.points-sheet {
+  background: var(--color-background);
+  border-radius: 28rpx 28rpx 0 0;
+  padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
+}
+.points-sheet .grab {
+  width: 64rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: var(--color-line);
+  margin: 16rpx auto 8rpx;
+}
+.points-sheet .sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8rpx 32rpx 16rpx;
+}
+.points-sheet .sheet-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.points-sheet .sheet-close {
+  font-size: 26rpx;
+  line-height: 1.3;
+  color: var(--color-muted);
+  padding: 8rpx 0 8rpx 24rpx;
+}
+.points-sheet .sheet-body {
+  max-height: 56vh;
+  overflow-y: auto;
+  padding: 0 32rpx 8rpx;
+  box-sizing: border-box;
+}
+.points-sheet .hint {
+  margin-bottom: 8rpx;
+}
+.points-sheet .empty {
+  padding: 80rpx 32rpx;
 }
 .sec-title {
   font-size: 26rpx;

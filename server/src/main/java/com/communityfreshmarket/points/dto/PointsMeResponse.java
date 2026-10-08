@@ -1,18 +1,19 @@
 package com.communityfreshmarket.points.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class PointsMeResponse {
 
   private int balance;
-  private int pointsPerYuan;
+  private BigDecimal pointsPerYuan;
   private List<PointLedgerItemResponse> recent;
   private List<PointRedeemResponse> redeems;
   private List<PointRedeemItemResponse> items;
 
   public PointsMeResponse(
       int balance,
-      int pointsPerYuan,
+      BigDecimal pointsPerYuan,
       List<PointLedgerItemResponse> recent,
       List<PointRedeemResponse> redeems,
       List<PointRedeemItemResponse> items) {
@@ -27,7 +28,7 @@ public class PointsMeResponse {
     return balance;
   }
 
-  public int getPointsPerYuan() {
+  public BigDecimal getPointsPerYuan() {
     return pointsPerYuan;
   }
 

@@ -84,7 +84,7 @@
     <scroll-view scroll-y class="picker-list">
       <view class="pending-card" wx:for="{{list}}" wx:key="id">
         <view class="title">{{item.title}}</view>
-        <view class="muted sm">{{item.timeText}} · 用户 {{item.userId}} · {{item.costPoints}} 分</view>
+        <view class="muted sm">{{item.timeText}} · {{item.displayName}} · {{item.costPoints}} 分</view>
         <view class="pending-actions">
           <button class="btn btn-ghost btn-sm" data-id="{{item.id}}" bind:tap="reject">{{copy.merchantPointRedeem.reject}}</button>
           <button class="btn btn-cta btn-sm" data-id="{{item.id}}" bind:tap="complete">{{copy.merchantPointRedeem.complete}}</button>

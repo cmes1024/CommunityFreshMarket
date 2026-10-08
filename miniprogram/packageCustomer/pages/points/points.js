@@ -1,6 +1,7 @@
 const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { format } = require("../../../utils/copy");
+const { formatRatio } = require("../../../utils/pointsRatio");
 
 function reasonText(reason) {
   const map = {
@@ -37,6 +38,7 @@ Page({
     recent: [],
     redeems: [],
     items: [],
+    sheet: "",
   },
   async onShow() {
     await this.reload();
@@ -48,7 +50,7 @@ Page({
       this.setData({
         balance: me.balance || 0,
         pointsPerYuan,
-        perYuanText: format(copy.points.perYuan, { n: pointsPerYuan }),
+        perYuanText: format(copy.points.perYuan, { n: formatRatio(pointsPerYuan) }),
         recent: (me.recent || []).map((r) => ({
           ...r,
           timeText: fmtTime(r.createdAt),
@@ -67,6 +69,25 @@ Page({
       });
     } catch (e) {}
   },
+  showRate() {
+    if (!this.data.perYuanText) return;
+    wx.showModal({
+      title: copy.points.balance,
+      content: this.data.perYuanText,
+      showCancel: false,
+      confirmText: copy.points.rateOk,
+    });
+  },
+  openSheet(e) {
+    const sheet = e.currentTarget.dataset.sheet;
+    if (sheet !== "catalog" && sheet !== "redeems") return;
+    this.setData({ sheet });
+  },
+  closeSheet() {
+    if (!this.data.sheet) return;
+    this.setData({ sheet: "" });
+  },
+  noop() {},
   redeemItem(e) {
     const id = e.currentTarget.dataset.id;
     const item = (this.data.items || []).find((it) => it.id === id);

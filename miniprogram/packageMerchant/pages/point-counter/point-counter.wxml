@@ -1,7 +1,13 @@
 <Header pageName="{{copy.titles.merchantCounter}}" back="{{true}}" />
 <view class="page-body no-tab counter-page">
   <view class="block">
-    <view class="block-title">{{copy.merchantCounter.who}}</view>
+    <view class="block-head">
+      <view class="block-title">{{copy.merchantCounter.who}}</view>
+      <view class="bubble-entry" bind:tap="openBubbles">
+        {{copy.merchantCounter.bubbles}}
+        <view wx:if="{{bubbles.length}}" class="bubble-dot"></view>
+      </view>
+    </view>
     <view class="who" wx:if="{{selected}}">
       <image wx:if="{{selected.avatarSrc}}" class="who-avatar" src="{{selected.avatarSrc}}" mode="aspectFill" />
       <view wx:elif="{{selected.initial}}" class="who-fallback">{{selected.initial}}</view>
@@ -11,22 +17,6 @@
       </view>
     </view>
     <view wx:else class="who-empty">{{copy.merchantCounter.whoEmpty}}</view>
-
-    <view class="subhead">{{copy.merchantCounter.bubbles}}</view>
-    <view class="bubble-row" wx:if="{{bubbles.length}}">
-      <view
-        class="person {{checkinId == item.id ? 'on' : ''}}"
-        wx:for="{{bubbles}}"
-        wx:key="id"
-        data-id="{{item.id}}"
-        bind:tap="pickBubble"
-      >
-        <image wx:if="{{item.avatarSrc}}" class="person-avatar" src="{{item.avatarSrc}}" mode="aspectFill" />
-        <view wx:else class="person-fallback">{{item.initial}}</view>
-        <text class="person-name">{{item.displayName}}</text>
-      </view>
-    </view>
-    <view wx:else class="hint">{{copy.merchantCounter.emptyBubbles}}</view>
 
     <button class="btn btn-ghost scan-btn" bind:tap="scan">{{copy.merchantCounter.scan}}</button>
   </view>
@@ -52,3 +42,38 @@
     {{copy.merchantCounter.submit}}
   </button>
 </view>
+
+<page-container
+  show="{{bubbleSheet}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto; max-height: 80vh;"
+  bind:clickoverlay="closeBubbles"
+  bind:afterleave="closeBubbles"
+>
+  <view class="bubble-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.merchantCounter.bubbles}}</view>
+      <view class="sheet-close" bind:tap="closeBubbles">{{copy.merchantCounter.sheetClose}}</view>
+    </view>
+    <scroll-view scroll-y class="bubble-list">
+      <view class="bubble-row" wx:if="{{bubbles.length}}">
+        <view
+          class="person {{checkinId == item.id ? 'on' : ''}}"
+          wx:for="{{bubbles}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bind:tap="pickBubble"
+        >
+          <image wx:if="{{item.avatarSrc}}" class="person-avatar" src="{{item.avatarSrc}}" mode="aspectFill" />
+          <view wx:else class="person-fallback">{{item.initial}}</view>
+          <view class="person-name">{{item.displayName}}</view>
+        </view>
+      </view>
+      <view wx:else class="empty muted">{{copy.merchantCounter.emptyBubbles}}</view>
+    </scroll-view>
+  </view>
+</page-container>

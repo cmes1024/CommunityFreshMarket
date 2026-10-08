@@ -1,27 +1,16 @@
 <Header pageName="{{copy.titles.points}}" back="{{true}}" />
 <view class="page-body no-tab wave-page">
   <view class="card balance-card">
-    <view class="label">{{copy.points.balance}}</view>
-    <view class="balance-num">{{balance}}</view>
-    <view class="muted sub">{{perYuanText}}</view>
-  </view>
-
-  <view class="sec-title">{{copy.points.catalog}}</view>
-  <view class="muted hint">{{copy.points.redeemHint}}</view>
-  <view class="card">
-    <view class="row" wx:for="{{items}}" wx:key="id">
-      <view class="grow">
-        <view class="row-title">{{item.title}}</view>
-        <view class="muted sm">{{item.costPoints}} 分</view>
-      </view>
-      <button
-        class="btn btn-cta btn-sm"
-        data-id="{{item.id}}"
-        disabled="{{!item.affordable}}"
-        bind:tap="redeemItem"
-      >{{item.affordable ? copy.points.redeemAction : copy.points.notEnough}}</button>
+    <view class="label-row">
+      <view class="label">{{copy.points.balance}}</view>
+      <view class="rate-tip" bind:tap="showRate">i</view>
     </view>
-    <view wx:if="{{!items.length}}" class="empty muted">{{copy.points.emptyCatalog}}</view>
+    <view class="balance-num">{{balance}}</view>
+    <view class="entry-row">
+      <view class="entry-link" data-sheet="catalog" bind:tap="openSheet">{{copy.points.redeemGo}}</view>
+      <view class="entry-sep">·</view>
+      <view class="entry-link" data-sheet="redeems" bind:tap="openSheet">{{copy.points.redeems}}</view>
+    </view>
   </view>
 
   <view class="sec-title">{{copy.points.ledger}}</view>
@@ -35,16 +24,49 @@
     </view>
     <view wx:if="{{!recent.length}}" class="empty muted">{{copy.points.emptyLedger}}</view>
   </view>
-
-  <view class="sec-title">{{copy.points.redeems}}</view>
-  <view class="card">
-    <view class="row" wx:for="{{redeems}}" wx:key="id">
-      <view class="grow">
-        <view class="row-title">{{item.title}}</view>
-        <view class="muted sm">{{item.timeText}} · {{item.statusText}}</view>
-      </view>
-      <view class="muted">-{{item.costPoints}}</view>
-    </view>
-    <view wx:if="{{!redeems.length}}" class="empty muted">{{copy.points.emptyRedeem}}</view>
-  </view>
 </view>
+
+<page-container
+  show="{{!!sheet}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto; max-height: 80vh;"
+  bind:clickoverlay="closeSheet"
+  bind:afterleave="closeSheet"
+>
+  <view class="points-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{sheet === 'catalog' ? copy.points.catalog : copy.points.redeems}}</view>
+      <view class="sheet-close" bind:tap="closeSheet">{{copy.points.sheetClose}}</view>
+    </view>
+    <view wx:if="{{sheet === 'catalog'}}" class="sheet-body">
+      <view class="muted hint">{{copy.points.redeemHint}}</view>
+      <view class="row" wx:for="{{items}}" wx:key="id">
+        <view class="grow">
+          <view class="row-title">{{item.title}}</view>
+          <view class="muted sm">{{item.costPoints}} 分</view>
+        </view>
+        <button
+          class="btn btn-cta btn-sm"
+          data-id="{{item.id}}"
+          disabled="{{!item.affordable}}"
+          bind:tap="redeemItem"
+        >{{item.affordable ? copy.points.redeemAction : copy.points.notEnough}}</button>
+      </view>
+      <view wx:if="{{!items.length}}" class="empty muted">{{copy.points.emptyCatalog}}</view>
+    </view>
+    <view wx:elif="{{sheet === 'redeems'}}" class="sheet-body">
+      <view class="row" wx:for="{{redeems}}" wx:key="id">
+        <view class="grow">
+          <view class="row-title">{{item.title}}</view>
+          <view class="muted sm">{{item.timeText}} · {{item.statusText}}</view>
+        </view>
+        <view class="muted">-{{item.costPoints}}</view>
+      </view>
+      <view wx:if="{{!redeems.length}}" class="empty muted">{{copy.points.emptyRedeem}}</view>
+    </view>
+  </view>
+</page-container>

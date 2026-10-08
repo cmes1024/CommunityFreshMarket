@@ -5,6 +5,8 @@ import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.domain.Store;
 import com.communityfreshmarket.mapper.StoreMapper;
+import com.communityfreshmarket.points.PointsRatio;
+import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,8 +38,8 @@ public class StoreQueryService {
     Integer cols = store.getHomeProductCols();
     r.setHomeProductCols(cols != null && cols >= 1 && cols <= 3 ? cols : 2);
     r.setProductDetailMode(normalizeDetailMode(store.getProductDetailMode()));
-    Integer ratio = store.getPointsPerYuan();
-    r.setPointsPerYuan(ratio == null || ratio < 0 ? 1 : ratio);
+    BigDecimal ratio = store.getPointsPerYuan();
+    r.setPointsPerYuan(ratio == null || ratio.signum() < 0 ? BigDecimal.ONE : PointsRatio.plain(ratio));
     Integer ttl = store.getPickImageTtlMinutes();
     r.setPickImageTtlMinutes(ttl == null || ttl < 1 ? 15 : ttl);
     return r;

@@ -1,8 +1,12 @@
 package com.communityfreshmarket.store.dto;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 
 public class StoreUpdateRequest {
 
@@ -45,9 +49,10 @@ public class StoreUpdateRequest {
   @Size(max = 16)
   private String productDetailMode;
 
-  @Min(0)
-  @Max(100)
-  private Integer pointsPerYuan;
+  @DecimalMin("0")
+  @DecimalMax("100")
+  @Digits(integer = 3, fraction = 2)
+  private BigDecimal pointsPerYuan;
 
   @Min(1)
   @Max(120)
@@ -133,11 +138,11 @@ public class StoreUpdateRequest {
     this.productDetailMode = productDetailMode;
   }
 
-  public Integer getPointsPerYuan() {
+  public BigDecimal getPointsPerYuan() {
     return pointsPerYuan;
   }
 
-  public void setPointsPerYuan(Integer pointsPerYuan) {
+  public void setPointsPerYuan(BigDecimal pointsPerYuan) {
     this.pointsPerYuan = pointsPerYuan;
   }
 

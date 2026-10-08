@@ -10,15 +10,21 @@ public class PointRedeemResponse {
   private int costPoints;
   private String title;
   private String status;
+  private String nickname;
   private LocalDateTime createdAt;
 
   public static PointRedeemResponse from(PointRedeem redeem) {
+    return from(redeem, null);
+  }
+
+  public static PointRedeemResponse from(PointRedeem redeem, String nickname) {
     PointRedeemResponse r = new PointRedeemResponse();
     r.id = redeem.getId();
     r.userId = redeem.getUserId();
     r.costPoints = redeem.getCostPoints() == null ? 0 : redeem.getCostPoints();
     r.title = redeem.getTitle();
     r.status = redeem.getStatus();
+    r.nickname = nickname;
     r.createdAt = redeem.getCreatedAt();
     return r;
   }
@@ -41,6 +47,10 @@ public class PointRedeemResponse {
 
   public String getStatus() {
     return status;
+  }
+
+  public String getNickname() {
+    return nickname;
   }
 
   public LocalDateTime getCreatedAt() {

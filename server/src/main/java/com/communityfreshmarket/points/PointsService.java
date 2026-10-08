@@ -29,10 +29,14 @@ import com.communityfreshmarket.points.dto.PointRedeemItemSaveRequest;
 import com.communityfreshmarket.points.dto.PointRedeemRequest;
 import com.communityfreshmarket.points.dto.PointRedeemResponse;
 import com.communityfreshmarket.points.dto.PointsMeResponse;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,9 +96,8 @@ public class PointsService {
         .map(PointRedeemResponse::from)
         .toList();
     Store store = storeMapper.selectById(storeId);
-    int ratio = store == null || store.getPointsPerYuan() == null ? 1 : store.getPointsPerYuan();
     List<PointRedeemItemResponse> items = enabledItems(storeId);
-    return new PointsMeResponse(balance, ratio, recent, redeems, items);
+    return new PointsMeResponse(balance, ratioOf(store), recent, redeems, items);
   }
 
   @Transactional
@@ -112,13 +115,13 @@ public class PointsService {
       return;
     }
     Store store = storeMapper.selectById(order.getStoreId());
-    int ratio = store == null || store.getPointsPerYuan() == null ? 1 : store.getPointsPerYuan();
-    if (ratio <= 0) {
+    BigDecimal ratio = ratioOf(store);
+    if (ratio.signum() <= 0) {
       return;
     }
     int discount = order.getDiscountFen() == null ? 0 : order.getDiscountFen();
     int payable = Math.max(0, order.getTotalAmountFen() - discount);
-    int earn = (payable / 100) * ratio;
+    int earn = PointsRatio.earn(payable, ratio);
     if (earn <= 0) {
       return;
     }
@@ -143,11 +146,11 @@ public class PointsService {
       return;
     }
     Store store = storeMapper.selectById(storeId);
-    int ratio = store == null || store.getPointsPerYuan() == null ? 1 : store.getPointsPerYuan();
-    if (ratio <= 0) {
+    BigDecimal ratio = ratioOf(store);
+    if (ratio.signum() <= 0) {
       return;
     }
-    int earn = (payFen / 100) * ratio;
+    int earn = PointsRatio.earn(payFen, ratio);
     if (earn <= 0) {
       return;
     }
@@ -176,13 +179,14 @@ public class PointsService {
       throw new BizException(ErrorCodes.BAD_REQUEST, "会员不存在");
     }
     Store store = storeMapper.selectById(storeId);
-    int ratio = store == null || store.getPointsPerYuan() == null ? 1 : store.getPointsPerYuan();
-    if (ratio <= 0) {
+    BigDecimal ratio = ratioOf(store);
+    if (ratio.signum() <= 0) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "店铺未开启积分");
     }
-    int earn = (amountFen / 100) * ratio;
+    int earn = PointsRatio.earn(amountFen, ratio);
     if (earn <= 0) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "不满 1 元，记不到积分");
+      throw new BizException(
+          ErrorCodes.BAD_REQUEST, amountFen < 100 ? "不满 1 元，记不到积分" : "按当前比例，这笔记不到积分");
     }
     if (checkinId != null) {
       checkinService.consume(checkinId, storeId);
@@ -200,6 +204,13 @@ public class PointsService {
     response.setPoints(earn);
     response.setBalance(balance);
     return response;
+  }
+
+  private BigDecimal ratioOf(Store store) {
+    if (store == null || store.getPointsPerYuan() == null) {
+      return BigDecimal.ONE;
+    }
+    return PointsRatio.plain(store.getPointsPerYuan());
   }
 
   public List<PointRedeemItemResponse> merchantItems() {
@@ -292,12 +303,21 @@ public class PointsService {
 
   public List<PointRedeemResponse> merchantPendingRedeems() {
     long storeId = UserContext.storeId();
-    return redeemMapper.selectList(new LambdaQueryWrapper<PointRedeem>()
-            .eq(PointRedeem::getStoreId, storeId)
-            .eq(PointRedeem::getStatus, "PENDING")
-            .orderByAsc(PointRedeem::getId))
-        .stream()
-        .map(PointRedeemResponse::from)
+    List<PointRedeem> rows = redeemMapper.selectList(new LambdaQueryWrapper<PointRedeem>()
+        .eq(PointRedeem::getStoreId, storeId)
+        .eq(PointRedeem::getStatus, "PENDING")
+        .orderByAsc(PointRedeem::getId));
+    List<Long> userIds = rows.stream().map(PointRedeem::getUserId).filter(Objects::nonNull).distinct().toList();
+    Map<Long, User> users = userIds.isEmpty()
+        ? Map.of()
+        : userMapper.selectBatchIds(userIds).stream()
+            .collect(Collectors.toMap(User::getId, Function.identity(), (a, b) -> a));
+    return rows.stream()
+        .map(row -> {
+          User user = users.get(row.getUserId());
+          String nickname = user == null ? null : user.getNickname();
+          return PointRedeemResponse.from(row, nickname);
+        })
         .toList();
   }
 

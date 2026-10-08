@@ -3,6 +3,7 @@ const copy = require("../../../utils/copy");
 const { chooseAndUpload } = require("../../../utils/upload");
 const { productDetailMode } = require("../../../utils/productOpen");
 const { yuanPlain } = require("../../../utils/money");
+const { formatRatio, parseRatio, sanitizeRatioInput } = require("../../../utils/pointsRatio");
 
 function normalizeCols(cols) {
   const n = Number(cols);
@@ -16,6 +17,7 @@ function formStore(store) {
     homeTitle: store.homeTitle || "",
     homeSubtitle: store.homeSubtitle || "",
     minDeliveryYuan: Number(store.minDeliveryFen) > 0 ? yuanPlain(store.minDeliveryFen) : "",
+    pointsPerYuan: store.pointsPerYuan == null ? "" : formatRatio(store.pointsPerYuan),
   };
 }
 
@@ -53,6 +55,11 @@ Page({
   },
   onStore(e) {
     this.setData({ [`store.${e.currentTarget.dataset.k}`]: e.detail.value });
+  },
+  onPoints(e) {
+    const value = sanitizeRatioInput(e.detail.value);
+    this.setData({ "store.pointsPerYuan": value });
+    return value;
   },
   onKicker(e) {
     this.setData({ "store.homeKicker": e.currentTarget.dataset.text || "" });
@@ -124,7 +131,12 @@ Page({
       productDetailMode: detailMode,
     };
     if (pointsPerYuan !== undefined && pointsPerYuan !== "") {
-      payload.pointsPerYuan = Number(pointsPerYuan);
+      const ratio = parseRatio(pointsPerYuan);
+      if (ratio == null) {
+        wx.showToast({ title: copy.settings.pointsInvalid, icon: "none" });
+        return;
+      }
+      payload.pointsPerYuan = ratio;
     }
     payload.pickImageTtlMinutes = ttl;
     try {

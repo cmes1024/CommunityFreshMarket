@@ -37,10 +37,14 @@ Page({
       ]);
       const shelf = (products || []).filter((p) => p.onShelf !== false);
       this.setData({
-        list: (list || []).map((r) => ({
-          ...r,
-          timeText: fmtTime(r.createdAt),
-        })),
+        list: (list || []).map((r) => {
+          const nick = r.nickname && String(r.nickname).trim();
+          return {
+            ...r,
+            timeText: fmtTime(r.createdAt),
+            displayName: nick || copy.profile.defaultNickname,
+          };
+        }),
         items: items || [],
         products: shelf,
         filtered: matchProducts(shelf, this.data.keyword),

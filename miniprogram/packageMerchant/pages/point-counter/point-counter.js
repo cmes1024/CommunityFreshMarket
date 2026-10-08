@@ -2,6 +2,7 @@ const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { format } = require("../../../utils/copy");
 const { absUrl } = require("../../../utils/upload");
+const { earnPoints } = require("../../../utils/pointsRatio");
 
 const MEMBER_PREFIX = "CFM-MEMBER:";
 
@@ -30,6 +31,7 @@ Page({
     previewText: "",
     pointsPerYuan: 1,
     submitting: false,
+    bubbleSheet: false,
   },
   onShow() {
     this.loadStore();
@@ -114,6 +116,15 @@ Page({
       },
     });
   },
+  openBubbles() {
+    this.setData({ bubbleSheet: true });
+    this.loadBubbles();
+  },
+  closeBubbles() {
+    if (!this.data.bubbleSheet) return;
+    this.setData({ bubbleSheet: false });
+  },
+  noop() {},
   pickBubble(e) {
     const id = Number(e.currentTarget.dataset.id);
     const item = (this.data.bubbles || []).find((row) => Number(row.id) === id);
@@ -123,6 +134,7 @@ Page({
       code: "",
       memberLabel: item.displayName,
       selected: bubbleSelected(item),
+      bubbleSheet: false,
     });
   },
   onAmount(e) {
@@ -136,11 +148,14 @@ Page({
       this.setData({ previewText: "" });
       return;
     }
-    const points = Math.floor(Math.round(yuan * 100) / 100) * ratio;
+    const amountFen = Math.round(yuan * 100);
+    const points = earnPoints(amountFen, ratio);
     this.setData({
       previewText: points > 0
         ? format(copy.merchantCounter.preview, { n: points })
-        : copy.merchantCounter.tooSmall,
+        : amountFen < 100
+          ? copy.merchantCounter.tooSmall
+          : copy.merchantCounter.tooSmallRatio,
     });
   },
   async submit() {
@@ -159,8 +174,11 @@ Page({
       wx.showToast({ title: copy.merchantCounter.needAmount, icon: "none" });
       return;
     }
-    if (Math.floor(amountFen / 100) * this.data.pointsPerYuan <= 0) {
-      wx.showToast({ title: copy.merchantCounter.tooSmall, icon: "none" });
+    if (earnPoints(amountFen, this.data.pointsPerYuan) <= 0) {
+      wx.showToast({
+        title: amountFen < 100 ? copy.merchantCounter.tooSmall : copy.merchantCounter.tooSmallRatio,
+        icon: "none",
+      });
       return;
     }
     const body = { amountFen };

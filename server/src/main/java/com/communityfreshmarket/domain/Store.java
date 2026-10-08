@@ -3,6 +3,7 @@ package com.communityfreshmarket.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @TableName("store")
@@ -26,8 +27,8 @@ public class Store {
   private String inviteCode;
   /** 与 inviteCode 对应的小程序码 PNG base64 缓存 */
   private String inviteQrcodeBase64;
-  /** 每消费 1 元入账积分；0=关闭 */
-  private Integer pointsPerYuan;
+  /** 每消费 1 元入账积分，最多两位小数；0=关闭 */
+  private BigDecimal pointsPerYuan;
   /** 图像选品会话有效分钟数 */
   private Integer pickImageTtlMinutes;
   private LocalDateTime createdAt;
@@ -145,11 +146,11 @@ public class Store {
     this.inviteQrcodeBase64 = inviteQrcodeBase64;
   }
 
-  public Integer getPointsPerYuan() {
+  public BigDecimal getPointsPerYuan() {
     return pointsPerYuan;
   }
 
-  public void setPointsPerYuan(Integer pointsPerYuan) {
+  public void setPointsPerYuan(BigDecimal pointsPerYuan) {
     this.pointsPerYuan = pointsPerYuan;
   }
 

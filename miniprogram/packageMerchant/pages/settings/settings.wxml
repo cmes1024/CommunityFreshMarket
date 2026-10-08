@@ -166,10 +166,10 @@
         <view class="cell-label">{{copy.settings.pointsPerYuanLabel}}</view>
         <input
           class="cell-input num-input"
-          type="number"
+          type="text"
           value="{{store.pointsPerYuan}}"
-          bindinput="onStore"
-          data-k="pointsPerYuan"
+          placeholder="{{copy.settings.pointsPlaceholder}}"
+          bindinput="onPoints"
         />
         <text class="cell-unit">{{copy.settings.pointsUnit}}</text>
       </view>
