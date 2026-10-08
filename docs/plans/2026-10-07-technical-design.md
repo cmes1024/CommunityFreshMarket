@@ -136,7 +136,7 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 备注快捷短语：前端常量即可（可后续改店铺配置），拼进 `order.remark` 提交。
 
-**与 UI 对齐**：列表加购、篮角标、提交成功反馈、订单横向状态、订单台分区等见产品 §2.8 与 `docs/plans/2026-10-07-ui-prototype.md`，接口需支撑同一套流程。
+**与 UI 对齐**：列表加购、篮角标、提交成功反馈、订单横向状态、订单台状态导航等见产品 §2.8 与 `docs/plans/2026-10-07-ui-prototype.md`，接口需支撑同一套流程。订单台仍用现有看板接口，由客户端按状态分列表。
 
 ### 3.4 权限
 

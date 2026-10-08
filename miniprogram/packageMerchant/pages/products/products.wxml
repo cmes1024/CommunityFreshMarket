@@ -16,19 +16,30 @@
       />
       <view wx:if="{{searchKeyword}}" class="m-search-clear" bind:tap="clearSearch">×</view>
     </view>
-    <scroll-view scroll-x class="m-filter-scroll">
-      <view
-        class="m-filter-chip {{filterCategoryId === 0 ? 'on' : ''}}"
-        data-id="0"
-        bind:tap="onFilterCat"
-      ><text>{{copy.merchant.filterAll}}</text></view>
-      <view
-        class="m-filter-chip {{filterCategoryId === item.id ? 'on' : ''}}"
-        wx:for="{{cats}}"
-        wx:key="id"
-        data-id="{{item.id}}"
-        bind:tap="onFilterCat"
-      ><text>{{item.name}}</text></view>
+    <scroll-view
+      scroll-x
+      class="m-filter-scroll"
+      scroll-into-view="{{catIntoView}}"
+      scroll-with-animation
+      enhanced
+      show-scrollbar="{{false}}"
+    >
+      <view class="m-filter-track">
+        <view
+          id="cat-0"
+          class="m-filter-chip {{filterCategoryId === 0 ? 'on' : ''}}"
+          data-id="0"
+          bind:tap="onFilterCat"
+        ><text>{{copy.merchant.filterAll}}</text></view>
+        <view
+          id="cat-{{item.id}}"
+          class="m-filter-chip {{filterCategoryId === item.id ? 'on' : ''}}"
+          wx:for="{{cats}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bind:tap="onFilterCat"
+        ><text>{{item.name}}</text></view>
+      </view>
     </scroll-view>
     <view class="m-filter-row">
       <view
@@ -46,51 +57,53 @@
         data-reco="off"
         bind:tap="onFilterReco"
       ><text>{{copy.merchant.filterRecoOff}}</text></view>
+      <view
+        class="m-filter-chip {{filterShelf === 'on' ? 'on' : ''}}"
+        data-shelf="on"
+        bind:tap="onFilterShelf"
+      ><text>{{copy.merchant.filterShelfOn}}</text></view>
+      <view
+        class="m-filter-chip {{filterShelf === 'off' ? 'on' : ''}}"
+        data-shelf="off"
+        bind:tap="onFilterShelf"
+      ><text>{{copy.merchant.filterShelfOff}}</text></view>
+      <view
+        class="m-filter-chip {{filterStock === 'out' ? 'on' : ''}}"
+        bind:tap="onFilterStock"
+      ><text>{{copy.merchant.filterSoldOut}}</text></view>
     </view>
   </view>
 
   <view class="m-grid">
-    <view class="m-card {{item.coverUrl ? 'has-cover' : ''}}" wx:for="{{list}}" wx:key="id">
-      <image
-        wx:if="{{item.coverUrl}}"
-        class="m-card-bg"
-        src="{{item.coverUrl}}"
-        mode="aspectFill"
-      />
-      <view class="m-card-mask"></view>
+    <view class="m-card {{item.coverUrl ? 'has-cover' : ''}} {{item.onShelf ? '' : 'is-off'}}" wx:for="{{list}}" wx:key="id">
+      <image wx:if="{{item.coverUrl}}" class="m-bg" src="{{item.coverUrl}}" mode="aspectFill" />
+      <view wx:if="{{item.coverUrl}}" class="m-bg-mask"></view>
       <view class="m-card-hit" data-id="{{item.id}}" bind:tap="edit">
-        <view class="name">{{item.name}}</view>
-        <view class="price">¥{{item.priceYuan}} / {{item.unitLabel}}</view>
-        <view wx:if="{{item.specNote}}" class="spec">{{item.specNote}}</view>
+        <view class="m-meta">
+          <view class="name">{{item.name}}</view>
+          <view class="price">¥{{item.priceYuan}}<text class="unit"> / {{item.unitLabel}}</text></view>
+          <view wx:if="{{item.specNote}}" class="spec">{{item.specNote}}</view>
+        </view>
       </view>
-      <view class="m-card-toggles">
+      <view class="m-actions">
         <view
-          class="m-mini-toggle"
+          class="m-act {{item.onShelf ? 'on' : ''}}"
           data-id="{{item.id}}"
           data-on="{{item.onShelf ? 1 : 0}}"
           catch:tap="toggleShelf"
-        >
-          <text>{{copy.merchant.shelfOn}}</text>
-          <view class="switch {{item.onShelf ? 'on' : ''}}"></view>
-        </view>
+        >{{item.onShelf ? copy.merchant.shelfOn : copy.merchant.shelfOff}}</view>
         <view
-          class="m-mini-toggle"
+          class="m-act {{item.inStock ? 'on' : 'warn'}}"
           data-id="{{item.id}}"
           data-on="{{item.inStock ? 1 : 0}}"
           catch:tap="toggleStock"
-        >
-          <text>{{copy.merchant.stockOn}}</text>
-          <view class="switch {{item.inStock ? 'on' : ''}}"></view>
-        </view>
+        >{{item.inStock ? copy.merchant.stockOn : copy.merchant.stockOff}}</view>
         <view
-          class="m-mini-toggle"
+          class="m-act {{item.homeRecommended ? 'on' : ''}}"
           data-id="{{item.id}}"
           data-on="{{item.homeRecommended ? 1 : 0}}"
           catch:tap="toggleHomeReco"
-        >
-          <text>{{copy.merchant.homeReco}}</text>
-          <view class="switch {{item.homeRecommended ? 'on' : ''}}"></view>
-        </view>
+        >{{copy.merchant.homeRecoShort}}</view>
       </view>
     </view>
   </view>

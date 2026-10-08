@@ -3,6 +3,7 @@ package com.communityfreshmarket.auth;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.config.AppProperties;
+import com.communityfreshmarket.wechat.WechatHttp;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
@@ -25,7 +26,7 @@ public class WechatClient {
   public WechatClient(AppProperties appProperties, ObjectMapper objectMapper) {
     this.appProperties = appProperties;
     this.objectMapper = objectMapper;
-    this.restClient = RestClient.create();
+    this.restClient = WechatHttp.client();
   }
 
   public String codeToOpenid(String code) {

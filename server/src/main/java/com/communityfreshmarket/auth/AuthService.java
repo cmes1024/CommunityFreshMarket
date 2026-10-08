@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -28,23 +29,29 @@ public class AuthService {
   private final JwtService jwtService;
   private final UserMapper userMapper;
   private final StoreMemberMapper storeMemberMapper;
+  private final TransactionTemplate transactionTemplate;
 
   public AuthService(
       AppProperties appProperties,
       WechatClient wechatClient,
       JwtService jwtService,
       UserMapper userMapper,
-      StoreMemberMapper storeMemberMapper) {
+      StoreMemberMapper storeMemberMapper,
+      PlatformTransactionManager transactionManager) {
     this.appProperties = appProperties;
     this.wechatClient = wechatClient;
     this.jwtService = jwtService;
     this.userMapper = userMapper;
     this.storeMemberMapper = storeMemberMapper;
+    this.transactionTemplate = new TransactionTemplate(transactionManager);
   }
 
-  @Transactional
   public LoginResponse loginByWechat(WechatLoginRequest request) {
     String openid = wechatClient.codeToOpenid(request.getCode());
+    return transactionTemplate.execute(status -> persistLogin(openid, request));
+  }
+
+  private LoginResponse persistLogin(String openid, WechatLoginRequest request) {
     User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getOpenid, openid));
     LocalDateTime now = LocalDateTime.now();
     if (user == null) {

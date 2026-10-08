@@ -1,6 +1,6 @@
 <Header pageName="{{copy.titles.merchantSettings}}" back="{{false}}" toCustomer="{{true}}" />
 <view class="page-body settings-page">
-  <!-- 1. 店铺资料 -->
+  <!-- 1. 门店信息 -->
   <view class="sec">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.storeSec}}</view>
@@ -44,7 +44,7 @@
     </view>
   </view>
 
-  <!-- 2. 顾客首页 -->
+  <!-- 2. 首页配置 -->
   <view class="sec">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.homeSec}}</view>
@@ -93,6 +93,7 @@
           maxlength="128"
         />
       </view>
+      <view class="subhead">{{copy.settings.browseLabel}}</view>
       <view class="cell cols-cell">
         <view class="cell-label">{{copy.settings.colsLabel}}</view>
         <view class="cols-row">
@@ -131,37 +132,49 @@
     </view>
   </view>
 
-  <!-- 3. 积分与实景 -->
+  <!-- 3. 积分 -->
   <view class="sec">
     <view class="sec-head">
-      <view class="sec-title">{{copy.settings.wave2Sec}}</view>
-      <view class="sec-desc">{{copy.settings.wave2Hint}}</view>
+      <view class="sec-title">{{copy.settings.pointsSec}}</view>
+      <view class="sec-desc">{{copy.settings.pointsHint}}</view>
     </view>
     <view class="group">
-      <view class="cell">
+      <view class="cell last">
         <view class="cell-label">{{copy.settings.pointsPerYuanLabel}}</view>
         <input
-          class="cell-input"
+          class="cell-input num-input"
           type="number"
           value="{{store.pointsPerYuan}}"
           bindinput="onStore"
           data-k="pointsPerYuan"
         />
+        <text class="cell-unit">{{copy.settings.pointsUnit}}</text>
       </view>
+    </view>
+  </view>
+
+  <!-- 4. 商品实景 -->
+  <view class="sec">
+    <view class="sec-head">
+      <view class="sec-title">{{copy.settings.liveSec}}</view>
+      <view class="sec-desc">{{copy.settings.liveHint}}</view>
+    </view>
+    <view class="group">
       <view class="cell last">
         <view class="cell-label">{{copy.settings.pickTtlLabel}}</view>
         <input
-          class="cell-input"
+          class="cell-input num-input"
           type="number"
           value="{{store.pickImageTtlMinutes}}"
           bindinput="onStore"
           data-k="pickImageTtlMinutes"
         />
+        <text class="cell-unit">{{copy.settings.pickTtlUnit}}</text>
       </view>
     </view>
   </view>
 
-  <!-- 4. 自提时段 -->
+  <!-- 5. 自提 -->
   <view class="sec">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.slotsSec}}</view>

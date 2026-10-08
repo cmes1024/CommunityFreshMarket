@@ -91,7 +91,7 @@ public class StoreSettingsService {
     if (request.getPickImageTtlMinutes() != null) {
       int ttl = request.getPickImageTtlMinutes();
       if (ttl < 1) {
-        throw new BizException(ErrorCodes.BAD_REQUEST, "实景有效时间至少 1 分钟");
+        throw new BizException(ErrorCodes.BAD_REQUEST, "有效时间至少 1 分钟");
       }
       store.setPickImageTtlMinutes(ttl);
     }

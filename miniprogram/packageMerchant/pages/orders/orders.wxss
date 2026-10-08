@@ -41,42 +41,81 @@
   border: none;
 }
 
-.m-priority {
-  padding: 24rpx 0 8rpx;
-  background: linear-gradient(180deg, #fff7ed 0%, var(--color-background) 100%);
+.status-nav {
+  position: sticky;
+  z-index: 10;
+  display: flex;
+  background: var(--color-surface);
+  border-bottom: 1rpx solid var(--color-line);
 }
 
-.m-priority-title {
-  padding: 0 32rpx 16rpx;
-  font-weight: 700;
-  font-size: 28rpx;
+.status-tab {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 88rpx;
+  padding: 16rpx 4rpx 18rpx;
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  justify-content: center;
+  gap: 6rpx;
+  font-size: 24rpx;
+  color: var(--color-muted);
+  box-sizing: border-box;
 }
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 40rpx;
-  height: 40rpx;
-  padding: 0 12rpx;
-  border-radius: 20rpx;
+.status-tab.active {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.status-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0;
+  height: 6rpx;
+  border-radius: 6rpx;
+  background: var(--color-primary);
+}
+
+.tab-badge {
+  flex-shrink: 0;
+  min-width: 32rpx;
+  height: 32rpx;
+  padding: 0 8rpx;
+  border-radius: 16rpx;
+  background: var(--color-mist);
+  color: var(--color-primary);
+  font-size: 20rpx;
+  font-weight: 700;
+  line-height: 32rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.tab-badge.warn {
+  background: #ffedd5;
+  color: var(--color-warn);
+}
+
+.status-tab.active .tab-badge {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.status-tab.active .tab-badge.warn {
   background: var(--color-price);
   color: #fff;
-  font-size: 22rpx;
-  font-weight: 700;
 }
 
-.section {
-  padding: 16rpx 0 8rpx;
+.order-list {
+  padding-top: 20rpx;
 }
 
-.section-title {
-  padding: 8rpx 32rpx 16rpx;
-  font-size: 28rpx;
-  font-weight: 700;
+.order-list.is-urgent {
+  background: linear-gradient(180deg, #fff7ed 0%, var(--color-background) 240rpx);
 }
 
 .order-card {

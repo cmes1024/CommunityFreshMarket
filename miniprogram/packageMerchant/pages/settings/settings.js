@@ -37,6 +37,7 @@ Page({
     productDetailMode: "SHEET",
   },
   async onShow() {
+    this.setData({ copy });
     await this.reload();
   },
   async reload() {
@@ -93,7 +94,7 @@ Page({
     const { pointsPerYuan, pickImageTtlMinutes } = this.data.store;
     const ttl = Number(pickImageTtlMinutes);
     if (pickImageTtlMinutes === undefined || pickImageTtlMinutes === "" || !Number.isFinite(ttl) || ttl < 1) {
-      wx.showToast({ title: "实景有效时间至少 1 分钟", icon: "none" });
+      wx.showToast({ title: copy.settings.pickTtlInvalid, icon: "none" });
       return;
     }
     const payload = {

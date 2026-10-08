@@ -17,7 +17,7 @@ curl -s http://127.0.0.1:8088/api/v1/health
 
 ## 绑店主（本地与生产相同）
 
-登录必须走真实微信 `code`（需已配置 AppID/Secret）。
+登录必须走真实微信 `code`（需已配置 AppID/Secret）。本机若开了代理，在 `deploy/.env` 设置 `HTTPS_PROXY=http://host.docker.internal:7890`，否则容器直连微信可能握手挂起，登录接口无响应。
 
 1. 用店主微信打开小程序，完成一次登录  
 2. 查 openid：

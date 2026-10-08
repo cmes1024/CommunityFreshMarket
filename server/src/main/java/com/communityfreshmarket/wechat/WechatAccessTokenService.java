@@ -19,7 +19,7 @@ public class WechatAccessTokenService {
   public WechatAccessTokenService(AppProperties appProperties, ObjectMapper objectMapper) {
     this.appProperties = appProperties;
     this.objectMapper = objectMapper;
-    this.restClient = RestClient.create();
+    this.restClient = WechatHttp.client();
   }
 
   public String requireAccessToken() throws Exception {

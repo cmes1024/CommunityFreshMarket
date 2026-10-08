@@ -13,7 +13,7 @@
 
 - 主包：启动页 + Header / TabBar / 公共 utils、`extend/`
 - `packageCustomer`：首页、分类、商品篮、结算、地址、订单、我的
-- `packageMerchant`：订单台、商品/分类、履约设置
+- `packageMerchant`：订单台、商品/分类、门店设置
 
 无云开发；请求走 `Authorization: Bearer`。
 

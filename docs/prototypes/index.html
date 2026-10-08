@@ -29,7 +29,7 @@
     <aside class="rail">
       <div class="eyebrow">UI 稿 v2 · 布局 + 交互</div>
       <h1>绿意鲜生</h1>
-      <p class="lede">相对 v1：列表内加购、篮角标、结算三步、横向状态条、提交 loading→成功、返回栈、商家「马上处理」分区。商家商品紧凑行 + 最多 3 图；详情轮播。色板见 MASTER。</p>
+      <p class="lede">相对 v1：列表内加购、篮角标、结算三步、横向状态条、提交 loading→成功、返回栈、商家订单台状态导航。商家商品紧凑行 + 最多 3 图；详情轮播。色板见 MASTER。</p>
       <div class="token-row" aria-label="色板">
         <span class="token" style="background:#0F766E"></span>
         <span class="token" style="background:#2DD4BF"></span>
@@ -46,7 +46,7 @@
         <li><strong>分类页 + / −</strong>不进详情也能加购，底栏出现「去结算」</li>
         <li><strong>提交预约</strong>按钮进入 loading，再出成功层</li>
         <li><strong>系统返回</strong>顶栏返回走历史栈，不是写死上一页</li>
-        <li><strong>商家订单台</strong>「马上处理」置顶，到店单有脉冲标</li>
+        <li><strong>商家订单台</strong>顶栏切换马上处理 / 备货中 / 配送中 / 待自提，到店单有脉冲标</li>
         <li><strong>商家商品</strong>紧凑行 + 双开关；编辑最多 3 图；详情可滑轮播</li>
       </ul>
       <h2>屏幕</h2>
@@ -441,14 +441,19 @@
 
           <!-- MERCHANT -->
           <section class="screen" data-screen="m-orders" data-title="订单台" data-tab="m-orders" data-mode="merchant" data-to-customer>
-            <div class="m-priority">
-              <div class="m-priority-title">马上处理 <span class="pill">2</span></div>
+            <div class="order-tabs" role="tablist">
+              <button type="button" class="order-tab active" data-order-tab="urgent" role="tab">马上处理 <span class="pill">2</span></button>
+              <button type="button" class="order-tab" data-order-tab="preparing" role="tab">备货中 <span class="pill">1</span></button>
+              <button type="button" class="order-tab" data-order-tab="delivering" role="tab">配送中 <span class="pill">1</span></button>
+              <button type="button" class="order-tab" data-order-tab="pickup" role="tab">待自提 <span class="pill">2</span></button>
+            </div>
+            <div class="order-panel is-urgent" data-order-panel="urgent">
               <div class="order-card urgent" data-go="m-order-detail">
                 <div class="top"><span>#A2081 · 刚刚</span><span class="chip warn">待确认</span></div>
                 <div class="items">小白菜 ×2斤、罗马生菜 ×1份</div>
                 <div class="fulfill">配送 · 尽快 · 阳光花园 3-1202</div>
                 <div class="actions">
-                  <button type="button" data-toast="已取消">取消</button>
+                  <button type="button" data-confirm-cancel data-toast="已取消">取消</button>
                   <button type="button" class="primary" data-accept>接单备货</button>
                 </div>
               </div>
@@ -461,12 +466,45 @@
                 </div>
               </div>
             </div>
-            <div class="section">
-              <h3 class="section-title">其他进行中</h3>
+            <div class="order-panel" data-order-panel="preparing" hidden>
               <div class="order-card" data-go="m-order-detail">
                 <div class="top"><span>#A2079</span><span class="chip">备货中</span></div>
                 <div class="items">土鸡蛋 ×2份</div>
                 <div class="fulfill">自提 · 17:00–18:00</div>
+                <div class="actions">
+                  <button type="button" data-confirm-cancel data-toast="已取消">取消</button>
+                  <button type="button" class="primary" data-toast="已推进为待自提">推进：待自提</button>
+                </div>
+              </div>
+            </div>
+            <div class="order-panel" data-order-panel="delivering" hidden>
+              <div class="order-card" data-go="m-order-detail">
+                <div class="top"><span>#A2072</span><span class="chip">配送中</span></div>
+                <div class="items">胡萝卜 ×1斤</div>
+                <div class="fulfill">配送 · 尽快 · 阳光花园 1-302</div>
+                <div class="actions">
+                  <button type="button" data-confirm-cancel data-toast="已取消">取消</button>
+                  <button type="button" class="primary" data-toast="已完成配送">完成配送</button>
+                </div>
+              </div>
+            </div>
+            <div class="order-panel" data-order-panel="pickup" hidden>
+              <div class="order-card urgent pulse" data-go="m-order-detail">
+                <div class="top"><span>#A2075</span><span class="chip busy pulse-chip">顾客已到店</span></div>
+                <div class="items">罗马生菜 ×1份</div>
+                <div class="fulfill">自提 · 今天 16:00–17:00</div>
+                <div class="actions">
+                  <button type="button" class="primary" data-toast="已完成取货">完成订单</button>
+                </div>
+              </div>
+              <div class="order-card" data-go="m-order-detail">
+                <div class="top"><span>#A2068</span><span class="chip">待自提</span></div>
+                <div class="items">本地小白菜 ×1斤</div>
+                <div class="fulfill">自提 · 今天 18:00–19:00</div>
+                <div class="actions">
+                  <button type="button" data-confirm-cancel data-toast="已取消">取消</button>
+                  <button type="button" class="primary" data-toast="已完成取货">完成取货</button>
+                </div>
               </div>
             </div>
           </section>
@@ -491,7 +529,7 @@
               <div class="action-stack">
                 <button type="button" class="btn btn-primary" data-advance>推进：开始备货</button>
                 <button type="button" class="btn btn-ghost" data-toast="状态 → 配送中">推进：开始配送</button>
-                <button type="button" class="btn btn-danger" data-toast="订单已取消">取消订单</button>
+                <button type="button" class="btn btn-danger" data-confirm-cancel data-toast="订单已取消">取消订单</button>
               </div>
             </div>
           </section>
@@ -515,47 +553,55 @@
                   <button type="button" class="chip-nav active">全部</button>
                   <button type="button" class="chip-nav">仅推荐</button>
                   <button type="button" class="chip-nav">未推荐</button>
+                  <button type="button" class="chip-nav">上架</button>
+                  <button type="button" class="chip-nav">下架</button>
+                  <button type="button" class="chip-nav">售罄</button>
                 </div>
               </div>
               <div class="m-grid">
                 <div class="m-card has-cover">
-                  <div class="m-card-bg veg-hero" aria-hidden="true"></div>
-                  <div class="m-card-mask"></div>
+                  <div class="m-bg veg-hero" aria-hidden="true"></div>
+                  <div class="m-bg-mask" aria-hidden="true"></div>
                   <button type="button" class="m-card-hit" data-go="m-product-edit">
-                    <div class="m-card-name">本地小白菜也有很长的名字示例</div>
-                    <div class="price">¥4.80 / 斤</div>
-                    <div class="m-sku-spec">约 1 斤</div>
+                    <div class="m-meta">
+                      <div class="m-card-name">本地小白菜也有很长的名字示例</div>
+                      <div class="price">¥4.80<span class="unit"> / 斤</span></div>
+                      <div class="m-sku-spec">约 1 斤</div>
+                    </div>
                   </button>
-                  <div class="m-card-toggles">
-                    <label class="m-mini-toggle"><span>上架</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
-                    <label class="m-mini-toggle"><span>有货</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
-                    <label class="m-mini-toggle"><span>首页推荐</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
+                  <div class="m-actions">
+                    <button type="button" class="m-act on" data-switch>上架</button>
+                    <button type="button" class="m-act on" data-switch>有货</button>
+                    <button type="button" class="m-act on" data-switch>推荐</button>
                   </div>
                 </div>
                 <div class="m-card has-cover">
-                  <div class="m-card-bg fruit-hero" aria-hidden="true"></div>
-                  <div class="m-card-mask"></div>
+                  <div class="m-bg fruit-hero" aria-hidden="true"></div>
+                  <div class="m-bg-mask" aria-hidden="true"></div>
                   <button type="button" class="m-card-hit" data-go="m-product-edit">
-                    <div class="m-card-name">红颜草莓</div>
-                    <div class="price">¥28.00 / 份</div>
+                    <div class="m-meta">
+                      <div class="m-card-name">红颜草莓</div>
+                      <div class="price">¥28.00<span class="unit"> / 份</span></div>
+                    </div>
                   </button>
-                  <div class="m-card-toggles">
-                    <label class="m-mini-toggle"><span>上架</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
-                    <label class="m-mini-toggle"><span>有货</span><div class="switch switch-sm" role="switch" data-switch></div></label>
-                    <label class="m-mini-toggle"><span>首页推荐</span><div class="switch switch-sm" role="switch" data-switch></div></label>
+                  <div class="m-actions">
+                    <button type="button" class="m-act on" data-switch>上架</button>
+                    <button type="button" class="m-act warn" data-switch>售罄</button>
+                    <button type="button" class="m-act" data-switch>推荐</button>
                   </div>
                 </div>
-                <div class="m-card">
-                  <div class="m-card-mask"></div>
+                <div class="m-card is-off">
                   <button type="button" class="m-card-hit" data-go="m-product-edit">
-                    <div class="m-card-name">土鸡蛋</div>
-                    <div class="price">¥12.80 / 份</div>
-                    <div class="m-sku-spec">约 10 枚</div>
+                    <div class="m-meta">
+                      <div class="m-card-name">土鸡蛋</div>
+                      <div class="price">¥12.80<span class="unit"> / 份</span></div>
+                      <div class="m-sku-spec">约 10 枚</div>
+                    </div>
                   </button>
-                  <div class="m-card-toggles">
-                    <label class="m-mini-toggle"><span>上架</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
-                    <label class="m-mini-toggle"><span>有货</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
-                    <label class="m-mini-toggle"><span>首页推荐</span><div class="switch on switch-sm" role="switch" data-switch></div></label>
+                  <div class="m-actions">
+                    <button type="button" class="m-act" data-switch>下架</button>
+                    <button type="button" class="m-act on" data-switch>有货</button>
+                    <button type="button" class="m-act" data-switch>推荐</button>
                   </div>
                 </div>
               </div>
@@ -628,11 +674,11 @@
             </div>
           </section>
 
-          <section class="screen" data-screen="m-settings" data-title="履约设置" data-tab="m-settings" data-mode="merchant" data-to-customer>
+          <section class="screen" data-screen="m-settings" data-title="门店设置" data-tab="m-settings" data-mode="merchant" data-to-customer>
             <div class="section settings-proto">
               <div class="sec-head">
-                <h3 class="section-title" style="margin:0 0 4px">店铺资料</h3>
-                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">店名显示在顾客端导航左上角</p>
+                <h3 class="section-title" style="margin:0 0 4px">门店信息</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">店名出现在顾客端导航左上角；购买须知有内容才出现在商品详情</p>
               </div>
               <div class="settings-group">
                 <div class="settings-cell"><label>店名</label><input value="绿意鲜生" /></div>
@@ -640,13 +686,14 @@
                 <div class="settings-cell"><label>购买须知</label><input placeholder="如配送范围、当面收款；留空则商详不展示" value="尽快配送 / 可自提" /></div>
               </div>
               <div class="sec-head" style="margin-top:18px">
-                <h3 class="section-title" style="margin:0 0 4px">顾客首页</h3>
-                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">头图、文案与商品列数；留空文案用默认</p>
+                <h3 class="section-title" style="margin:0 0 4px">首页配置</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">头图和文案出现在顾客首页；主标题留空则不显示</p>
               </div>
               <div class="settings-group">
                 <div class="settings-cell"><label>营业状态</label><input value="营业中" /></div>
                 <div class="settings-cell"><label>主标题</label><input value="时令鲜到" placeholder="头图大字；留空不显示" /></div>
                 <div class="settings-cell"><label>副标题</label><input value="可预约配送" /></div>
+                <div class="settings-cell" style="font-size:12px;font-weight:600;color:var(--color-muted)">怎么逛</div>
                 <div class="settings-cell settings-cols">
                   <label>商品列数</label>
                   <div class="cols-row" style="display:flex;gap:8px;margin-top:6px;width:100%">
@@ -664,8 +711,22 @@
                 </div>
               </div>
               <div class="sec-head" style="margin-top:18px">
-                <h3 class="section-title" style="margin:0 0 4px">自提时段</h3>
-                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">顾客结算自提时可选</p>
+                <h3 class="section-title" style="margin:0 0 4px">积分</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">订单完成后按实付金额入账</p>
+              </div>
+              <div class="settings-group">
+                <div class="settings-cell"><label>每元积分</label><input inputmode="numeric" value="1" style="text-align:right" /><span style="color:var(--color-muted);font-size:13px">分</span></div>
+              </div>
+              <div class="sec-head" style="margin-top:18px">
+                <h3 class="section-title" style="margin:0 0 4px">商品实景</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">超时后顾客可申请换一张新图</p>
+              </div>
+              <div class="settings-group">
+                <div class="settings-cell"><label>有效时间</label><input inputmode="numeric" value="15" style="text-align:right" /><span style="color:var(--color-muted);font-size:13px">分钟</span></div>
+              </div>
+              <div class="sec-head" style="margin-top:18px">
+                <h3 class="section-title" style="margin:0 0 4px">自提</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">添加或删除后立即生效，顾客结算自提时可选</p>
               </div>
               <div class="settings-group">
                 <div class="slot static" style="margin:0;border:0;border-radius:0;border-bottom:1px solid var(--color-line)">今天 16:00 – 17:00</div>
@@ -694,6 +755,16 @@
 
         <nav class="tabbar" id="tabbar"></nav>
         <div class="toast" id="toast"></div>
+        <div class="sheet confirm-sheet" id="confirmSheet" hidden>
+          <div class="sheet-card confirm-card">
+            <h3 id="confirmTitle">取消订单</h3>
+            <p id="confirmBody">确定取消这单吗？取消后无法恢复。</p>
+            <div class="confirm-actions">
+              <button type="button" class="btn btn-ghost" id="confirmBack">返回</button>
+              <button type="button" class="btn btn-danger" id="confirmOk">确定取消</button>
+            </div>
+          </div>
+        </div>
 
         <div class="sheet" id="successSheet" hidden>
           <div class="sheet-card">

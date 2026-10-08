@@ -2,6 +2,7 @@ package com.communityfreshmarket.notify;
 
 import com.communityfreshmarket.config.AppProperties;
 import com.communityfreshmarket.wechat.WechatAccessTokenService;
+import com.communityfreshmarket.wechat.WechatHttp;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
@@ -42,7 +43,7 @@ public class SubscribeMessageService {
     this.appProperties = appProperties;
     this.accessTokenService = accessTokenService;
     this.objectMapper = objectMapper;
-    this.restClient = RestClient.create();
+    this.restClient = WechatHttp.client();
   }
 
   public void sendRestock(String openid, String productName) {

@@ -43,12 +43,12 @@ const screenMeta = {
   "c-order-done": { label: "再来一单", mode: "customer" },
   "c-order-pickup": { label: "我到店了", mode: "customer" },
   "c-profile": { label: "我的", mode: "customer" },
-  "m-orders": { label: "订单台 · 马上处理", mode: "merchant" },
+  "m-orders": { label: "订单台 · 状态导航", mode: "merchant" },
   "m-order-detail": { label: "商家订单详情", mode: "merchant" },
-  "m-products": { label: "商品 · 蒙层卡片", mode: "merchant" },
+  "m-products": { label: "商品 · 状态卡片", mode: "merchant" },
   "m-categories": { label: "分类管理", mode: "merchant" },
   "m-product-edit": { label: "编辑商品 · 最多3图", mode: "merchant" },
-  "m-settings": { label: "履约设置", mode: "merchant" },
+  "m-settings": { label: "门店设置", mode: "merchant" },
   "m-profile": { label: "商家我的", mode: "merchant" },
 };
 
@@ -90,6 +90,36 @@ function addItem(id, delta = 1) {
     } catch (_) {}
   }
   syncCartUI();
+}
+
+function askConfirm() {
+  return new Promise((resolve) => {
+    const layer = $("#confirmSheet");
+    const okBtn = $("#confirmOk");
+    const backBtn = $("#confirmBack");
+    layer.hidden = false;
+    const finish = (ok) => {
+      layer.hidden = true;
+      okBtn.removeEventListener("click", onOk);
+      backBtn.removeEventListener("click", onBack);
+      layer.removeEventListener("click", onBackdrop);
+      resolve(ok);
+    };
+    const onOk = (ev) => {
+      ev.stopPropagation();
+      finish(true);
+    };
+    const onBack = (ev) => {
+      ev.stopPropagation();
+      finish(false);
+    };
+    const onBackdrop = (ev) => {
+      if (ev.target === layer) finish(false);
+    };
+    okBtn.addEventListener("click", onOk);
+    backBtn.addEventListener("click", onBack);
+    layer.addEventListener("click", onBackdrop);
+  });
 }
 
 function showToast(msg) {
@@ -366,6 +396,20 @@ document.addEventListener("click", (e) => {
     return;
   }
 
+  const orderTab = e.target.closest("[data-order-tab]");
+  if (orderTab) {
+    const key = orderTab.dataset.orderTab;
+    $$("[data-order-tab]").forEach((b) => {
+      const on = b.dataset.orderTab === key;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    $$("[data-order-panel]").forEach((p) => {
+      p.hidden = p.dataset.orderPanel !== key;
+    });
+    return;
+  }
+
   const goEl = e.target.closest("[data-go]");
   if (goEl && !e.target.closest(".actions button, .icon-add, [data-line-step], [data-add], [data-accept], [data-advance]")) {
     if (goEl.dataset.modeSwitch) mode = goEl.dataset.modeSwitch;
@@ -376,6 +420,16 @@ document.addEventListener("click", (e) => {
       $$("#catSide button").forEach((b) => b.classList.toggle("active", b.dataset.filter === activeCat));
       renderCategory();
     }
+    return;
+  }
+
+  const cancelBtn = e.target.closest("[data-confirm-cancel]");
+  if (cancelBtn) {
+    e.stopPropagation();
+    const toast = cancelBtn.dataset.toast || "已取消";
+    askConfirm().then((ok) => {
+      if (ok) showToast(toast);
+    });
     return;
   }
 

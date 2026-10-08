@@ -27,6 +27,11 @@ services:
     build:
       context: ../server
       dockerfile: Dockerfile
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
+      args:
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        HTTP_PROXY: ${HTTPS_PROXY:-}
     container_name: cfm-api
     restart: unless-stopped
     depends_on:
@@ -35,6 +40,8 @@ services:
     environment:
       TZ: Asia/Shanghai
       JAVA_TOOL_OPTIONS: -Duser.timezone=Asia/Shanghai
+      # 本机开了代理时，容器直连微信会 TLS 握手挂起，登录接口无响应。留空则直连。
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
       DB_URL: jdbc:mysql://mysql:3306/cfm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
       DB_USER: cfm
       DB_PASSWORD: ${DB_PASSWORD:-cfm_dev_password}
@@ -52,6 +59,8 @@ services:
       INVITE_LINK_BASE: ${INVITE_LINK_BASE:-}
     volumes:
       - cfm_uploads:/app/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     expose:
       - "8080"
 

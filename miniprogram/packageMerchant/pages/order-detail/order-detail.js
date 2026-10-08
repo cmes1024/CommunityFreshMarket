@@ -1,4 +1,5 @@
 const api = require("../../../utils/api");
+const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const {
   label,
@@ -56,6 +57,8 @@ Page({
     } catch (e) {}
   },
   async cancel() {
+    const ok = await askCancel(this.id);
+    if (!ok) return;
     try {
       await requestSubscribe(["cancelTemplateId"]);
       await api.merchantCancelOrder(this.id, "商家取消");
@@ -63,3 +66,17 @@ Page({
     } catch (e) {}
   },
 });
+
+function askCancel(id) {
+  return new Promise((resolve) => {
+    wx.showModal({
+      title: copy.merchant.cancelConfirmTitle,
+      content: copy.format(copy.merchant.cancelConfirm, { id }),
+      confirmText: copy.merchant.cancelConfirmOk,
+      cancelText: copy.merchant.cancelConfirmBack,
+      confirmColor: "#DC2626",
+      success: (res) => resolve(!!res.confirm),
+      fail: () => resolve(false),
+    });
+  });
+}

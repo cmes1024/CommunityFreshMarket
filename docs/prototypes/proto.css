@@ -1667,6 +1667,10 @@ button:focus-visible,
   place-items: center;
   margin: 0 auto 12px;
 }
+.confirm-sheet { place-items: center; }
+.confirm-card { max-width: 280px; }
+.confirm-actions { display: flex; gap: 8px; }
+.confirm-actions .btn { flex: 1; }
 .sheet-card h3 { margin: 0 0 8px; font-size: 18px; }
 .sheet-card p { margin: 0 0 20px; font-size: 13px; color: var(--color-muted); line-height: 1.55; }
 
@@ -1780,6 +1784,80 @@ button:focus-visible,
   border-color: var(--color-secondary);
 }
 
+.order-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-line);
+}
+.order-tab {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 8px 2px;
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.order-tab .pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--color-mist);
+  color: var(--color-primary);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+}
+.order-tab:first-child .pill {
+  background: #ffedd5;
+  color: var(--color-warn);
+}
+.order-tab.active {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.order-tab.active .pill {
+  background: var(--color-primary);
+  color: #fff;
+}
+.order-tab:first-child.active .pill {
+  background: var(--color-price);
+  color: #fff;
+}
+.order-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--color-primary);
+}
+.order-panel {
+  padding-top: 12px;
+}
+.order-panel.is-urgent {
+  background: linear-gradient(180deg, #fff7ed 0%, var(--color-background) 120px);
+}
+.order-panel[hidden] {
+  display: none;
+}
+
 .m-priority {
   padding: 12px 0 0;
   background: linear-gradient(180deg, #fff7ed 0%, var(--color-background) 100%);
@@ -1831,35 +1909,33 @@ button:focus-visible,
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: flex-start;
 }
 .m-card {
   position: relative;
   width: calc((100% - 8px) / 2);
+  height: 148px;
   box-sizing: border-box;
-  min-height: 148px;
-  background: var(--color-mist);
+  background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
-.m-card-bg {
+.m-bg {
   position: absolute;
-  inset: -6px;
+  inset: 0;
   z-index: 0;
-  filter: blur(4px);
-  transform: scale(1.04);
 }
-.m-card-mask {
+.m-bg.veg-hero { background: #5eead4; }
+.m-bg.fruit-hero { background: #fcd34d; }
+.m-bg-mask {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(19,78,74,.18) 0%, rgba(19,78,74,.38) 45%, rgba(19,78,74,.78) 100%);
-}
-.m-card:not(.has-cover) .m-card-mask {
-  background: linear-gradient(180deg, rgba(240,253,250,.15) 0%, rgba(204,229,225,.5) 100%);
+  background: linear-gradient(180deg, rgba(19,78,74,.08) 0%, rgba(19,78,74,.28) 42%, rgba(19,78,74,.78) 100%);
 }
 .m-card-hit {
   position: relative;
@@ -1867,7 +1943,7 @@ button:focus-visible,
   flex: 1;
   border: 0;
   background: transparent;
-  padding: 10px 8px 6px;
+  padding: 0;
   text-align: left;
   cursor: pointer;
   font: inherit;
@@ -1875,76 +1951,85 @@ button:focus-visible,
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
+}
+.m-meta {
+  padding: 8px 8px 4px;
 }
 .m-card-name {
+  min-height: 2.6em;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.3;
-  margin-bottom: 2px;
-  color: #fff;
+  color: var(--color-text);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
   word-break: break-all;
-  text-shadow: 0 1px 2px rgba(0,0,0,.25);
-}
-.m-card:not(.has-cover) .m-card-name {
-  color: var(--color-text);
-  text-shadow: none;
 }
 .m-card .price {
-  font-size: 12px;
-  color: #fde68a;
-}
-.m-card:not(.has-cover) .price {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--color-price);
+}
+.m-card .unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-muted);
 }
 .m-sku-spec {
   font-size: 11px;
   margin-top: 2px;
-  color: rgba(255,255,255,.85);
+  color: var(--color-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.m-card:not(.has-cover) .m-sku-spec {
-  color: var(--color-muted);
+.m-card.has-cover .m-card-name {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
-.m-card-toggles {
+.m-card.has-cover .price { color: #fde68a; }
+.m-card.has-cover .unit,
+.m-card.has-cover .m-sku-spec { color: rgba(255,255,255,.88); }
+.m-card.is-off .m-card-name,
+.m-card.is-off .price {
+  opacity: 0.55;
+}
+.m-actions {
   position: relative;
   z-index: 2;
-  margin-top: auto;
-  padding: 6px 8px 8px;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-line);
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  padding: 6px 6px 8px;
 }
-.m-mini-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 11px;
+.m-act {
+  flex: 1;
+  min-width: 0;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 2px;
+  border-radius: 8px;
+  border: 1px solid var(--color-line);
+  background: var(--color-background);
   color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.2;
   cursor: pointer;
 }
-.switch-sm {
-  width: 36px;
-  height: 22px;
-  border-radius: 11px;
+.m-act.on {
+  color: #fff;
+  font-weight: 600;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
-.switch-sm::after {
-  width: 16px;
-  height: 16px;
-  top: 3px;
-  left: 3px;
-}
-.switch-sm.on::after {
-  transform: translateX(14px);
+.m-act.warn {
+  color: var(--color-warn);
+  font-weight: 600;
+  background: var(--color-surface);
+  border-color: var(--color-warn);
 }
 .hint-tight {
   font-size: 12px;
