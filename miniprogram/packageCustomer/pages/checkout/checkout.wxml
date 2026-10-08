@@ -1,6 +1,5 @@
 <Header pageName="{{copy.titles.checkout}}" back="{{true}}" />
 <view class="page-body no-tab">
-  <view class="steps muted">{{copy.checkout.steps}}</view>
   <view class="seg">
     <view class="seg-item {{fulfillment === 'DELIVERY' ? 'on' : ''}}" data-v="DELIVERY" bind:tap="switchF">{{copy.checkout.delivery}}</view>
     <view class="seg-item {{fulfillment === 'PICKUP' ? 'on' : ''}}" data-v="PICKUP" bind:tap="switchF">{{copy.checkout.pickup}}</view>
@@ -31,7 +30,16 @@
     <view class="phrases">
       <view class="chip {{item.on ? 'active' : ''}}" wx:for="{{phrases}}" wx:key="text" data-text="{{item.text}}" bind:tap="togglePhrase">{{item.text}}</view>
     </view>
-    <textarea class="area" value="{{remark}}" bindinput="onRemark" placeholder="{{copy.checkout.remarkPlaceholder}}" />
+    <textarea
+      class="area"
+      style="height: 120rpx;"
+      value="{{remark}}"
+      bindinput="onRemark"
+      placeholder="{{copy.checkout.remarkPlaceholder}}"
+      auto-height
+      disable-default-padding
+      show-confirm-bar="{{false}}"
+    />
   </view>
   <view class="card coupon-entry" wx:if="{{coupons.length}}" bind:tap="openCouponSheet">
     <view class="grow">
@@ -56,10 +64,19 @@
       <text class="bill-label">{{copy.checkout.payable}}</text>
       <text class="bill-money">¥{{payYuan}}</text>
     </view>
+    <view class="bill-row warn" wx:if="{{deliveryBlocked}}">
+      <text class="bill-label">{{deliveryMinText}}</text>
+      <text class="bill-money short">{{deliveryShortText}}</text>
+    </view>
     <view class="muted bill-hint">{{copy.pay.offlineHint}}</view>
   </view>
   <view class="muted subscribe-hint">{{copy.checkout.subscribeHint}}</view>
-  <button class="btn btn-cta" loading="{{submitting}}" disabled="{{submitting}}" bind:tap="submit">{{copy.checkout.submit}}</button>
+  <button
+    class="btn {{deliveryBlocked ? 'btn-short' : 'btn-cta'}}"
+    loading="{{submitting}}"
+    disabled="{{submitting && !deliveryBlocked}}"
+    bind:tap="submit"
+  >{{deliveryBlocked ? deliveryShortText : copy.checkout.submit}}</button>
 </view>
 
 <page-container

@@ -15,6 +15,11 @@ public class StoreUpdateRequest {
   @Size(max = 1000)
   private String contactNote;
 
+  /** 配送起送金额（分）；0=不限制 */
+  @Min(0)
+  @Max(10_000_000)
+  private Integer minDeliveryFen;
+
   /** 传空字符串可清除首页头图 */
   @Size(max = 512)
   private String heroImageUrl;
@@ -70,6 +75,14 @@ public class StoreUpdateRequest {
 
   public void setContactNote(String contactNote) {
     this.contactNote = contactNote;
+  }
+
+  public Integer getMinDeliveryFen() {
+    return minDeliveryFen;
+  }
+
+  public void setMinDeliveryFen(Integer minDeliveryFen) {
+    this.minDeliveryFen = minDeliveryFen;
   }
 
   public String getHeroImageUrl() {

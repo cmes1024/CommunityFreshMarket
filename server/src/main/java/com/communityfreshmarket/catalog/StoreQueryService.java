@@ -27,6 +27,8 @@ public class StoreQueryService {
     r.setName(store.getName());
     r.setContactPhone(store.getContactPhone());
     r.setContactNote(store.getContactNote());
+    Integer minDelivery = store.getMinDeliveryFen();
+    r.setMinDeliveryFen(minDelivery == null || minDelivery < 0 ? 0 : minDelivery);
     r.setHeroImageUrl(store.getHeroImageUrl());
     r.setHomeKicker(store.getHomeKicker());
     r.setHomeTitle(store.getHomeTitle());

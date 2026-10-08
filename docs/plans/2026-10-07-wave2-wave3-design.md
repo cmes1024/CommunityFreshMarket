@@ -19,6 +19,7 @@
 | 优惠券 | 自建满减/固定面额；领取后下单可挂「抵扣意向」；核销记流水；不接微信卡券 |
 | 收银 | 店员建收银单、扫码/选商品、挂会员、临时改价落库；状态完成触发积分；收款线下 |
 | 快速报到 | 顾客主动报到，有效 **2 分钟**；店员列表点选挂到收银；附近 500m 列表可后补 GPS，先做主动报到 |
+| 配送起送 | `min_delivery_fen` 默认 0（不限制）。只在提交配送时按商品合计（券前预估）比较；自提不看。订单不记该门槛 |
 
 ---
 
@@ -38,6 +39,7 @@
 
 - `points_per_yuan INT NOT NULL DEFAULT 1`（0=关闭积分）
 - `pick_image_ttl_minutes INT NOT NULL DEFAULT 15`
+- `min_delivery_fen INT NOT NULL DEFAULT 0`（配送起送金额，分；0=不限制）
 
 ### 1.3 积分
 
@@ -78,7 +80,7 @@ member_checkin (id, store_id, user_id, expires_at, consumed_at NULL, lat/lng opt
 - 篮/下单：服务端校验起购限购库存；提交扣减；取消回滚
 - `GET /api/v1/points/me` 余额+最近明细
 - `POST /api/v1/points/redeem` `{ title, costPoints }`
-- `GET|PUT` 商家店铺设置含 `pointsPerYuan`、`pickImageTtlMinutes`
+- `GET|PUT` 商家店铺设置含 `pointsPerYuan`、`pickImageTtlMinutes`、`minDeliveryFen`
 - 商家：`GET /api/v1/merchant/points/redeems`、`POST .../redeems/{id}/complete`
 - 实景图：见 `2026-10-08-live-photo-design.md`（申请、站内信、提交新图）
 
@@ -127,3 +129,4 @@ member_checkin (id, store_id, user_id, expires_at, consumed_at NULL, lat/lng opt
 | 2026-10-08 | 领取截止与使用截止分开：领取截止只停新领，使用截止才让未使用的券过期 |
 | 2026-10-08 | 发券半屏：面额、门槛、张数一行；领取开始与领取截止一行；使用截止单独一行 |
 | 2026-10-08 | 预约页优惠券改为一行摘要加半屏选择，默认使用减免最多的可用券 |
+| 2026-10-08 | 门店可设配送起送金额，默认 0 不限制；只拦配送提交 |

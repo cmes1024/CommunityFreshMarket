@@ -6,7 +6,7 @@
       <view class="sec-title">{{copy.settings.storeSec}}</view>
       <view class="sec-desc">{{copy.settings.storeHint}}</view>
     </view>
-    <view class="group">
+    <view class="group pair">
       <view class="cell">
         <view class="cell-label">{{copy.settings.nameLabel}}</view>
         <input
@@ -27,6 +27,18 @@
           data-k="contactPhone"
           type="number"
         />
+      </view>
+      <view class="cell">
+        <view class="cell-label">{{copy.settings.minDeliveryLabel}}</view>
+        <input
+          class="cell-input num-input"
+          type="digit"
+          placeholder="{{copy.settings.minDeliveryPh}}"
+          value="{{store.minDeliveryYuan}}"
+          bindinput="onStore"
+          data-k="minDeliveryYuan"
+        />
+        <text class="cell-unit">{{copy.settings.minDeliveryUnit}}</text>
       </view>
       <view class="cell cell-note last">
         <view class="cell-label">{{copy.settings.noteLabel}}</view>
@@ -60,10 +72,22 @@
       <view wx:if="{{store.heroImageUrl}}" class="cell hero-actions">
         <text class="link-danger" bind:tap="clearHero">{{copy.settings.heroClear}}</text>
       </view>
-      <view class="cell">
+      <view class="cell kicker-cell">
         <view class="cell-label">{{copy.settings.kickerLabel}}</view>
+        <view class="cols-row">
+          <view
+            class="cols-opt {{store.homeKicker === copy.settings.kickerOpen ? 'on' : ''}}"
+            data-text="{{copy.settings.kickerOpen}}"
+            bind:tap="onKicker"
+          >{{copy.settings.kickerOpen}}</view>
+          <view
+            class="cols-opt {{store.homeKicker === copy.settings.kickerClosed ? 'on' : ''}}"
+            data-text="{{copy.settings.kickerClosed}}"
+            bind:tap="onKicker"
+          >{{copy.settings.kickerClosed}}</view>
+        </view>
         <input
-          class="cell-input"
+          class="cell-input kicker-input"
           placeholder="{{copy.settings.kickerPlaceholder}}"
           value="{{store.homeKicker}}"
           bindinput="onStore"
@@ -71,7 +95,7 @@
           maxlength="64"
         />
       </view>
-      <view class="cell">
+      <view class="cell pair">
         <view class="cell-label">{{copy.settings.titleLabel}}</view>
         <input
           class="cell-input"
@@ -82,7 +106,7 @@
           maxlength="64"
         />
       </view>
-      <view class="cell">
+      <view class="cell pair">
         <view class="cell-label">{{copy.settings.subtitleLabel}}</view>
         <input
           class="cell-input"
@@ -93,7 +117,6 @@
           maxlength="128"
         />
       </view>
-      <view class="subhead">{{copy.settings.browseLabel}}</view>
       <view class="cell cols-cell">
         <view class="cell-label">{{copy.settings.colsLabel}}</view>
         <view class="cols-row">

@@ -13,6 +13,8 @@ public class Store {
   private String name;
   private String contactPhone;
   private String contactNote;
+  /** 配送起送金额（分）；0=不限制 */
+  private Integer minDeliveryFen;
   private String heroImageUrl;
   private String homeKicker;
   private String homeTitle;
@@ -61,6 +63,14 @@ public class Store {
 
   public void setContactNote(String contactNote) {
     this.contactNote = contactNote;
+  }
+
+  public Integer getMinDeliveryFen() {
+    return minDeliveryFen;
+  }
+
+  public void setMinDeliveryFen(Integer minDeliveryFen) {
+    this.minDeliveryFen = minDeliveryFen;
   }
 
   public String getHeroImageUrl() {

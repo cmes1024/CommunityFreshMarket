@@ -1,5 +1,5 @@
 const api = require("../../../utils/api");
-const { fenToYuan } = require("../../../utils/money");
+const { fenToYuan, yuanPlain } = require("../../../utils/money");
 const { syncCartCount, qtyMap } = require("../../../utils/cartSync");
 const copy = require("../../../utils/copy");
 const { listUnitLine } = require("../../../utils/productUnitLine");
@@ -10,6 +10,12 @@ const { storeDisplayName } = copy;
 function normalizeCols(cols) {
   const n = Number(cols);
   return n === 1 || n === 3 ? n : 2;
+}
+
+function deliverySubText(store) {
+  const min = Number(store && store.minDeliveryFen) || 0;
+  if (min > 0) return copy.format(copy.home.deliveryMin, { yuan: yuanPlain(min) });
+  return copy.home.deliverySub;
 }
 
 Page({
@@ -23,6 +29,7 @@ Page({
     categories: [],
     products: [],
     pickupHint: "",
+    deliverySub: copy.home.deliverySub,
     sheetShow: false,
     sheetProductId: 0,
   },
@@ -61,6 +68,7 @@ Page({
         homeSubtitle: (store && store.homeSubtitle) || copy.home.heroDesc,
         homeProductCols: normalizeCols(store && store.homeProductCols),
         categories,
+        deliverySub: deliverySubText(store),
         pickupHint: (slots && slots[0] && slots[0].label) || this.data.copy.home.pickupSubFallback,
         products: ranked,
       });

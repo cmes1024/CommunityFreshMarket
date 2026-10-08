@@ -16,10 +16,12 @@ import com.communityfreshmarket.domain.Order;
 import com.communityfreshmarket.domain.OrderItem;
 import com.communityfreshmarket.domain.PickupSlot;
 import com.communityfreshmarket.domain.Product;
+import com.communityfreshmarket.domain.Store;
 import com.communityfreshmarket.domain.UserAddress;
 import com.communityfreshmarket.mapper.OrderItemMapper;
 import com.communityfreshmarket.mapper.OrderMapper;
 import com.communityfreshmarket.mapper.ProductMapper;
+import com.communityfreshmarket.mapper.StoreMapper;
 import com.communityfreshmarket.notify.OrderNotifyService;
 import com.communityfreshmarket.points.PointsService;
 import com.communityfreshmarket.order.dto.CancelOrderRequest;
@@ -57,6 +59,7 @@ public class OrderService {
   private final StockInventoryService stockInventoryService;
   private final PointsService pointsService;
   private final CouponService couponService;
+  private final StoreMapper storeMapper;
 
   public OrderService(
       OrderMapper orderMapper,
@@ -69,7 +72,8 @@ public class OrderService {
       OrderNotifyService orderNotifyService,
       StockInventoryService stockInventoryService,
       PointsService pointsService,
-      CouponService couponService) {
+      CouponService couponService,
+      StoreMapper storeMapper) {
     this.orderMapper = orderMapper;
     this.orderItemMapper = orderItemMapper;
     this.cartService = cartService;
@@ -81,6 +85,7 @@ public class OrderService {
     this.stockInventoryService = stockInventoryService;
     this.pointsService = pointsService;
     this.couponService = couponService;
+    this.storeMapper = storeMapper;
   }
 
   @Transactional
@@ -152,6 +157,13 @@ public class OrderService {
     }
 
     int total = available.stream().mapToInt(CartLineResponse::getAmountFen).sum();
+    if (fulfillment == FulfillmentType.DELIVERY) {
+      Store store = storeMapper.selectById(storeId);
+      int minDeliveryFen = store == null || store.getMinDeliveryFen() == null ? 0 : store.getMinDeliveryFen();
+      if (minDeliveryFen > 0 && total < minDeliveryFen) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "未满配送起送金额");
+      }
+    }
     order.setTotalAmountFen(total);
     order.setDiscountFen(0);
     orderMapper.insert(order);

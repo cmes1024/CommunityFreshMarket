@@ -2,6 +2,7 @@ const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { chooseAndUpload } = require("../../../utils/upload");
 const { productDetailMode } = require("../../../utils/productOpen");
+const { yuanPlain } = require("../../../utils/money");
 
 function normalizeCols(cols) {
   const n = Number(cols);
@@ -14,6 +15,7 @@ function formStore(store) {
     homeKicker: store.homeKicker || "",
     homeTitle: store.homeTitle || "",
     homeSubtitle: store.homeSubtitle || "",
+    minDeliveryYuan: Number(store.minDeliveryFen) > 0 ? yuanPlain(store.minDeliveryFen) : "",
   };
 }
 
@@ -52,6 +54,9 @@ Page({
   onStore(e) {
     this.setData({ [`store.${e.currentTarget.dataset.k}`]: e.detail.value });
   },
+  onKicker(e) {
+    this.setData({ "store.homeKicker": e.currentTarget.dataset.text || "" });
+  },
   onCols(e) {
     this.setData({ homeProductCols: normalizeCols(e.currentTarget.dataset.cols) });
   },
@@ -88,7 +93,17 @@ Page({
     } catch (e) {}
   },
   async saveStore() {
-    const { name, contactPhone, contactNote, homeKicker, homeTitle, homeSubtitle } = this.data.store;
+    const { name, contactPhone, contactNote, homeKicker, homeTitle, homeSubtitle, minDeliveryYuan } = this.data.store;
+    const minRaw = String(minDeliveryYuan ?? "").trim();
+    let minDeliveryFen = 0;
+    if (minRaw !== "") {
+      const yuan = Number(minRaw);
+      if (!Number.isFinite(yuan) || yuan < 0 || yuan > 100000) {
+        wx.showToast({ title: copy.settings.minDeliveryInvalid, icon: "none" });
+        return;
+      }
+      minDeliveryFen = Math.round(yuan * 100);
+    }
     const cols = this.data.homeProductCols;
     const detailMode = this.data.productDetailMode;
     const { pointsPerYuan, pickImageTtlMinutes } = this.data.store;
@@ -101,6 +116,7 @@ Page({
       name,
       contactPhone,
       contactNote,
+      minDeliveryFen,
       homeKicker: homeKicker == null ? "" : String(homeKicker),
       homeTitle: homeTitle == null ? "" : String(homeTitle),
       homeSubtitle: homeSubtitle == null ? "" : String(homeSubtitle),
@@ -114,7 +130,7 @@ Page({
     try {
       const store = await api.merchantUpdateStore(payload);
       this.setData({
-        store: mergeHomeFields({ ...this.data.store, ...store }, payload),
+        store: formStore(mergeHomeFields({ ...this.data.store, ...store }, payload)),
         homeProductCols: Object.prototype.hasOwnProperty.call(store, "homeProductCols")
           ? normalizeCols(store.homeProductCols)
           : cols,

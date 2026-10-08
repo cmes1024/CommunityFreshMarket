@@ -61,6 +61,11 @@
   color: var(--color-text);
 }
 
+.pair .cell-input,
+.pair .cell-textarea {
+  text-align: right;
+}
+
 .cell-note {
   align-items: flex-start;
   padding-top: 24rpx;
@@ -120,14 +125,6 @@
   padding: 12rpx 0;
 }
 
-.subhead {
-  padding: 18rpx 28rpx 4rpx;
-  font-size: 22rpx;
-  font-weight: 600;
-  color: var(--color-muted);
-  border-top: 1rpx solid var(--color-line);
-}
-
 .cell-unit {
   flex-shrink: 0;
   margin-left: 8rpx;
@@ -146,15 +143,28 @@
 }
 
 .cols-cell {
-  align-items: stretch;
-  padding-top: 20rpx;
-  padding-bottom: 20rpx;
-  flex-wrap: wrap;
+  align-items: center;
+  flex-wrap: nowrap;
+  padding-top: 16rpx;
+  padding-bottom: 16rpx;
 }
 
 .cols-cell .cell-label {
-  width: 100%;
-  margin-bottom: 12rpx;
+  width: auto;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.cols-cell .cols-row {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.cols-cell .cols-opt {
+  flex: 0 0 auto;
+  padding: 0 28rpx;
 }
 
 .cols-row {
@@ -182,6 +192,38 @@
   font-weight: 600;
   background: var(--color-primary);
   border-color: var(--color-primary);
+}
+
+.kicker-cell {
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 20rpx;
+  padding-bottom: 20rpx;
+}
+
+.kicker-cell .cols-row {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.kicker-cell .cols-opt {
+  flex: 0 0 auto;
+  padding: 0 28rpx;
+}
+
+.kicker-input {
+  flex: 0 0 100%;
+  width: 100%;
+  min-height: 72rpx;
+  margin-top: 16rpx;
+  padding: 0 20rpx;
+  text-align: left;
+  background: var(--color-background);
+  border: 1rpx solid var(--color-line);
+  border-radius: 16rpx;
+  box-sizing: border-box;
 }
 
 .slot-row {

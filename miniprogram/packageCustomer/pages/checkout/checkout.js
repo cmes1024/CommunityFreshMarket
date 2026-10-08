@@ -1,6 +1,6 @@
 const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
-const { fenToYuan } = require("../../../utils/money");
+const { fenToYuan, yuanPlain } = require("../../../utils/money");
 const { syncCartCount } = require("../../../utils/cartSync");
 const { requestSubscribe } = require("../../../utils/subscribe");
 
@@ -13,6 +13,25 @@ function splitSlotLabel(label) {
     return { day: parts[1], time: parts[2] };
   }
   return { day: "", time: text };
+}
+
+function deliveryView(fulfillment, totalFen, minDeliveryFen) {
+  const min = Number(minDeliveryFen) || 0;
+  const total = Number(totalFen) || 0;
+  const active = fulfillment === "DELIVERY" && min > 0;
+  const blocked = active && total < min;
+  const deliveryMinText = active
+    ? copy.format(copy.checkout.deliveryMin, { yuan: yuanPlain(min) })
+    : "";
+  const deliveryShortText = blocked
+    ? copy.format(copy.checkout.deliveryShort, { yuan: yuanPlain(min - total) })
+    : "";
+  return {
+    minDeliveryFen: min,
+    deliveryMinText,
+    deliveryShortText,
+    deliveryBlocked: blocked,
+  };
 }
 
 function faceLabel(fen) {
@@ -39,23 +58,29 @@ Page({
     couponSummaryKind: "none",
     discountYuan: "0.00",
     payYuan: "0.00",
+    minDeliveryFen: 0,
+    deliveryMinText: "",
+    deliveryShortText: "",
+    deliveryBlocked: false,
     submitting: false,
   },
   couponChosen: false,
   async onShow() {
     const gen = (this._loadGen || 0) + 1;
     this._loadGen = gen;
-    const [cart, addresses, slots, mine] = await Promise.all([
+    const [cart, addresses, slots, mine, store] = await Promise.all([
       api.cart(),
       api.addresses(),
       api.pickupSlots(),
       api.couponsMine().catch(() => []),
+      api.store().catch(() => ({})),
     ]);
     if (gen !== this._loadGen) return;
     const picked = getApp().globalData.pickedAddress;
     const address =
       picked || addresses.find((a) => a.isDefault) || addresses[0] || null;
     const totalFen = cart.totalFen || 0;
+    const minDeliveryFen = Number(store && store.minDeliveryFen) || 0;
     const coupons = this.buildCoupons(mine, totalFen);
     const couponClaimId = this.pickCouponId(coupons);
     this.setData({
@@ -67,6 +92,7 @@ Page({
       slots: (slots || []).map((s) => ({ ...s, ...splitSlotLabel(s.label) })),
       pickupSlotId: this.data.pickupSlotId || (slots[0] && slots[0].id) || 0,
       ...this.payView(coupons, couponClaimId, totalFen),
+      ...deliveryView(this.data.fulfillment, totalFen, minDeliveryFen),
     });
   },
   buildCoupons(mine, totalFen) {
@@ -149,7 +175,11 @@ Page({
     });
   },
   switchF(e) {
-    this.setData({ fulfillment: e.currentTarget.dataset.v });
+    const fulfillment = e.currentTarget.dataset.v;
+    this.setData({
+      fulfillment,
+      ...deliveryView(fulfillment, this.data.totalFen, this.data.minDeliveryFen),
+    });
   },
   pickAddress() {
     wx.navigateTo({ url: "/packageCustomer/pages/address-list/address-list?pick=1" });
@@ -170,6 +200,15 @@ Page({
     if (this.data.submitting) return;
     const body = { fulfillment: this.data.fulfillment, remark: this.data.remark };
     if (this.data.fulfillment === "DELIVERY") {
+      if (this.data.deliveryBlocked) {
+        wx.showToast({
+          title: copy.format(copy.checkout.deliveryShort, {
+            yuan: yuanPlain(this.data.minDeliveryFen - this.data.totalFen),
+          }),
+          icon: "none",
+        });
+        return;
+      }
       if (!this.data.address) {
         wx.showToast({ title: copy.checkout.pickAddress, icon: "none" });
         return;

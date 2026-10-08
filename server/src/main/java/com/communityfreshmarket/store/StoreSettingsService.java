@@ -46,6 +46,9 @@ public class StoreSettingsService {
     if (request.getContactNote() != null) {
       store.setContactNote(blankToNull(request.getContactNote()));
     }
+    if (request.getMinDeliveryFen() != null) {
+      store.setMinDeliveryFen(request.getMinDeliveryFen());
+    }
     boolean clearHero = false;
     String previousHero = store.getHeroImageUrl();
     if (request.getHeroImageUrl() != null) {

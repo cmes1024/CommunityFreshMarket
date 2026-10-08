@@ -15,7 +15,7 @@
       <view class="dot truck"></view>
       <view>
         <view class="strong">{{copy.home.delivery}}</view>
-        <view class="muted">{{copy.home.deliverySub}}</view>
+        <view class="muted">{{deliverySub}}</view>
       </view>
     </view>
     <view class="status-item">
