@@ -45,18 +45,53 @@
   font-size: 34rpx;
   font-weight: 700;
   margin-bottom: 8rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.edit {
+.avatar-on {
+  opacity: 0.75;
+}
+
+.head-stats {
   flex-shrink: 0;
-  font-size: 26rpx;
-  font-weight: 600;
-  color: var(--color-primary);
-  padding: 8rpx 4rpx 8rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: 10rpx;
+  min-width: 200rpx;
 }
 
-.edit-on {
-  opacity: 0.6;
+.head-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8rpx;
+  min-height: 56rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  background: var(--color-fill);
+  box-sizing: border-box;
+}
+
+.head-label {
+  flex: none;
+  font-size: 22rpx;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.head-val {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.head-stat-on {
+  background: var(--color-mist);
 }
 
 .profile-sheet {

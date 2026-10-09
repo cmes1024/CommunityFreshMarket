@@ -8,6 +8,7 @@ import com.communityfreshmarket.mapper.StoreMapper;
 import com.communityfreshmarket.points.PointsRatio;
 import com.communityfreshmarket.store.RemarkPhrases;
 import java.math.BigDecimal;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,10 +35,13 @@ public class StoreQueryService {
     r.setPickupRemarkPhrases(RemarkPhrases.parse(store.getPickupRemarkPhrases()));
     Integer minDelivery = store.getMinDeliveryFen();
     r.setMinDeliveryFen(minDelivery == null || minDelivery < 0 ? 0 : minDelivery);
-    r.setHeroImageUrl(store.getHeroImageUrl());
+    List<String> heroes = ProductImageUrls.resolve(store.getHeroImageUrls(), store.getHeroImageUrl());
+    r.setHeroImageUrls(heroes);
+    r.setHeroImageUrl(ProductImageUrls.cover(heroes));
     r.setHomeKicker(store.getHomeKicker());
     r.setHomeTitle(store.getHomeTitle());
     r.setHomeSubtitle(store.getHomeSubtitle());
+    r.setHomeNotice(store.getHomeNotice());
     Integer cols = store.getHomeProductCols();
     r.setHomeProductCols(cols != null && cols >= 1 && cols <= 3 ? cols : 2);
     r.setProductDetailMode(normalizeDetailMode(store.getProductDetailMode()));

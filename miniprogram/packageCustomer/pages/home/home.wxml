@@ -1,12 +1,47 @@
 <Header pageName="{{displayStoreName}}" back="{{false}}" brand="{{true}}" alignContent="left" />
 <view class="page-body home">
-  <view class="hero {{store.heroImageUrl ? 'has-img' : ''}}">
-    <image wx:if="{{store.heroImageUrl}}" class="hero-bg" src="{{store.heroImageUrl}}" mode="aspectFill" />
-    <view wx:if="{{store.heroImageUrl}}" class="hero-mask"></view>
+  <view class="hero {{heroImages.length ? 'has-img' : ''}}">
+    <image
+      wx:if="{{heroImages.length === 1}}"
+      class="hero-photo"
+      style="width: 100%; height: 360rpx;"
+      src="{{heroImages[0]}}"
+      mode="aspectFill"
+    />
+    <swiper
+      wx:if="{{heroImages.length > 1}}"
+      class="hero-swiper"
+      style="width: 100%; height: 360rpx;"
+      autoplay="{{true}}"
+      interval="{{2500}}"
+      circular="{{true}}"
+      indicator-dots="{{true}}"
+      indicator-color="rgba(255,255,255,0.45)"
+      indicator-active-color="#ffffff"
+    >
+      <swiper-item wx:for="{{heroImages}}" wx:key="*this">
+        <image class="hero-photo" style="width: 100%; height: 360rpx;" src="{{item}}" mode="aspectFill" />
+      </swiper-item>
+    </swiper>
+    <view wx:if="{{heroImages.length}}" class="hero-mask"></view>
     <view class="hero-content">
       <view class="kicker">{{homeKicker}}</view>
       <view wx:if="{{homeTitle}}" class="store">{{homeTitle}}</view>
       <view class="desc">{{homeSubtitle}}</view>
+    </view>
+  </view>
+
+  <view class="notice" wx:if="{{homeNotice}}">
+    <text class="notice-label">公告</text>
+    <view class="notice-window">
+      <view class="notice-track" animation="{{noticeAnim}}">
+        <view class="notice-item">
+          <text class="notice-item-text">{{homeNotice}}</text>
+        </view>
+        <view class="notice-item">
+          <text class="notice-item-text">{{homeNotice}}</text>
+        </view>
+      </view>
     </view>
   </view>
 

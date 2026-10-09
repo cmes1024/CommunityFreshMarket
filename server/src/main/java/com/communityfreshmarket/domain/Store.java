@@ -25,9 +25,15 @@ public class Store {
   /** 配送起送金额（分）；0=不限制 */
   private Integer minDeliveryFen;
   private String heroImageUrl;
+  /** JSON 数组，最多 3 张；第一张与 heroImageUrl 相同 */
+  @TableField(value = "hero_image_urls", updateStrategy = FieldStrategy.ALWAYS)
+  private String heroImageUrls;
   private String homeKicker;
   private String homeTitle;
   private String homeSubtitle;
+  /** 首页公告；空则顾客端不展示 */
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private String homeNotice;
   private Integer homeProductCols;
   private String productDetailMode;
   /** 顾客会员码入口：PROFILE 我的 | TAB 底栏正中 */
@@ -108,6 +114,14 @@ public class Store {
     this.heroImageUrl = heroImageUrl;
   }
 
+  public String getHeroImageUrls() {
+    return heroImageUrls;
+  }
+
+  public void setHeroImageUrls(String heroImageUrls) {
+    this.heroImageUrls = heroImageUrls;
+  }
+
   public String getHomeKicker() {
     return homeKicker;
   }
@@ -130,6 +144,14 @@ public class Store {
 
   public void setHomeSubtitle(String homeSubtitle) {
     this.homeSubtitle = homeSubtitle;
+  }
+
+  public String getHomeNotice() {
+    return homeNotice;
+  }
+
+  public void setHomeNotice(String homeNotice) {
+    this.homeNotice = homeNotice;
   }
 
   public Integer getHomeProductCols() {

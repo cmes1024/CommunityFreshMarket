@@ -105,14 +105,28 @@
       <view class="sec-desc">{{copy.settings.homeHint}}</view>
     </view>
     <view class="group">
-      <view class="hero-box" bind:tap="pickHero">
-        <image wx:if="{{store.heroImageUrl}}" src="{{store.heroImageUrl}}" mode="aspectFill" class="hero-img" />
-        <view wx:else class="hero-empty">
-          <text class="hero-empty-txt">{{copy.settings.heroUpload}}</text>
+      <view class="hero-grid">
+        <view class="hero-tile" wx:for="{{heroImages}}" wx:key="*this">
+          <image src="{{item}}" mode="aspectFill" class="hero-img" />
+          <view class="hero-remove" data-index="{{index}}" catch:tap="removeHero">×</view>
+        </view>
+        <view wx:if="{{heroImages.length < 3}}" class="hero-tile hero-add" bind:tap="pickHero">
+          <text class="hero-empty-txt">＋</text>
+          <text class="hero-empty-txt">{{heroImages.length}}/3</text>
         </view>
       </view>
-      <view wx:if="{{store.heroImageUrl}}" class="cell hero-actions">
-        <text class="link-danger" bind:tap="clearHero">{{copy.settings.heroClear}}</text>
+      <view class="hero-hint">{{copy.settings.heroHint}}</view>
+      <view class="cell notice-cell">
+        <view class="cell-label">{{copy.settings.noticeLabel}}</view>
+        <input
+          class="notice-input"
+          type="text"
+          maxlength="80"
+          placeholder="{{copy.settings.noticePlaceholder}}"
+          value="{{store.homeNotice}}"
+          bindinput="onStore"
+          data-k="homeNotice"
+        />
       </view>
       <view class="cell kicker-cell">
         <view class="cell-label">{{copy.settings.kickerLabel}}</view>

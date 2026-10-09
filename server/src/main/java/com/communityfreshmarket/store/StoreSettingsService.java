@@ -2,6 +2,7 @@ package com.communityfreshmarket.store;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.communityfreshmarket.auth.UserContext;
+import com.communityfreshmarket.catalog.ProductImageUrls;
 import com.communityfreshmarket.catalog.StoreQueryService;
 import com.communityfreshmarket.catalog.StoreSummaryResponse;
 import com.communityfreshmarket.common.BizException;
@@ -57,11 +58,18 @@ public class StoreSettingsService {
       store.setMinDeliveryFen(request.getMinDeliveryFen());
     }
     boolean clearHero = false;
-    String previousHero = store.getHeroImageUrl();
-    if (request.getHeroImageUrl() != null) {
+    boolean clearHeroUrls = false;
+    List<String> removedHeroes = List.of();
+    if (request.getHeroImageUrls() != null) {
+      removedHeroes = applyHeroes(store, ProductImageUrls.normalize(request.getHeroImageUrls()));
+      clearHero = store.getHeroImageUrl() == null;
+      clearHeroUrls = store.getHeroImageUrls() == null;
+    } else if (request.getHeroImageUrl() != null) {
       String hero = blankToNull(request.getHeroImageUrl());
-      store.setHeroImageUrl(hero);
-      clearHero = hero == null;
+      List<String> next = hero == null ? List.of() : ProductImageUrls.normalize(List.of(hero));
+      removedHeroes = applyHeroes(store, next);
+      clearHero = store.getHeroImageUrl() == null;
+      clearHeroUrls = store.getHeroImageUrls() == null;
     }
     boolean clearKicker = false;
     if (request.getHomeKicker() != null) {
@@ -80,6 +88,15 @@ public class StoreSettingsService {
       String subtitle = blankToNull(request.getHomeSubtitle());
       store.setHomeSubtitle(subtitle);
       clearSubtitle = subtitle == null;
+    }
+    boolean clearNotice = false;
+    if (request.getHomeNotice() != null) {
+      String notice = blankToNull(request.getHomeNotice());
+      if (notice != null && notice.length() > 80) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "公告最多 80 个字");
+      }
+      store.setHomeNotice(notice);
+      clearNotice = notice == null;
     }
     if (request.getHomeProductCols() != null) {
       int cols = request.getHomeProductCols();
@@ -115,11 +132,14 @@ public class StoreSettingsService {
     store.setUpdatedAt(LocalDateTime.now());
     storeMapper.updateById(store);
     // updateById 默认跳过 null，清除需显式 set null
-    if (clearHero || clearKicker || clearTitle || clearSubtitle) {
+    if (clearHero || clearHeroUrls || clearKicker || clearTitle || clearSubtitle || clearNotice) {
       LambdaUpdateWrapper<Store> clear =
           new LambdaUpdateWrapper<Store>().eq(Store::getId, storeId);
       if (clearHero) {
         clear.set(Store::getHeroImageUrl, null);
+      }
+      if (clearHeroUrls) {
+        clear.set(Store::getHeroImageUrls, null);
       }
       if (clearKicker) {
         clear.set(Store::getHomeKicker, null);
@@ -130,18 +150,22 @@ public class StoreSettingsService {
       if (clearSubtitle) {
         clear.set(Store::getHomeSubtitle, null);
       }
+      if (clearNotice) {
+        clear.set(Store::getHomeNotice, null);
+      }
       storeMapper.update(null, clear);
     }
-    if (request.getHeroImageUrl() != null && !sameText(previousHero, store.getHeroImageUrl())) {
-      uploadCleanup.release(previousHero == null ? List.of() : List.of(previousHero));
+    if (!removedHeroes.isEmpty()) {
+      uploadCleanup.release(removedHeroes);
     }
     return storeQueryService.currentStore();
   }
 
-  private static boolean sameText(String left, String right) {
-    String a = StringUtils.hasText(left) ? left.trim() : "";
-    String b = StringUtils.hasText(right) ? right.trim() : "";
-    return a.equals(b);
+  private static List<String> applyHeroes(Store store, List<String> next) {
+    List<String> previous = ProductImageUrls.resolve(store.getHeroImageUrls(), store.getHeroImageUrl());
+    store.setHeroImageUrls(ProductImageUrls.toJson(next));
+    store.setHeroImageUrl(ProductImageUrls.cover(next));
+    return previous.stream().filter(url -> next == null || !next.contains(url)).toList();
   }
 
   private static String blankToNull(String value) {

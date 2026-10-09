@@ -16,9 +16,11 @@ public class StoreSummaryResponse {
   /** 配送起送金额（分）；0=不限制 */
   private int minDeliveryFen;
   private String heroImageUrl;
+  private List<String> heroImageUrls = List.of();
   private String homeKicker;
   private String homeTitle;
   private String homeSubtitle;
+  private String homeNotice;
   private int homeProductCols = 2;
   private String productDetailMode = "SHEET";
   /** PROFILE 我的（默认）| TAB 底栏正中 */
@@ -90,6 +92,14 @@ public class StoreSummaryResponse {
     this.heroImageUrl = heroImageUrl;
   }
 
+  public List<String> getHeroImageUrls() {
+    return heroImageUrls;
+  }
+
+  public void setHeroImageUrls(List<String> heroImageUrls) {
+    this.heroImageUrls = heroImageUrls == null ? List.of() : heroImageUrls;
+  }
+
   public String getHomeKicker() {
     return homeKicker;
   }
@@ -112,6 +122,14 @@ public class StoreSummaryResponse {
 
   public void setHomeSubtitle(String homeSubtitle) {
     this.homeSubtitle = homeSubtitle;
+  }
+
+  public String getHomeNotice() {
+    return homeNotice;
+  }
+
+  public void setHomeNotice(String homeNotice) {
+    this.homeNotice = homeNotice;
   }
 
   public int getHomeProductCols() {

@@ -60,7 +60,7 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 
 | 表 | 要点 |
 |----|------|
-| `store` | 店名、联系方式、`contact_note` 购买须知（可多行）、`delivery_remark_phrases` / `pickup_remark_phrases`（配送、自提各自的结算备注快捷短语，换行分隔，各最多 8 句、每句 8 字；空=该履约方式不显示短语）、`min_delivery_fen`（配送起送金额，分，0=不限制；只拦配送提交，按商品合计券前预估比较）、状态、`invite_code`（店员邀请，可轮换）、首页头图、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）、会员码入口 `member_code_entry`（PROFILE\|TAB，默认 PROFILE）；单店时一条记录 |
+| `store` | 店名、联系方式、`contact_note` 购买须知（可多行）、`delivery_remark_phrases` / `pickup_remark_phrases`（配送、自提各自的结算备注快捷短语，换行分隔，各最多 8 句、每句 8 字；空=该履约方式不显示短语）、`min_delivery_fen`（配送起送金额，分，0=不限制；只拦配送提交，按商品合计券前预估比较）、状态、`invite_code`（店员邀请，可轮换）、首页头图 `hero_image_url`（封面，与列表第一张同步）与 `hero_image_urls`（JSON，最多 3 张）、公告 `home_notice`（最多 80 字，空则不展示）、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）、会员码入口 `member_code_entry`（PROFILE\|TAB，默认 PROFILE）；单店时一条记录 |
 | `user` | `openid` 唯一、昵称/头像可选 |
 | `store_member` | `user_id + store_id + role`（`OWNER` / `STAFF`）；第一版能力相同 |
 | `category` | `store_id`、名称、排序、启用 |
@@ -273,3 +273,4 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 | 2026-10-08 | 商品软删除与批量操作：`DELETE /merchant/products/{id}`、`POST /merchant/products/batch` |
 | 2026-10-09 | 店铺 `remark_phrases`：结算备注短语按店配置，接口随店铺摘要与门店设置读写 |
 | 2026-10-09 | 备注短语拆成 `delivery_remark_phrases` 与 `pickup_remark_phrases`；原列复制到两套后删除 |
+| 2026-10-09 | 店铺 `hero_image_urls`（≤3，封面仍写 `hero_image_url`）与 `home_notice`；顾客首页轮播与跑马灯 |

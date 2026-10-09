@@ -1,15 +1,24 @@
 <Header pageName="{{copy.titles.profile}}" back="{{false}}" />
 <view class="profile-page">
   <view class="profile-head">
-    <view class="avatar">
+    <view class="avatar" hover-class="avatar-on" bind:tap="openProfileSheet">
       <image wx:if="{{avatarSrc}}" class="avatar-img" src="{{avatarSrc}}" mode="aspectFill" />
       <block wx:else>{{avatarText}}</block>
     </view>
     <view class="meta">
-      <view class="name">{{user.nickname || copy.profile.defaultNickname}}</view>
+      <view class="name">{{greetName}}</view>
       <view class="sub">{{user.storeMember ? copy.profile.memberHint : copy.profile.guestHint}}</view>
     </view>
-    <view class="edit" hover-class="edit-on" bind:tap="openProfileSheet">{{copy.profile.edit}}</view>
+    <view class="head-stats">
+      <view class="head-stat" hover-class="head-stat-on" bind:tap="goPoints">
+        <text class="head-label">{{copy.profile.pointsShort}}</text>
+        <text class="head-val">{{pointsValue}}</text>
+      </view>
+      <view class="head-stat" hover-class="head-stat-on" bind:tap="goBalance">
+        <text class="head-label">{{copy.profile.balanceShort}}</text>
+        <text class="head-val">¥{{balanceYuan}}</text>
+      </view>
+    </view>
   </view>
 
   <view class="shortcut-grid">
@@ -27,14 +36,14 @@
         <view class="shortcut-sub">{{copy.profile.addressSub}}</view>
       </view>
     </view>
-    <view class="shortcut" hover-class="shortcut-on" bind:tap="goPoints">
+    <view class="shortcut" hidden hover-class="shortcut-on" bind:tap="goPoints">
       <view class="mark mark-amber"><image src="/images/profile-points.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">
         <view class="shortcut-title">{{copy.profile.points}}</view>
         <view class="shortcut-sub">{{copy.profile.pointsSub}}</view>
       </view>
     </view>
-    <view class="shortcut" hover-class="shortcut-on" bind:tap="goBalance">
+    <view class="shortcut" hidden hover-class="shortcut-on" bind:tap="goBalance">
       <view class="mark mark-green"><text class="mark-yen">¥</text></view>
       <view class="shortcut-copy">
         <view class="shortcut-title">{{copy.profile.balance}}</view>

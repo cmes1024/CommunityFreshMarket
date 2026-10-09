@@ -31,9 +31,12 @@ public class StoreUpdateRequest {
   @Max(10_000_000)
   private Integer minDeliveryFen;
 
-  /** 传空字符串可清除首页头图 */
+  /** 传空字符串可清除首页头图；有 heroImageUrls 时以列表为准 */
   @Size(max = 512)
   private String heroImageUrl;
+
+  /** 首页头图，最多 3 张；传空列表可清除 */
+  private List<String> heroImageUrls;
 
   /** 传空字符串可清除，顾客端回落默认文案 */
   @Size(max = 64)
@@ -46,6 +49,10 @@ public class StoreUpdateRequest {
   /** 传空字符串可清除，顾客端回落默认文案 */
   @Size(max = 128)
   private String homeSubtitle;
+
+  /** 首页公告；传空清除 */
+  @Size(max = 80)
+  private String homeNotice;
 
   /** 首页商品列数：1 通栏 / 2 / 3 */
   @Min(1)
@@ -125,6 +132,14 @@ public class StoreUpdateRequest {
     this.heroImageUrl = heroImageUrl;
   }
 
+  public List<String> getHeroImageUrls() {
+    return heroImageUrls;
+  }
+
+  public void setHeroImageUrls(List<String> heroImageUrls) {
+    this.heroImageUrls = heroImageUrls;
+  }
+
   public String getHomeKicker() {
     return homeKicker;
   }
@@ -147,6 +162,14 @@ public class StoreUpdateRequest {
 
   public void setHomeSubtitle(String homeSubtitle) {
     this.homeSubtitle = homeSubtitle;
+  }
+
+  public String getHomeNotice() {
+    return homeNotice;
+  }
+
+  public void setHomeNotice(String homeNotice) {
+    this.homeNotice = homeNotice;
   }
 
   public Integer getHomeProductCols() {

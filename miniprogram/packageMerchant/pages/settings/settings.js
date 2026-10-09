@@ -26,6 +26,14 @@ function phraseFields(kind) {
     : { list: "deliveryRemarkPhrases", draft: "deliveryPhraseDraft" };
 }
 
+function heroImagesOf(store) {
+  const list = store && store.heroImageUrls;
+  if (Array.isArray(list) && list.length) {
+    return list.map((url) => String(url || "").trim()).filter(Boolean).slice(0, 3);
+  }
+  const one = store && store.heroImageUrl;
+  return one ? [one] : [];
+}
 function normalizeCols(cols) {
   const n = Number(cols);
   return n === 1 || n === 3 ? n : 2;
@@ -37,6 +45,7 @@ function formStore(store) {
     homeKicker: store.homeKicker || "",
     homeTitle: store.homeTitle || "",
     homeSubtitle: store.homeSubtitle || "",
+    homeNotice: store.homeNotice || "",
     minDeliveryYuan: Number(store.minDeliveryFen) > 0 ? yuanPlain(store.minDeliveryFen) : "",
     pointsPerYuan: store.pointsPerYuan == null ? "" : formatRatio(store.pointsPerYuan),
   };
@@ -64,6 +73,7 @@ Page({
     settingsTab: "store",
     stickyTop: 88,
     phraseKind: "delivery",
+    heroImages: [],
     deliveryRemarkPhrases: [],
     pickupRemarkPhrases: [],
     deliveryPhraseDraft: "",
@@ -77,6 +87,7 @@ Page({
     const [store, slots] = await Promise.all([api.store(), api.merchantPickupSlots()]);
     this.setData({
       store: formStore(store),
+      heroImages: heroImagesOf(store),
       slots,
       homeProductCols: normalizeCols(store.homeProductCols),
       productDetailMode: productDetailMode(store),
@@ -158,32 +169,41 @@ Page({
     this.setData({ addingSlot: true });
   },
   async pickHero() {
+    const left = 3 - (this.data.heroImages || []).length;
+    if (left <= 0) {
+      wx.showToast({ title: copy.settings.heroTooMany, icon: "none" });
+      return;
+    }
     try {
-      const url = await chooseAndUpload();
-      const store = await api.merchantUpdateStore({ heroImageUrl: url });
-      this.setData({
-        store: formStore(store),
-        homeProductCols: normalizeCols(store.homeProductCols),
-        productDetailMode: productDetailMode(store),
-        memberCodeEntry: memberCodeEntry(store),
-      });
+      const uploaded = await chooseAndUpload(left);
+      const added = Array.isArray(uploaded) ? uploaded : [uploaded];
+      await this.saveHeroes((this.data.heroImages || []).concat(added).slice(0, 3));
       wx.showToast({ title: copy.settings.heroSaved, icon: "none" });
     } catch (e) {}
   },
-  async clearHero() {
+  async removeHero(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const next = (this.data.heroImages || []).slice();
+    if (index < 0 || index >= next.length) return;
+    next.splice(index, 1);
     try {
-      const store = await api.merchantUpdateStore({ heroImageUrl: "" });
-      this.setData({
-        store: formStore(store),
-        homeProductCols: normalizeCols(store.homeProductCols),
-        productDetailMode: productDetailMode(store),
-        memberCodeEntry: memberCodeEntry(store),
-      });
-      wx.showToast({ title: copy.settings.heroCleared, icon: "none" });
-    } catch (e) {}
+      await this.saveHeroes(next);
+      wx.showToast({ title: next.length ? copy.settings.heroSaved : copy.settings.heroCleared, icon: "none" });
+    } catch (err) {}
+  },
+  async saveHeroes(urls) {
+    const heroImageUrls = (urls || []).slice(0, 3);
+    const store = await api.merchantUpdateStore({ heroImageUrls });
+    this.setData({
+      store: formStore(store),
+      heroImages: heroImagesOf(store),
+      homeProductCols: normalizeCols(store.homeProductCols),
+      productDetailMode: productDetailMode(store),
+      memberCodeEntry: memberCodeEntry(store),
+    });
   },
   async saveStore() {
-    const { name, contactPhone, contactNote, homeKicker, homeTitle, homeSubtitle, minDeliveryYuan } = this.data.store;
+    const { name, contactPhone, contactNote, homeKicker, homeTitle, homeSubtitle, homeNotice, minDeliveryYuan } = this.data.store;
     const minRaw = String(minDeliveryYuan ?? "").trim();
     let minDeliveryFen = 0;
     if (minRaw !== "") {
@@ -211,6 +231,7 @@ Page({
       homeKicker: homeKicker == null ? "" : String(homeKicker),
       homeTitle: homeTitle == null ? "" : String(homeTitle),
       homeSubtitle: homeSubtitle == null ? "" : String(homeSubtitle),
+      homeNotice: homeNotice == null ? "" : String(homeNotice).trim(),
       homeProductCols: cols,
       productDetailMode: detailMode,
       memberCodeEntry: codeEntry,

@@ -2,12 +2,21 @@ const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { setUser } = require("../../../utils/request");
 const { uploadImage, absUrl } = require("../../../utils/upload");
+const { fenToYuan } = require("../../../utils/money");
 const { memberCodeEntry } = require("../../../utils/memberCodeEntry");
+
+function greetName(name) {
+  const hour = new Date().getHours();
+  const template =
+    hour < 12 ? copy.profile.morning : hour < 18 ? copy.profile.afternoon : copy.profile.evening;
+  return copy.format(template, { name });
+}
 
 Page({
   data: {
     user: {},
     avatarText: copy.storeName.slice(0, 1),
+    greetName: greetName(copy.profile.defaultNickname),
     avatarSrc: "",
     sheet: "",
     sheetOpen: false,
@@ -18,14 +27,23 @@ Page({
     profileSaving: false,
     contactPhone: "",
     showMemberCode: true,
+    pointsValue: 0,
+    balanceYuan: "0.00",
   },
   async onShow() {
     try {
-      const [user, store] = await Promise.all([api.me(), api.store().catch(() => ({}))]);
+      const [user, store, points, balance] = await Promise.all([
+        api.me(),
+        api.store().catch(() => ({})),
+        api.pointsMe().catch(() => ({ balance: 0 })),
+        api.balanceMe().catch(() => ({ balanceFen: 0 })),
+      ]);
       this.applyUser(user);
       this.setData({
         contactPhone: (store && store.contactPhone) || "",
         showMemberCode: memberCodeEntry(store) !== "TAB",
+        pointsValue: points && points.balance != null ? points.balance : 0,
+        balanceYuan: fenToYuan(balance && balance.balanceFen),
       });
     } catch (e) {}
   },
@@ -39,6 +57,7 @@ Page({
     this.setData({
       user,
       nicknameInput: nick,
+      greetName: greetName(shown),
       avatarSrc: absUrl(user.avatarUrl),
       avatarText: shown.slice(0, 1),
     });

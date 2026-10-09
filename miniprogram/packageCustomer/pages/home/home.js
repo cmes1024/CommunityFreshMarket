@@ -7,6 +7,19 @@ const { openProduct } = require("../../../utils/productOpen");
 const { qtyBounds, normalizeCartQty } = require("../../../utils/productQty");
 const { storeDisplayName } = copy;
 
+function heroImagesOf(store) {
+  const list = store && store.heroImageUrls;
+  if (Array.isArray(list) && list.length) {
+    return list.map((url) => String(url || "").trim()).filter(Boolean).slice(0, 3);
+  }
+  const one = store && store.heroImageUrl;
+  return one ? [one] : [];
+}
+
+function noticeDuration(text) {
+  const n = String(text || "").trim().length;
+  return Math.max(8, Math.round(n * 0.45));
+}
 function normalizeCols(cols) {
   const n = Number(cols);
   return n === 1 || n === 3 ? n : 2;
@@ -25,6 +38,9 @@ Page({
     homeKicker: copy.home.kicker,
     homeTitle: "",
     homeSubtitle: copy.home.heroDesc,
+    homeNotice: "",
+    noticeAnim: {},
+    heroImages: [],
     homeProductCols: 2,
     categories: [],
     products: [],
@@ -66,15 +82,60 @@ Page({
         // 主标题与导航店名分工：有配置才显示，空则不显示，避免重复
         homeTitle: (store && store.homeTitle) || "",
         homeSubtitle: (store && store.homeSubtitle) || copy.home.heroDesc,
+        homeNotice: (store && store.homeNotice) || "",
+        noticeAnim: {},
+        heroImages: heroImagesOf(store),
         homeProductCols: normalizeCols(store && store.homeProductCols),
         categories,
         deliverySub: deliverySubText(store),
         pickupHint: (slots && slots[0] && slots[0].label) || this.data.copy.home.pickupSubFallback,
         products: ranked,
-      });
+      }, () => this.startNotice());
     } catch (e) {
+      this.clearNotice();
       this.setData({ displayStoreName: storeDisplayName(null) });
     }
+  },
+  onHide() {
+    this.clearNotice();
+  },
+  onUnload() {
+    this.clearNotice();
+  },
+  clearNotice() {
+    if (this._noticeTimer) {
+      clearTimeout(this._noticeTimer);
+      this._noticeTimer = null;
+    }
+  },
+  startNotice() {
+    this.clearNotice();
+    const text = this.data.homeNotice;
+    if (!text) return;
+    wx.nextTick(() => {
+      wx.createSelectorQuery()
+        .in(this)
+        .select(".notice-item")
+        .boundingClientRect((rect) => {
+          if (!rect || !rect.width || this.data.homeNotice !== text) return;
+          this.loopNotice(text, Math.ceil(rect.width));
+        })
+        .exec();
+    });
+  },
+  loopNotice(text, distance) {
+    if (this.data.homeNotice !== text) return;
+    const duration = noticeDuration(text) * 1000;
+    const anim = wx.createAnimation({ duration, timingFunction: "linear" });
+    anim.translateX(-distance).step();
+    this.setData({ noticeAnim: anim.export() });
+    this._noticeTimer = setTimeout(() => {
+      if (this.data.homeNotice !== text) return;
+      const reset = wx.createAnimation({ duration: 0 });
+      reset.translateX(0).step();
+      this.setData({ noticeAnim: reset.export() });
+      this._noticeTimer = setTimeout(() => this.loopNotice(text, distance), 30);
+    }, duration);
   },
   goAll() {
     wx.reLaunch({ url: "/packageCustomer/pages/category/category" });
