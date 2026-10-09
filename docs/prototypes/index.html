@@ -725,6 +725,14 @@
 
           <section class="screen" data-screen="m-settings" data-title="门店设置" data-tab="m-settings" data-mode="merchant" data-to-customer>
             <div class="section settings-proto">
+              <div class="settings-nav" id="settingsNav">
+                <button type="button" class="settings-tab active" data-settings-tab="store">门店</button>
+                <button type="button" class="settings-tab" data-settings-tab="home">首页</button>
+                <button type="button" class="settings-tab" data-settings-tab="points">积分</button>
+                <button type="button" class="settings-tab" data-settings-tab="live">实景</button>
+                <button type="button" class="settings-tab" data-settings-tab="slots">自提</button>
+              </div>
+              <div data-settings-panel="store">
               <div class="sec-head">
                 <h3 class="section-title" style="margin:0 0 4px">门店信息</h3>
                 <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">店名出现在顾客端导航左上角；购买须知有内容才出现在商品详情</p>
@@ -734,6 +742,27 @@
                 <div class="settings-cell"><label>电话</label><input inputmode="tel" value="021-6688XXXX" /></div>
                 <div class="settings-cell"><label>购买须知</label><input placeholder="如配送范围、当面收款；留空则商详不展示" value="尽快配送 / 可自提" /></div>
               </div>
+              <div class="sec-head" style="margin-top:18px">
+                <h3 class="section-title" style="margin:0">备注短语</h3>
+              </div>
+              <div class="settings-group">
+                <div class="settings-cell settings-cols phrase-settings">
+                  <div class="phrase-nav" id="phraseNav">
+                    <button type="button" class="phrase-tab active" data-phrase-kind="delivery">配送</button>
+                    <button type="button" class="phrase-tab" data-phrase-kind="pickup">自提</button>
+                  </div>
+                  <p class="hint" id="phraseHint">顾客选配送时可以点。留空则配送只手写。每句最多 8 个字。</p>
+                  <div class="phrase-editor">
+                    <div class="phrase-row" id="settingsPhrases"></div>
+                    <div class="phrase-add">
+                      <input id="phraseDraft" maxlength="8" placeholder="如放门口" />
+                      <button type="button" id="addPhrase">添加</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </div>
+              <div data-settings-panel="home" hidden>
               <div class="sec-head" style="margin-top:18px">
                 <h3 class="section-title" style="margin:0 0 4px">首页配置</h3>
                 <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">头图和文案出现在顾客首页；主标题留空则不显示</p>
@@ -759,6 +788,8 @@
                   </div>
                 </div>
               </div>
+              </div>
+              <div data-settings-panel="points" hidden>
               <div class="sec-head" style="margin-top:18px">
                 <h3 class="section-title" style="margin:0 0 4px">积分</h3>
                 <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">订单完成后按实付金额入账</p>
@@ -773,6 +804,8 @@
                   </div>
                 </div>
               </div>
+              </div>
+              <div data-settings-panel="live" hidden>
               <div class="sec-head" style="margin-top:18px">
                 <h3 class="section-title" style="margin:0 0 4px">商品实景</h3>
                 <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">超时后顾客可申请换一张新图</p>
@@ -780,6 +813,8 @@
               <div class="settings-group">
                 <div class="settings-cell"><label>有效时间</label><input inputmode="numeric" value="15" style="text-align:right" /><span style="color:var(--color-muted);font-size:13px">分钟</span></div>
               </div>
+              </div>
+              <div data-settings-panel="slots" hidden>
               <div class="sec-head" style="margin-top:18px">
                 <h3 class="section-title" style="margin:0 0 4px">自提</h3>
                 <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">添加或删除后立即生效，顾客结算自提时可选</p>
@@ -788,6 +823,7 @@
                 <div class="slot static" style="margin:0;border:0;border-radius:0;border-bottom:1px solid var(--color-line)">今天 16:00 – 17:00</div>
                 <div class="slot static" style="margin:0;border:0;border-radius:0">今天 17:00 – 18:00</div>
                 <button type="button" class="btn btn-ghost" style="width:100%;margin:0;border-radius:0;border:0;border-top:1px solid var(--color-line)" data-toast="原型：添加时段">添加时段</button>
+              </div>
               </div>
               <button type="button" class="btn btn-primary" style="width:100%;margin-top:16px" data-toast="设置已保存">保存设置</button>
             </div>

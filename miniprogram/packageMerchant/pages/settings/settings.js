@@ -6,6 +6,26 @@ const { memberCodeEntry } = require("../../../utils/memberCodeEntry");
 const { yuanPlain } = require("../../../utils/money");
 const { formatRatio, parseRatio, sanitizeRatioInput } = require("../../../utils/pointsRatio");
 
+function stickyTopPx() {
+  try {
+    const menu = wx.getMenuButtonBoundingClientRect();
+    return (Number(menu.top) || 0) + (Number(menu.height) || 32) + 6;
+  } catch (e) {
+    return 88;
+  }
+}
+
+function phraseList(raw) {
+  const list = Array.isArray(raw) ? raw : [];
+  return list.map((text) => String(text || "").trim()).filter(Boolean);
+}
+
+function phraseFields(kind) {
+  return kind === "pickup"
+    ? { list: "pickupRemarkPhrases", draft: "pickupPhraseDraft" }
+    : { list: "deliveryRemarkPhrases", draft: "deliveryPhraseDraft" };
+}
+
 function normalizeCols(cols) {
   const n = Number(cols);
   return n === 1 || n === 3 ? n : 2;
@@ -41,9 +61,16 @@ Page({
     homeProductCols: 2,
     productDetailMode: "SHEET",
     memberCodeEntry: "PROFILE",
+    settingsTab: "store",
+    stickyTop: 88,
+    phraseKind: "delivery",
+    deliveryRemarkPhrases: [],
+    pickupRemarkPhrases: [],
+    deliveryPhraseDraft: "",
+    pickupPhraseDraft: "",
   },
   async onShow() {
-    this.setData({ copy });
+    this.setData({ copy, stickyTop: stickyTopPx() });
     await this.reload();
   },
   async reload() {
@@ -54,6 +81,14 @@ Page({
       homeProductCols: normalizeCols(store.homeProductCols),
       productDetailMode: productDetailMode(store),
       memberCodeEntry: memberCodeEntry(store),
+      deliveryRemarkPhrases: phraseList(
+        store.deliveryRemarkPhrases != null ? store.deliveryRemarkPhrases : store.remarkPhrases
+      ),
+      pickupRemarkPhrases: phraseList(
+        store.pickupRemarkPhrases != null ? store.pickupRemarkPhrases : store.remarkPhrases
+      ),
+      deliveryPhraseDraft: "",
+      pickupPhraseDraft: "",
     });
   },
   onStore(e) {
@@ -75,6 +110,46 @@ Page({
   },
   onMemberCodeEntry(e) {
     this.setData({ memberCodeEntry: memberCodeEntry({ memberCodeEntry: e.currentTarget.dataset.entry }) });
+  },
+  onSettingsTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (!tab || tab === this.data.settingsTab) return;
+    this.setData({ settingsTab: tab });
+  },
+  onPhraseKind(e) {
+    const kind = e.currentTarget.dataset.kind === "pickup" ? "pickup" : "delivery";
+    if (kind === this.data.phraseKind) return;
+    this.setData({ phraseKind: kind });
+  },
+  onPhraseDraft(e) {
+    const fields = phraseFields(e.currentTarget.dataset.kind);
+    this.setData({ [fields.draft]: e.detail.value });
+  },
+  addPhrase(e) {
+    const fields = phraseFields(e.currentTarget.dataset.kind);
+    const text = String(this.data[fields.draft] || "").trim();
+    if (!text) return;
+    if (text.length > 8) {
+      wx.showToast({ title: copy.settings.phraseTooLong, icon: "none" });
+      return;
+    }
+    const list = this.data[fields.list] || [];
+    if (list.indexOf(text) >= 0) {
+      this.setData({ [fields.draft]: "" });
+      return;
+    }
+    if (list.length >= 8) {
+      wx.showToast({ title: copy.settings.phraseTooMany, icon: "none" });
+      return;
+    }
+    this.setData({ [fields.list]: list.concat(text), [fields.draft]: "" });
+  },
+  removePhrase(e) {
+    const fields = phraseFields(e.currentTarget.dataset.kind);
+    const text = e.currentTarget.dataset.text;
+    this.setData({
+      [fields.list]: (this.data[fields.list] || []).filter((item) => item !== text),
+    });
   },
   onSlotLabel(e) {
     this.setData({ slotLabel: e.detail.value });
@@ -139,6 +214,8 @@ Page({
       homeProductCols: cols,
       productDetailMode: detailMode,
       memberCodeEntry: codeEntry,
+      deliveryRemarkPhrases: this.data.deliveryRemarkPhrases || [],
+      pickupRemarkPhrases: this.data.pickupRemarkPhrases || [],
     };
     if (pointsPerYuan !== undefined && pointsPerYuan !== "") {
       const ratio = parseRatio(pointsPerYuan);
@@ -162,6 +239,14 @@ Page({
         memberCodeEntry: Object.prototype.hasOwnProperty.call(store, "memberCodeEntry")
           ? memberCodeEntry(store)
           : codeEntry,
+        deliveryRemarkPhrases: Object.prototype.hasOwnProperty.call(store, "deliveryRemarkPhrases")
+          ? phraseList(store.deliveryRemarkPhrases)
+          : this.data.deliveryRemarkPhrases,
+        pickupRemarkPhrases: Object.prototype.hasOwnProperty.call(store, "pickupRemarkPhrases")
+          ? phraseList(store.pickupRemarkPhrases)
+          : this.data.pickupRemarkPhrases,
+        deliveryPhraseDraft: "",
+        pickupPhraseDraft: "",
       });
       getApp().globalData.memberCodeEntry = Object.prototype.hasOwnProperty.call(store, "memberCodeEntry")
         ? memberCodeEntry(store)

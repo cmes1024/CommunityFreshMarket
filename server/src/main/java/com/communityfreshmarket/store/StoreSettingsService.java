@@ -47,6 +47,12 @@ public class StoreSettingsService {
     if (request.getContactNote() != null) {
       store.setContactNote(blankToNull(request.getContactNote()));
     }
+    if (request.getDeliveryRemarkPhrases() != null) {
+      store.setDeliveryRemarkPhrases(RemarkPhrases.store(request.getDeliveryRemarkPhrases()));
+    }
+    if (request.getPickupRemarkPhrases() != null) {
+      store.setPickupRemarkPhrases(RemarkPhrases.store(request.getPickupRemarkPhrases()));
+    }
     if (request.getMinDeliveryFen() != null) {
       store.setMinDeliveryFen(request.getMinDeliveryFen());
     }

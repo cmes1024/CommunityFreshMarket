@@ -559,6 +559,7 @@ $("#fulfillSeg")?.addEventListener("click", (e) => {
   $("#deliveryBlock").hidden = !delivery;
   $("#pickupBlock").hidden = delivery;
   updateCheckoutSteps();
+  renderRemarkPhrases();
 });
 
 $$("#pickupBlock .slot").forEach((slot) => {
@@ -567,6 +568,114 @@ $$("#pickupBlock .slot").forEach((slot) => {
     slot.classList.add("active");
   });
 });
+
+const deliveryRemarkPhrases = ["放门口", "少葱", "称重点", "不要电话"];
+const pickupRemarkPhrases = ["少葱", "称重点"];
+let settingsPhraseKind = "delivery";
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function activeRemarkPhrases() {
+  return $("#pickupBlock") && !$("#pickupBlock").hidden ? pickupRemarkPhrases : deliveryRemarkPhrases;
+}
+
+function settingsPhraseList() {
+  return settingsPhraseKind === "pickup" ? pickupRemarkPhrases : deliveryRemarkPhrases;
+}
+
+function phraseButtons(phrases) {
+  return phrases
+    .map(
+      (text) =>
+        `<button type="button" class="phrase" data-remove-phrase="${escapeHtml(text)}">${escapeHtml(text)} ×</button>`
+    )
+    .join("");
+}
+
+function renderRemarkPhrases() {
+  const phrases = activeRemarkPhrases();
+  const checkout = $("#remarkPhrases");
+  if (checkout) {
+    checkout.hidden = phrases.length === 0;
+    checkout.innerHTML = phrases
+      .map((text) => `<button type="button" class="phrase">${escapeHtml(text)}</button>`)
+      .join("");
+  }
+  const settings = $("#settingsPhrases");
+  if (settings) settings.innerHTML = phraseButtons(settingsPhraseList());
+  const hint = $("#phraseHint");
+  if (hint) {
+    hint.textContent =
+      settingsPhraseKind === "pickup"
+        ? "顾客选自提时可以点。留空则自提只手写。每句最多 8 个字。"
+        : "顾客选配送时可以点。留空则配送只手写。每句最多 8 个字。";
+  }
+  const draft = $("#phraseDraft");
+  if (draft) draft.placeholder = settingsPhraseKind === "pickup" ? "如到店再称" : "如放门口";
+  $$("#phraseNav .phrase-tab").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.phraseKind === settingsPhraseKind);
+  });
+  const input = $("#remarkInput");
+  if (input) input.placeholder = phrases.length ? "点短语或手写补充" : "手写补充";
+}
+
+$("#settingsNav")?.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-settings-tab]");
+  if (!btn) return;
+  const tab = btn.dataset.settingsTab;
+  $$("#settingsNav .settings-tab").forEach((el) => el.classList.toggle("active", el === btn));
+  $$("[data-settings-panel]").forEach((el) => {
+    el.hidden = el.dataset.settingsPanel !== tab;
+  });
+});
+
+$("#phraseNav")?.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-phrase-kind]");
+  if (!btn) return;
+  settingsPhraseKind = btn.dataset.phraseKind === "pickup" ? "pickup" : "delivery";
+  renderRemarkPhrases();
+});
+
+$("#settingsPhrases")?.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-remove-phrase]");
+  if (!btn) return;
+  const phrases = settingsPhraseList();
+  const text = btn.getAttribute("data-remove-phrase");
+  const index = phrases.indexOf(text);
+  if (index >= 0) phrases.splice(index, 1);
+  renderRemarkPhrases();
+});
+
+$("#addPhrase")?.addEventListener("click", () => {
+  const input = $("#phraseDraft");
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  const phrases = settingsPhraseList();
+  if ([...text].length > 8) {
+    showToast("每句最多 8 个字");
+    return;
+  }
+  if (phrases.includes(text)) {
+    input.value = "";
+    return;
+  }
+  if (phrases.length >= 8) {
+    showToast("最多 8 句");
+    return;
+  }
+  phrases.push(text);
+  input.value = "";
+  renderRemarkPhrases();
+});
+
+renderRemarkPhrases();
 
 $("#remarkPhrases")?.addEventListener("click", (e) => {
   const btn = e.target.closest(".phrase");

@@ -1,6 +1,8 @@
 package com.communityfreshmarket.domain;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.math.BigDecimal;
@@ -14,6 +16,12 @@ public class Store {
   private String name;
   private String contactPhone;
   private String contactNote;
+  /** 配送结算备注快捷短语，换行分隔；空=不展示 */
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private String deliveryRemarkPhrases;
+  /** 自提结算备注快捷短语，换行分隔；空=不展示 */
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private String pickupRemarkPhrases;
   /** 配送起送金额（分）；0=不限制 */
   private Integer minDeliveryFen;
   private String heroImageUrl;
@@ -66,6 +74,22 @@ public class Store {
 
   public void setContactNote(String contactNote) {
     this.contactNote = contactNote;
+  }
+
+  public String getDeliveryRemarkPhrases() {
+    return deliveryRemarkPhrases;
+  }
+
+  public void setDeliveryRemarkPhrases(String deliveryRemarkPhrases) {
+    this.deliveryRemarkPhrases = deliveryRemarkPhrases;
+  }
+
+  public String getPickupRemarkPhrases() {
+    return pickupRemarkPhrases;
+  }
+
+  public void setPickupRemarkPhrases(String pickupRemarkPhrases) {
+    this.pickupRemarkPhrases = pickupRemarkPhrases;
   }
 
   public Integer getMinDeliveryFen() {

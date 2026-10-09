@@ -1,7 +1,14 @@
 <Header pageName="{{copy.titles.merchantSettings}}" back="{{false}}" toCustomer="{{true}}" />
+<view class="settings-nav" style="top: {{stickyTop}}px;">
+  <view class="settings-tab {{settingsTab === 'store' ? 'on' : ''}}" data-tab="store" bind:tap="onSettingsTab">{{copy.settings.tabStore}}</view>
+  <view class="settings-tab {{settingsTab === 'home' ? 'on' : ''}}" data-tab="home" bind:tap="onSettingsTab">{{copy.settings.tabHome}}</view>
+  <view class="settings-tab {{settingsTab === 'points' ? 'on' : ''}}" data-tab="points" bind:tap="onSettingsTab">{{copy.settings.tabPoints}}</view>
+  <view class="settings-tab {{settingsTab === 'live' ? 'on' : ''}}" data-tab="live" bind:tap="onSettingsTab">{{copy.settings.tabLive}}</view>
+  <view class="settings-tab {{settingsTab === 'slots' ? 'on' : ''}}" data-tab="slots" bind:tap="onSettingsTab">{{copy.settings.tabSlots}}</view>
+</view>
 <view class="page-body settings-page">
   <!-- 1. 门店信息 -->
-  <view class="sec">
+  <view class="sec" wx:if="{{settingsTab === 'store'}}">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.storeSec}}</view>
       <view class="sec-desc">{{copy.settings.storeHint}}</view>
@@ -54,10 +61,45 @@
         />
       </view>
     </view>
+    <view class="phrase-head">
+      <view class="phrase-title">{{copy.settings.phraseTitle}}</view>
+    </view>
+    <view class="group phrase-group">
+      <view class="phrase-nav">
+        <view
+          class="phrase-tab {{phraseKind === 'delivery' ? 'on' : ''}}"
+          data-kind="delivery"
+          bind:tap="onPhraseKind"
+        >{{copy.checkout.delivery}}</view>
+        <view
+          class="phrase-tab {{phraseKind === 'pickup' ? 'on' : ''}}"
+          data-kind="pickup"
+          bind:tap="onPhraseKind"
+        >{{copy.checkout.pickup}}</view>
+      </view>
+      <view class="phrase-hint">{{phraseKind === 'pickup' ? copy.settings.pickupPhraseHint : copy.settings.deliveryPhraseHint}}</view>
+      <view class="slot-row" wx:for="{{phraseKind === 'pickup' ? pickupRemarkPhrases : deliveryRemarkPhrases}}" wx:key="*this">
+        <text class="slot-label">{{item}}</text>
+        <text class="link-muted" data-kind="{{phraseKind}}" data-text="{{item}}" bind:tap="removePhrase">{{copy.settings.remove}}</text>
+      </view>
+      <view class="slot-add">
+        <input
+          class="cell-input grow"
+          placeholder="{{phraseKind === 'pickup' ? copy.settings.pickupPhrasePlaceholder : copy.settings.deliveryPhrasePlaceholder}}"
+          value="{{phraseKind === 'pickup' ? pickupPhraseDraft : deliveryPhraseDraft}}"
+          data-kind="{{phraseKind}}"
+          bindinput="onPhraseDraft"
+          bindconfirm="addPhrase"
+          maxlength="8"
+          confirm-type="done"
+        />
+        <button class="btn-inline" data-kind="{{phraseKind}}" bind:tap="addPhrase">{{copy.settings.phraseAdd}}</button>
+      </view>
+    </view>
   </view>
 
   <!-- 2. 首页配置 -->
-  <view class="sec">
+  <view class="sec" wx:if="{{settingsTab === 'home'}}">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.homeSec}}</view>
       <view class="sec-desc">{{copy.settings.homeHint}}</view>
@@ -156,7 +198,7 @@
   </view>
 
   <!-- 3. 积分 -->
-  <view class="sec">
+  <view class="sec" wx:if="{{settingsTab === 'points'}}">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.pointsSec}}</view>
       <view class="sec-desc">{{copy.settings.pointsHint}}</view>
@@ -192,7 +234,7 @@
   </view>
 
   <!-- 4. 商品实景 -->
-  <view class="sec">
+  <view class="sec" wx:if="{{settingsTab === 'live'}}">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.liveSec}}</view>
       <view class="sec-desc">{{copy.settings.liveHint}}</view>
@@ -213,7 +255,7 @@
   </view>
 
   <!-- 5. 自提 -->
-  <view class="sec">
+  <view class="sec" wx:if="{{settingsTab === 'slots'}}">
     <view class="sec-head">
       <view class="sec-title">{{copy.settings.slotsSec}}</view>
       <view class="sec-desc">{{copy.settings.slotsHint}}</view>

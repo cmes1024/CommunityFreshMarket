@@ -1,6 +1,7 @@
 package com.communityfreshmarket.catalog;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class StoreSummaryResponse {
 
@@ -8,6 +9,10 @@ public class StoreSummaryResponse {
   private String name;
   private String contactPhone;
   private String contactNote;
+  /** 配送结算备注快捷短语；空列表=不展示 */
+  private List<String> deliveryRemarkPhrases = List.of();
+  /** 自提结算备注快捷短语；空列表=不展示 */
+  private List<String> pickupRemarkPhrases = List.of();
   /** 配送起送金额（分）；0=不限制 */
   private int minDeliveryFen;
   private String heroImageUrl;
@@ -51,6 +56,22 @@ public class StoreSummaryResponse {
 
   public void setContactNote(String contactNote) {
     this.contactNote = contactNote;
+  }
+
+  public List<String> getDeliveryRemarkPhrases() {
+    return deliveryRemarkPhrases;
+  }
+
+  public void setDeliveryRemarkPhrases(List<String> deliveryRemarkPhrases) {
+    this.deliveryRemarkPhrases = deliveryRemarkPhrases == null ? List.of() : deliveryRemarkPhrases;
+  }
+
+  public List<String> getPickupRemarkPhrases() {
+    return pickupRemarkPhrases;
+  }
+
+  public void setPickupRemarkPhrases(List<String> pickupRemarkPhrases) {
+    this.pickupRemarkPhrases = pickupRemarkPhrases == null ? List.of() : pickupRemarkPhrases;
   }
 
   public int getMinDeliveryFen() {

@@ -4,7 +4,30 @@ const { fenToYuan, yuanPlain } = require("../../../utils/money");
 const { syncCartCount } = require("../../../utils/cartSync");
 const { requestSubscribe } = require("../../../utils/subscribe");
 
-const PHRASES = ["放门口", "少葱", "称重点", "不要电话"];
+function phrasesFromList(raw, previous) {
+  const selected = new Set((previous || []).filter((item) => item.on).map((item) => item.text));
+  const list = Array.isArray(raw) ? raw : [];
+  return list
+    .map((text) => String(text || "").trim())
+    .filter(Boolean)
+    .map((text) => ({ text, on: selected.has(text) }));
+}
+
+function phraseLists(store, deliveryPrevious, pickupPrevious) {
+  const split =
+    store &&
+    (Array.isArray(store.deliveryRemarkPhrases) || Array.isArray(store.pickupRemarkPhrases));
+  const deliveryRaw = split ? store.deliveryRemarkPhrases : store && store.remarkPhrases;
+  const pickupRaw = split ? store.pickupRemarkPhrases : store && store.remarkPhrases;
+  return {
+    deliveryPhrases: phrasesFromList(deliveryRaw, deliveryPrevious),
+    pickupPhrases: phrasesFromList(pickupRaw, pickupPrevious),
+  };
+}
+
+function visiblePhrases(fulfillment, deliveryPhrases, pickupPhrases) {
+  return fulfillment === "PICKUP" ? pickupPhrases : deliveryPhrases;
+}
 
 function splitSlotLabel(label) {
   const text = String(label || "").trim();
@@ -46,7 +69,9 @@ Page({
     address: null,
     slots: [],
     pickupSlotId: 0,
-    phrases: PHRASES.map((text) => ({ text, on: false })),
+    deliveryPhrases: [],
+    pickupPhrases: [],
+    phrases: [],
     remark: "",
     totalFen: 0,
     totalYuan: "0.00",
@@ -84,7 +109,15 @@ Page({
     const minDeliveryFen = Number(store && store.minDeliveryFen) || 0;
     const coupons = this.buildCoupons(mine, totalFen);
     const couponClaimId = this.pickCouponId(coupons);
+    const lists = phraseLists(store, this.data.deliveryPhrases, this.data.pickupPhrases);
+    const phrases = visiblePhrases(this.data.fulfillment, lists.deliveryPhrases, lists.pickupPhrases);
     this.setData({
+      deliveryPhrases: lists.deliveryPhrases,
+      pickupPhrases: lists.pickupPhrases,
+      phrases,
+      remarkPlaceholder: phrases.length
+        ? copy.checkout.remarkPlaceholder
+        : copy.checkout.remarkOnly,
       totalFen,
       totalYuan: fenToYuan(totalFen),
       coupons,
@@ -179,8 +212,13 @@ Page({
   },
   switchF(e) {
     const fulfillment = e.currentTarget.dataset.v;
+    const phrases = visiblePhrases(fulfillment, this.data.deliveryPhrases, this.data.pickupPhrases);
     this.setData({
       fulfillment,
+      phrases,
+      remarkPlaceholder: phrases.length
+        ? copy.checkout.remarkPlaceholder
+        : copy.checkout.remarkOnly,
       ...deliveryView(fulfillment, this.data.totalFen, this.data.minDeliveryFen),
     });
   },
@@ -194,7 +232,8 @@ Page({
     const text = e.currentTarget.dataset.text;
     const phrases = this.data.phrases.map((p) => (p.text === text ? { ...p, on: !p.on } : p));
     const extra = phrases.filter((p) => p.on).map((p) => p.text).join("，");
-    this.setData({ phrases, remark: extra });
+    const key = this.data.fulfillment === "PICKUP" ? "pickupPhrases" : "deliveryPhrases";
+    this.setData({ phrases, [key]: phrases, remark: extra });
   },
   onRemark(e) {
     this.setData({ remark: e.detail.value });

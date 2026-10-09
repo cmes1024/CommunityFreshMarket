@@ -852,6 +852,114 @@ button:focus-visible,
   font-weight: 600;
 }
 
+.settings-nav {
+  display: flex;
+  margin: -16px -16px 12px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.settings-tab {
+  position: relative;
+  flex: 1;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.settings-tab.active {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.settings-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--color-primary);
+}
+
+.phrase-settings {
+  padding: 0 0 12px;
+}
+
+.phrase-nav {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.phrase-tab {
+  position: relative;
+  flex: 1;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.phrase-tab.active {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.phrase-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 28%;
+  right: 28%;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--color-primary);
+}
+
+.phrase-settings .hint {
+  margin: 8px 0;
+}
+
+.phrase-editor {
+  width: 100%;
+}
+
+.phrase-add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.settings-cell .phrase-add input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: var(--color-surface);
+}
+
+.phrase-add button {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line);
+  background: var(--color-mist);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .field input,
 .field textarea,
 .field select {

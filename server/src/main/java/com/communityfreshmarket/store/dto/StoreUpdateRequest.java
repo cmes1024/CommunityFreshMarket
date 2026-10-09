@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class StoreUpdateRequest {
 
@@ -18,6 +19,12 @@ public class StoreUpdateRequest {
 
   @Size(max = 1000)
   private String contactNote;
+
+  /** 配送结算备注快捷短语；空列表表示清除。null 表示本次不改 */
+  private List<String> deliveryRemarkPhrases;
+
+  /** 自提结算备注快捷短语；空列表表示清除。null 表示本次不改 */
+  private List<String> pickupRemarkPhrases;
 
   /** 配送起送金额（分）；0=不限制 */
   @Min(0)
@@ -84,6 +91,22 @@ public class StoreUpdateRequest {
 
   public void setContactNote(String contactNote) {
     this.contactNote = contactNote;
+  }
+
+  public List<String> getDeliveryRemarkPhrases() {
+    return deliveryRemarkPhrases;
+  }
+
+  public void setDeliveryRemarkPhrases(List<String> deliveryRemarkPhrases) {
+    this.deliveryRemarkPhrases = deliveryRemarkPhrases;
+  }
+
+  public List<String> getPickupRemarkPhrases() {
+    return pickupRemarkPhrases;
+  }
+
+  public void setPickupRemarkPhrases(List<String> pickupRemarkPhrases) {
+    this.pickupRemarkPhrases = pickupRemarkPhrases;
   }
 
   public Integer getMinDeliveryFen() {

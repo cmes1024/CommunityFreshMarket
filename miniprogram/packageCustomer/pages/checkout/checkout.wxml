@@ -27,7 +27,7 @@
   </view>
   <view class="card">
     <view class="muted">{{copy.checkout.remarkLabel}}</view>
-    <view class="phrases">
+    <view class="phrases" wx:if="{{phrases.length}}">
       <view class="chip {{item.on ? 'active' : ''}}" wx:for="{{phrases}}" wx:key="text" data-text="{{item.text}}" bind:tap="togglePhrase">{{item.text}}</view>
     </view>
     <textarea
@@ -35,7 +35,7 @@
       style="height: 120rpx;"
       value="{{remark}}"
       bindinput="onRemark"
-      placeholder="{{copy.checkout.remarkPlaceholder}}"
+      placeholder="{{remarkPlaceholder || copy.checkout.remarkPlaceholder}}"
       auto-height
       disable-default-padding
       show-confirm-bar="{{false}}"
