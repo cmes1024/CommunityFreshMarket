@@ -41,12 +41,12 @@
   width: 96rpx;
   height: 96rpx;
   border-radius: 16rpx;
-  background: #6ee7b7;
+  background: var(--color-ph-veg);
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
 }
-.thumb.sold { background: #e5e7eb; }
+.thumb.sold { background: var(--color-ph-sold); }
 .thumb-img {
   width: 100%;
   height: 100%;
@@ -92,7 +92,7 @@
   right: 24rpx;
   bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 16rpx);
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
   border-radius: var(--radius-pill);
   min-height: 88rpx;
   padding: 0 28rpx;
@@ -102,7 +102,7 @@
   z-index: 15;
   box-shadow: 0 16rpx 48rpx rgba(15, 118, 110, 0.2);
 }
-.mini-bar .price { color: #fff; font-weight: 700; }
+.mini-bar .price { color: var(--color-on-primary); font-weight: 700; }
 .go {
   background: var(--color-cta);
   padding: 16rpx 28rpx;

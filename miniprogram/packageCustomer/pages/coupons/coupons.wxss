@@ -80,17 +80,17 @@
   line-height: 1;
 }
 .coupon-state.claimed {
-  background: #d1fae5;
-  color: #166534;
+  background: var(--color-mist);
+  color: var(--color-primary);
 }
 .coupon-state.soldout,
 .coupon-state.past {
-  background: #f4f7f6;
+  background: var(--color-fill);
   color: var(--color-muted);
   border: 1rpx solid var(--color-line);
 }
 .coupon-state.inuse {
-  background: #fef3c7;
+  background: var(--color-warn-soft);
   color: var(--color-warn);
 }
 .history-sheet {

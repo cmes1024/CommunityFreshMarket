@@ -18,8 +18,8 @@
 .chip {
   padding: 6rpx 16rpx;
   border-radius: var(--radius-pill);
-  background: #cffafe;
-  color: #0e7490;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   font-size: 22rpx;
   font-weight: 600;
   flex-shrink: 0;
@@ -101,7 +101,7 @@
 
 .h-step.current::before {
   background: var(--color-price);
-  box-shadow: 0 0 0 6rpx #ffedd5;
+  box-shadow: 0 0 0 6rpx var(--color-warn-soft);
 }
 
 .summary-card {

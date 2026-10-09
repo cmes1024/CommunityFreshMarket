@@ -14,7 +14,7 @@
   bottom: 0;
   left: 0;
   z-index: var(--policyzindex);
-  background: #EDEDED;
+  background: var(--color-fill);
   border-top-left-radius: 24rpx;
   border-top-right-radius: 24rpx;
   height: 532rpx;
@@ -25,7 +25,7 @@
 }
 
 .title {
-  color: #333;
+  color: var(--color-text);
   font-size: 36rpx;
   line-height: 48rpx;
   margin: 20rpx 0 40rpx;
@@ -36,13 +36,13 @@
   height: 316rpx;
   font-size: 28rpx;
   line-height: 40rpx;
-  color: #333;
+  color: var(--color-text);
 }
 
 .desc {}
 
 .policy-txt {
-  color: #247DFF;
+  color: var(--color-primary);
 }
 
 .btns {
@@ -56,9 +56,9 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  background: #FFFFFF;
+  background: var(--color-surface);
   border-radius: 8rpx;
-  color: #07C160;
+  color: var(--color-primary);
 }
 
 .btns-agree {
@@ -67,9 +67,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #07C160;
+  background: var(--color-primary);
   border-radius: 8rpx;
-  color: white;
+  color: var(--color-on-primary);
   margin-left: 20rpx;
 }
 

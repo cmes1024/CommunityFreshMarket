@@ -11,13 +11,13 @@
   isolation: isolate;
   padding: 44rpx 40rpx 40rpx;
   background: var(--color-primary);
-  color: #f0fdfa;
+  color: var(--color-on-ink);
   min-height: 280rpx;
   box-sizing: border-box;
   overflow: hidden;
 }
 .hero.has-img {
-  background: #0f3d38;
+  background: var(--color-ink);
 }
 .hero-bg {
   position: absolute;
@@ -94,8 +94,8 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.dot.truck { background: #99f6e4; }
-.dot.store { background: #6ee7b7; }
+.dot.truck { background: var(--color-secondary); }
+.dot.store { background: var(--color-primary); }
 .section {
   padding: 32rpx 32rpx 0;
 }
@@ -154,12 +154,12 @@
   height: 0;
   padding-bottom: 100%;
   border-radius: 0;
-  background: #99f6e4;
+  background: var(--color-ph-veg);
   position: relative;
   overflow: hidden;
 }
-.thumb.veg { background: #6ee7b7; }
-.thumb.sold { background: #fcd34d; }
+.thumb.veg { background: var(--color-ph-veg); }
+.thumb.sold { background: var(--color-ph-sold); }
 .thumb-img {
   position: absolute;
   left: 0;
@@ -170,8 +170,8 @@
 .sold-tag {
   position: absolute;
   inset: 0;
-  background: rgba(19, 78, 74, 0.5);
-  color: #fff;
+  background: var(--color-scrim);
+  color: var(--color-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;

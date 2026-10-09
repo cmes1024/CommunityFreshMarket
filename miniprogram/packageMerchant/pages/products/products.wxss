@@ -31,7 +31,7 @@
 .m-search-input {
   min-height: 68rpx;
   padding: 0 56rpx 0 24rpx;
-  background: #f4f7f6;
+  background: var(--color-fill);
   border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
   font-size: 26rpx;
@@ -102,11 +102,11 @@
 .m-filter-chip.on {
   border-color: var(--color-primary);
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .m-filter-chip.on text {
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .m-grid {
@@ -210,12 +210,12 @@
 }
 
 .m-card.has-cover .name {
-  color: #fff;
+  color: var(--color-on-primary);
   text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.35);
 }
 
 .m-card.has-cover .price {
-  color: #fde68a;
+  color: var(--color-price-on-dark);
 }
 
 .m-card.has-cover .unit,
@@ -243,7 +243,7 @@
   border-radius: 50%;
   border: 2rpx solid rgba(255, 255, 255, 0.92);
   background: rgba(19, 78, 74, 0.35);
-  color: #fff;
+  color: var(--color-on-primary);
   font-size: 24rpx;
   line-height: 36rpx;
   text-align: center;
@@ -252,14 +252,14 @@
 
 .m-card:not(.has-cover) .m-check {
   border-color: var(--color-line);
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-primary);
 }
 
 .m-check.on {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .batch-bar {
@@ -268,7 +268,7 @@
   right: 0;
   bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   z-index: 19;
-  background: #fff;
+  background: var(--color-surface);
   border-top: 1rpx solid var(--color-line);
   padding: 12rpx 16rpx 16rpx;
   box-sizing: border-box;
@@ -307,7 +307,7 @@
 
 .batch-chip.danger {
   color: var(--color-danger);
-  border-color: #fecaca;
+  border-color: var(--color-danger-line);
 }
 
 .m-actions {
@@ -337,7 +337,7 @@
 }
 
 .m-act.on {
-  color: #fff;
+  color: var(--color-on-primary);
   font-weight: 600;
   background: var(--color-primary);
   border-color: var(--color-primary);

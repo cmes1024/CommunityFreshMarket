@@ -2,18 +2,43 @@
 @import "/styles/common.wxss";
 
 page {
+  /* 品牌：一条青绿。主按钮与导航同色 */
   --color-primary: #0f766e;
-  --color-secondary: #2dd4bf;
-  --color-cta: #16a34a;
+  --color-primary-pressed: #115e59;
+  --color-secondary: #0d9488;
+  --color-cta: #0f766e;
+  --color-on-primary: #ffffff;
+  --color-on-ink: #f0fdfa;
+
+  /* 表面 */
   --color-background: #f0fdfa;
   --color-surface: #ffffff;
+  --color-mist: #ccfbf1;
+  --color-fill: #f4f7f6;
+  --color-line: #cce5e1;
+  --color-ink: #0f3d38;
+
+  /* 文字 */
   --color-text: #134e4a;
   --color-muted: #5b7c78;
-  --color-line: #cce5e1;
+
+  /* 语义：价格 / 待处理 / 危险。正向状态复用 mist + primary */
   --color-price: #d97706;
-  --color-danger: #dc2626;
+  --color-price-on-dark: #fde68a;
   --color-warn: #b45309;
-  --color-mist: #ccfbf1;
+  --color-warn-soft: #fef6e8;
+  --color-warn-line: #f3d7a8;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
+  --color-danger-line: #fecaca;
+
+  /* 无图占位 */
+  --color-ph-veg: #c5e8e1;
+  --color-ph-fruit: #f4e0b0;
+  --color-ph-sold: #e4eae8;
+  --color-ph-deep: #b7d4ce;
+  --color-scrim: rgba(19, 78, 74, 0.5);
+  --shadow-float: 0 16rpx 48rpx rgba(15, 118, 110, 0.16);
   --radius: 24rpx;
   --radius-pill: 999rpx;
   --space-xs: 8rpx;
@@ -42,7 +67,7 @@ page {
   border-radius: var(--radius);
   padding: 16rpx 28rpx;
   margin-bottom: 16rpx;
-  border: 1rpx solid rgba(204, 229, 225, 0.65);
+  border: 1rpx solid var(--color-line);
   gap: 10rpx;
   display: flex;
   flex-direction: column;
@@ -74,12 +99,12 @@ page {
 
 .btn-cta {
   background: var(--color-cta);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .btn-primary {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .btn-ghost {
@@ -91,7 +116,7 @@ page {
 .btn-danger {
   background: transparent;
   color: var(--color-danger);
-  border: 2rpx solid #fecaca;
+  border: 2rpx solid var(--color-danger-line);
 }
 
 .btn[disabled] {
@@ -129,5 +154,5 @@ page {
 
 .chip.active {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }

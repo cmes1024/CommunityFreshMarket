@@ -108,7 +108,7 @@
   margin-bottom: 16rpx;
 }
 .field-input {
-  background: #f4f7f6;
+  background: var(--color-fill);
   border: 1rpx solid var(--color-line);
   border-radius: 16rpx;
   padding: 20rpx 24rpx;

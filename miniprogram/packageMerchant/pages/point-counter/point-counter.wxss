@@ -49,7 +49,7 @@
   gap: 20rpx;
   margin-top: 20rpx;
   padding: 20rpx;
-  background: #f0fdfa;
+  background: var(--color-background);
   border-radius: 20rpx;
 }
 
@@ -63,7 +63,7 @@
 
 .who-fallback {
   background: var(--color-cta);
-  color: #f0fdfa;
+  color: var(--color-on-ink);
   font-size: 36rpx;
   font-weight: 700;
   display: flex;
@@ -106,7 +106,7 @@
   align-items: center;
   max-width: 100%;
   padding: 6rpx 18rpx 6rpx 6rpx;
-  background: #f4f7f6;
+  background: var(--color-fill);
   border-radius: 999rpx;
   border: 2rpx solid var(--color-line);
   box-sizing: border-box;
@@ -122,7 +122,7 @@
 
 .person-fallback {
   background: var(--color-cta);
-  color: #f0fdfa;
+  color: var(--color-on-ink);
   font-size: 22rpx;
   font-weight: 700;
   display: flex;
@@ -143,11 +143,11 @@
 }
 
 .person.on .person-name {
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .person.on .person-fallback {
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-cta);
 }
 
@@ -213,7 +213,7 @@
   align-items: center;
   margin-top: 16rpx;
   padding: 8rpx 8rpx 8rpx 24rpx;
-  background: #f4f7f6;
+  background: var(--color-fill);
   border: 1rpx solid var(--color-line);
   border-radius: 16rpx;
 }

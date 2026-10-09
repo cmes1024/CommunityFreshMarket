@@ -18,7 +18,7 @@ page {
 .side {
   width: 176rpx;
   height: 100%;
-  background: #d9f3ef;
+  background: var(--color-mist);
   flex-shrink: 0;
   align-self: stretch;
 }
@@ -68,14 +68,14 @@ page {
   width: 144rpx;
   height: 144rpx;
   border-radius: 20rpx;
-  background: #6ee7b7;
+  background: var(--color-ph-veg);
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
 }
 
 .thumb.sold {
-  background: #fcd34d;
+  background: var(--color-ph-sold);
 }
 
 .thumb-img {
@@ -86,8 +86,8 @@ page {
 .sold-tag {
   position: absolute;
   inset: 0;
-  background: rgba(19, 78, 74, 0.5);
-  color: #fff;
+  background: var(--color-scrim);
+  color: var(--color-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,7 +136,7 @@ page {
   right: 24rpx;
   bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 16rpx);
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
   border-radius: var(--radius-pill);
   min-height: 88rpx;
   padding: 0 28rpx;
@@ -148,7 +148,7 @@ page {
 }
 
 .mini-bar .price {
-  color: #fff;
+  color: var(--color-on-primary);
   font-weight: 700;
 }
 

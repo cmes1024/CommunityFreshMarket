@@ -53,7 +53,7 @@
 }
 .h-node.current .h-dot {
   background: var(--color-price);
-  box-shadow: 0 0 0 6rpx #ffedd5;
+  box-shadow: 0 0 0 6rpx var(--color-warn-soft);
 }
 .h-node.current .h-label {
   color: var(--color-price);

@@ -16,7 +16,7 @@
   max-height: 36rpx;
   border-radius: 50%;
   background: var(--color-cta);
-  color: #fff;
+  color: var(--color-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,7 +29,7 @@
   margin: 0;
 }
 .step-btn.minus {
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-cta);
   border: 2rpx solid var(--color-cta);
 }

@@ -43,7 +43,7 @@
 }
 
 .chip.off {
-  background: #fee2e2;
+  background: var(--color-danger-soft);
   color: var(--color-danger);
 }
 
@@ -58,7 +58,7 @@
 
 .field-input {
   min-height: 88rpx;
-  background: #f4f7f6;
+  background: var(--color-fill);
   border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
   padding: 0 24rpx;

@@ -35,13 +35,13 @@
 
 .hero {
   height: 360rpx;
-  background: #6ee7b7;
+  background: var(--color-ph-veg);
   overflow: hidden;
   margin: 0 24rpx;
   border-radius: 20rpx;
 }
 .hero.fruit {
-  background: #fcd34d;
+  background: var(--color-ph-fruit);
 }
 .hero-swiper {
   width: 100%;
@@ -68,7 +68,7 @@
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
   background: rgba(0, 0, 0, 0.45);
-  color: #fff;
+  color: var(--color-on-primary);
   font-size: 22rpx;
 }
 .live-req {
@@ -77,7 +77,7 @@
   bottom: 16rpx;
   padding: 8rpx 16rpx;
   border-radius: 999rpx;
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-primary);
   font-size: 22rpx;
   font-weight: 600;
@@ -107,13 +107,13 @@
   flex-shrink: 0;
   padding: 8rpx 18rpx;
   border-radius: 999rpx;
-  background: #ccfbf1;
+  background: var(--color-mist);
   color: var(--color-primary, #0f766e);
   font-size: 22rpx;
   font-weight: 600;
 }
 .chip.sold {
-  background: #fee2e2;
+  background: var(--color-danger-soft);
   color: var(--color-danger, #dc2626);
 }
 
@@ -136,14 +136,14 @@
 }
 
 .info-block {
-  background: #fff;
+  background: var(--color-surface);
   border: 1rpx solid var(--color-line, #cce5e1);
   border-radius: 20rpx;
   padding: 24rpx;
 }
 .info-block.warn {
-  border-color: #fde68a;
-  background: #fffbeb;
+  border-color: var(--color-warn-line);
+  background: var(--color-warn-soft);
 }
 .h4 {
   font-weight: 600;
@@ -170,7 +170,7 @@
   min-height: 64rpx;
   line-height: 64rpx;
   font-size: 26rpx;
-  background: var(--color-mist, #ecfdf5);
+  background: var(--color-mist, #ccfbf1);
   color: var(--color-primary, #0f766e);
   border-radius: 16rpx;
   border: none;
@@ -185,7 +185,7 @@
   align-items: center;
   gap: 16rpx;
   padding: 16rpx 28rpx calc(16rpx + env(safe-area-inset-bottom));
-  background: #fff;
+  background: var(--color-surface);
   border-top: 1rpx solid var(--color-line, #cce5e1);
 }
 
@@ -196,8 +196,8 @@
   line-height: 72rpx;
   padding: 0 24rpx;
   border-radius: 20rpx;
-  background: var(--color-cta, #16a34a);
-  color: #fff;
+  background: var(--color-cta, #0f766e);
+  color: var(--color-on-primary);
   font-size: 28rpx;
   font-weight: 600;
   border: none;

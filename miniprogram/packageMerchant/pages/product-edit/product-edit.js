@@ -211,7 +211,7 @@ Page({
       title: copy.merchant.removeProduct,
       content: copy.merchant.removeProductConfirm,
       confirmText: "删除",
-      confirmColor: "#b91c1c",
+      confirmColor: "#DC2626",
       success: async (res) => {
         if (!res.confirm) return;
         this._removing = true;

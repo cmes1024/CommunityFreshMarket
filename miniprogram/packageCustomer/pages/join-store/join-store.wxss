@@ -19,7 +19,7 @@
   padding: 0 28rpx;
   margin-bottom: 28rpx;
   box-sizing: border-box;
-  background: #f4f7f6;
+  background: var(--color-fill);
   border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
   font-size: 34rpx;

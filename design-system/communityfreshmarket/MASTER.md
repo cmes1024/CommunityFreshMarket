@@ -33,21 +33,30 @@
 
 ## Color Palette
 
+一条青绿做品牌，外加价格 / 待处理 / 危险三组语义色。不再使用第二套草绿、荧光青、青色或微信绿。细则见 `docs/plans/2026-10-08-color-system.md`。
+
 | Role | Hex | CSS Variable | 用途 |
 |------|-----|--------------|------|
-| Primary | `#0F766E` | `--color-primary` | Tab 选中、链接、主结构 |
-| Secondary | `#2DD4BF` | `--color-secondary` | 浅强调、进度点 |
-| CTA | `#16A34A` | `--color-cta` | 主按钮（预约/加购） |
+| Primary | `#0F766E` | `--color-primary` / `--color-cta` | 选中、链接、主按钮（预约/加购） |
+| Primary pressed | `#115E59` | `--color-primary-pressed` | 按下 |
+| Secondary | `#0D9488` | `--color-secondary` | 进度、描边强调（同色相、浅一档） |
 | Background | `#F0FDFA` | `--color-background` | 页底 |
-| Surface | `#FFFFFF` | `--color-surface` | 列表行底 |
+| Surface | `#FFFFFF` | `--color-surface` | 卡片、按钮上的白 |
+| Mist | `#CCFBF1` | `--color-mist` | 有货、选中、正向浅底 |
+| Fill | `#F4F7F6` | `--color-fill` | 输入、禁用、凹槽 |
 | Text | `#134E4A` | `--color-text` | 正文 |
 | Muted | `#5B7C78` | `--color-muted` | 次要说明 |
 | Line | `#CCE5E1` | `--color-line` | 分割 |
-| Price | `#D97706` | `--color-price` | 价格 |
+| Ink | `#0F3D38` | `--color-ink` | 深色头图、次级实心块 |
+| Price | `#D97706` | `--color-price` | 价格数字 |
+| Price on dark | `#FDE68A` | `--color-price-on-dark` | 深色封面上的价格 |
+| Warn | `#B45309` | `--color-warn` | 待确认文字 |
+| Warn soft / line | `#FEF6E8` / `#F3D7A8` | `--color-warn-soft` / `--color-warn-line` | 待确认底与边 |
 | Danger | `#DC2626` | `--color-danger` | 售罄、取消 |
-| Warn | `#B45309` | `--color-warn` | 待确认徽章 |
+| Danger soft / line | `#FEF2F2` / `#FECACA` | `--color-danger-soft` / `--color-danger-line` | 危险底与边 |
+| Placeholder | `#C5E8E1` / `#F4E0B0` / `#E4EAE8` | `--color-ph-veg` / `--color-ph-fruit` / `--color-ph-sold` | 无图：菜、果、售罄 |
 
-对比：正文与背景满足 ≥ 4.5:1；主按钮白字于 `#16A34A` 可读。
+对比：正文与页底 ≥ 4.5:1；白字于 `#0F766E` 可读。有货与「已到店」都走青绿（浅底或实心），不另起青色。
 
 ---
 

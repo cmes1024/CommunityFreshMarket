@@ -69,7 +69,7 @@
 .field-input {
   width: 100%;
   min-height: 72rpx;
-  background: #f4f7f6;
+  background: var(--color-fill);
   border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
   padding: 0 20rpx;
@@ -89,7 +89,7 @@
 .field-textarea {
   width: 100%;
   min-height: 120rpx;
-  background: #f4f7f6;
+  background: var(--color-fill);
   border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
   padding: 16rpx 20rpx;
@@ -172,7 +172,7 @@
   height: 40rpx;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.45);
-  color: #fff;
+  color: var(--color-on-primary);
   font-size: 28rpx;
   line-height: 40rpx;
   text-align: center;
@@ -207,7 +207,7 @@
   width: 76rpx;
   height: 44rpx;
   border-radius: 22rpx;
-  background: #b6d4cf;
+  background: var(--color-ph-deep);
   position: relative;
   flex-shrink: 0;
   transition: background 0.2s ease;
@@ -221,7 +221,7 @@
   width: 36rpx;
   height: 36rpx;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.12);
   transition: transform 0.2s ease;
 }

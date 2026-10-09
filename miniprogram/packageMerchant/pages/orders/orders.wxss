@@ -31,7 +31,7 @@
   line-height: 64rpx;
   font-size: 24rpx;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-on-primary);
   background: var(--color-cta);
   border-radius: var(--radius-pill);
   border: none;
@@ -96,18 +96,18 @@
 }
 
 .tab-badge.warn {
-  background: #ffedd5;
+  background: var(--color-warn-soft);
   color: var(--color-warn);
 }
 
 .status-tab.active .tab-badge {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .status-tab.active .tab-badge.warn {
   background: var(--color-price);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .order-list {
@@ -115,7 +115,7 @@
 }
 
 .order-list.is-urgent {
-  background: linear-gradient(180deg, #fff7ed 0%, var(--color-background) 240rpx);
+  background: linear-gradient(180deg, var(--color-warn-soft) 0%, var(--color-background) 240rpx);
 }
 
 .order-card {
@@ -128,8 +128,8 @@
 }
 
 .order-card.urgent {
-  border-color: #fdba74;
-  background: #fffbeb;
+  border-color: var(--color-warn-line);
+  background: var(--color-warn-soft);
 }
 
 .order-card.pulse {
@@ -138,7 +138,7 @@
 
 @keyframes pulse-border {
   50% {
-    border-color: #0891b2;
+    border-color: var(--color-primary);
   }
 }
 
@@ -162,13 +162,13 @@
 }
 
 .chip.warn {
-  background: #ffedd5;
+  background: var(--color-warn-soft);
   color: var(--color-warn);
 }
 
 .chip.pulse-chip {
-  background: #cffafe;
-  color: #0e7490;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   animation: pulse-chip 1.2s ease infinite;
 }
 
@@ -205,7 +205,7 @@
   font-size: 24rpx;
   font-weight: 600;
   border: 2rpx solid var(--color-line);
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-text);
   margin: 0;
 }
@@ -216,7 +216,7 @@
 
 .act.primary {
   background: var(--color-cta);
-  color: #fff;
+  color: var(--color-on-primary);
   border-color: var(--color-cta);
 }
 

@@ -11,7 +11,7 @@
   padding: 28rpx;
   margin-bottom: 16rpx;
   background: var(--color-surface);
-  border: 1rpx solid rgba(204, 229, 225, 0.9);
+  border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
 }
 
@@ -20,7 +20,7 @@
   height: 112rpx;
   border-radius: 50%;
   background: var(--color-primary);
-  color: #f0fdfa;
+  color: var(--color-on-ink);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,7 +53,7 @@
   min-height: 176rpx;
   padding: 24rpx 20rpx 20rpx;
   background: var(--color-surface);
-  border: 1rpx solid rgba(204, 229, 225, 0.9);
+  border: 1rpx solid var(--color-line);
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
@@ -74,12 +74,12 @@
 }
 
 .shortcut-alert {
-  background: #fef2f2;
-  border-color: #fecaca;
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger-line);
 }
 
 .shortcut-alert.shortcut-on {
-  background: #fee2e2;
+  background: var(--color-danger-soft);
 }
 
 .mark {
@@ -99,11 +99,11 @@
 }
 
 .mark-green {
-  background: #dcfce7;
+  background: var(--color-mist);
 }
 
 .mark-amber {
-  background: #fef3c7;
+  background: var(--color-warn-soft);
 }
 
 .mark image {
@@ -147,7 +147,7 @@
   padding: 0 10rpx;
   border-radius: 999rpx;
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-on-primary);
   font-size: 22rpx;
   font-weight: 700;
   line-height: 36rpx;
@@ -160,7 +160,7 @@
   padding: 32rpx;
   border-radius: var(--radius);
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .entry-on {
@@ -168,7 +168,7 @@
 }
 
 .merchant-entry.alt {
-  background: #3f6f6a;
+  background: var(--color-ink);
 }
 
 .me-title {
@@ -227,7 +227,7 @@
   width: 360rpx;
   height: 360rpx;
   margin: 0 auto 16rpx;
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 12rpx;
 }
 

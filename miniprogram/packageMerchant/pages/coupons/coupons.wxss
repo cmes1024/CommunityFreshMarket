@@ -119,7 +119,7 @@
   padding: 0 20rpx;
   margin: 0;
   box-sizing: border-box;
-  background: #f4f7f6;
+  background: var(--color-fill);
   border: 1rpx solid var(--color-line);
   border-radius: 16rpx;
   font-size: 28rpx;

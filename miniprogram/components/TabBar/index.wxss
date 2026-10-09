@@ -5,7 +5,7 @@
   bottom: 0;
   z-index: 20;
   display: flex;
-  background: #fff;
+  background: var(--color-surface);
   border-top: 1rpx solid var(--color-line);
   padding-bottom: env(safe-area-inset-bottom);
   height: calc(116rpx + env(safe-area-inset-bottom));
@@ -40,7 +40,7 @@
   padding: 0 6rpx;
   border-radius: 999rpx;
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-on-primary);
   font-size: 18rpx;
   line-height: 28rpx;
   text-align: center;

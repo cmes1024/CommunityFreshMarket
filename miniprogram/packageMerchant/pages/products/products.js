@@ -184,7 +184,7 @@ Page({
         title: copy.merchant.removeProduct,
         content,
         confirmText: "删除",
-        confirmColor: "#b91c1c",
+        confirmColor: "#DC2626",
         success: (res) => {
           if (res.confirm) this.submitBatch(op, ids);
         },
