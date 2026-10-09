@@ -2,6 +2,7 @@ const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { chooseAndUpload } = require("../../../utils/upload");
 const { productDetailMode } = require("../../../utils/productOpen");
+const { memberCodeEntry } = require("../../../utils/memberCodeEntry");
 const { yuanPlain } = require("../../../utils/money");
 const { formatRatio, parseRatio, sanitizeRatioInput } = require("../../../utils/pointsRatio");
 
@@ -39,6 +40,7 @@ Page({
     addingSlot: false,
     homeProductCols: 2,
     productDetailMode: "SHEET",
+    memberCodeEntry: "PROFILE",
   },
   async onShow() {
     this.setData({ copy });
@@ -51,6 +53,7 @@ Page({
       slots,
       homeProductCols: normalizeCols(store.homeProductCols),
       productDetailMode: productDetailMode(store),
+      memberCodeEntry: memberCodeEntry(store),
     });
   },
   onStore(e) {
@@ -70,6 +73,9 @@ Page({
   onDetailMode(e) {
     this.setData({ productDetailMode: productDetailMode({ productDetailMode: e.currentTarget.dataset.mode }) });
   },
+  onMemberCodeEntry(e) {
+    this.setData({ memberCodeEntry: memberCodeEntry({ memberCodeEntry: e.currentTarget.dataset.entry }) });
+  },
   onSlotLabel(e) {
     this.setData({ slotLabel: e.detail.value });
   },
@@ -84,6 +90,7 @@ Page({
         store: formStore(store),
         homeProductCols: normalizeCols(store.homeProductCols),
         productDetailMode: productDetailMode(store),
+        memberCodeEntry: memberCodeEntry(store),
       });
       wx.showToast({ title: copy.settings.heroSaved, icon: "none" });
     } catch (e) {}
@@ -95,6 +102,7 @@ Page({
         store: formStore(store),
         homeProductCols: normalizeCols(store.homeProductCols),
         productDetailMode: productDetailMode(store),
+        memberCodeEntry: memberCodeEntry(store),
       });
       wx.showToast({ title: copy.settings.heroCleared, icon: "none" });
     } catch (e) {}
@@ -113,6 +121,7 @@ Page({
     }
     const cols = this.data.homeProductCols;
     const detailMode = this.data.productDetailMode;
+    const codeEntry = memberCodeEntry({ memberCodeEntry: this.data.memberCodeEntry });
     const { pointsPerYuan, pickImageTtlMinutes } = this.data.store;
     const ttl = Number(pickImageTtlMinutes);
     if (pickImageTtlMinutes === undefined || pickImageTtlMinutes === "" || !Number.isFinite(ttl) || ttl < 1) {
@@ -129,6 +138,7 @@ Page({
       homeSubtitle: homeSubtitle == null ? "" : String(homeSubtitle),
       homeProductCols: cols,
       productDetailMode: detailMode,
+      memberCodeEntry: codeEntry,
     };
     if (pointsPerYuan !== undefined && pointsPerYuan !== "") {
       const ratio = parseRatio(pointsPerYuan);
@@ -149,7 +159,13 @@ Page({
         productDetailMode: Object.prototype.hasOwnProperty.call(store, "productDetailMode")
           ? productDetailMode(store)
           : detailMode,
+        memberCodeEntry: Object.prototype.hasOwnProperty.call(store, "memberCodeEntry")
+          ? memberCodeEntry(store)
+          : codeEntry,
       });
+      getApp().globalData.memberCodeEntry = Object.prototype.hasOwnProperty.call(store, "memberCodeEntry")
+        ? memberCodeEntry(store)
+        : codeEntry;
       wx.showToast({ title: copy.settings.saved, icon: "none" });
     } catch (e) {}
   },

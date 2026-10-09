@@ -915,6 +915,10 @@ button:focus-visible,
   gap: 8px;
 }
 
+.shortcut[hidden] {
+  display: none !important;
+}
+
 .shortcut {
   position: relative;
   width: calc((100% - 8px) / 2);

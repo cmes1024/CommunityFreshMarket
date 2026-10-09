@@ -38,6 +38,7 @@ public class StoreQueryService {
     Integer cols = store.getHomeProductCols();
     r.setHomeProductCols(cols != null && cols >= 1 && cols <= 3 ? cols : 2);
     r.setProductDetailMode(normalizeDetailMode(store.getProductDetailMode()));
+    r.setMemberCodeEntry(normalizeMemberCodeEntry(store.getMemberCodeEntry()));
     BigDecimal ratio = store.getPointsPerYuan();
     r.setPointsPerYuan(ratio == null || ratio.signum() < 0 ? BigDecimal.ONE : PointsRatio.plain(ratio));
     Integer ttl = store.getPickImageTtlMinutes();
@@ -47,5 +48,9 @@ public class StoreQueryService {
 
   static String normalizeDetailMode(String mode) {
     return "PAGE".equalsIgnoreCase(mode) ? "PAGE" : "SHEET";
+  }
+
+  static String normalizeMemberCodeEntry(String entry) {
+    return "TAB".equalsIgnoreCase(entry) ? "TAB" : "PROFILE";
   }
 }

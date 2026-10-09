@@ -49,6 +49,10 @@ public class StoreUpdateRequest {
   @Size(max = 16)
   private String productDetailMode;
 
+  /** 会员码入口：PROFILE 我的（默认）/ TAB 底栏正中 */
+  @Size(max = 16)
+  private String memberCodeEntry;
+
   @DecimalMin("0")
   @DecimalMax("100")
   @Digits(integer = 3, fraction = 2)
@@ -136,6 +140,14 @@ public class StoreUpdateRequest {
 
   public void setProductDetailMode(String productDetailMode) {
     this.productDetailMode = productDetailMode;
+  }
+
+  public String getMemberCodeEntry() {
+    return memberCodeEntry;
+  }
+
+  public void setMemberCodeEntry(String memberCodeEntry) {
+    this.memberCodeEntry = memberCodeEntry;
   }
 
   public BigDecimal getPointsPerYuan() {

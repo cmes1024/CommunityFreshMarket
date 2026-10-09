@@ -41,7 +41,7 @@
         <view class="shortcut-sub">{{copy.profile.couponsSub}}</view>
       </view>
     </view>
-    <view class="shortcut" hover-class="shortcut-on" bind:tap="goMemberCode">
+    <view class="shortcut" wx:if="{{showMemberCode}}" hover-class="shortcut-on" bind:tap="goMemberCode">
       <view class="mark mark-green"><image src="/images/profile-checkin.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">
         <view class="shortcut-title">{{copy.profile.memberCode}}</view>
@@ -64,20 +64,20 @@
 </view>
 
 <page-container
-  show="{{profileSheetShow}}"
+  show="{{sheetOpen}}"
   round="{{true}}"
   overlay="{{true}}"
   position="bottom"
   close-on-slide-down="{{true}}"
   custom-style="height: auto;"
-  bind:clickoverlay="closeProfileSheet"
-  bind:afterleave="closeProfileSheet"
+  bind:clickoverlay="closeSheet"
+  bind:afterleave="onSheetLeave"
 >
-  <view class="contact-sheet profile-sheet" catch:tap="noop">
+  <view wx:if="{{sheet === 'profile'}}" class="contact-sheet profile-sheet" catch:tap="noop">
     <view class="grab"></view>
     <view class="sheet-head">
       <view class="sheet-title">{{copy.profile.editSheetTitle}}</view>
-      <view class="sheet-close" bind:tap="closeProfileSheet">关闭</view>
+      <view class="sheet-close" bind:tap="closeSheet">关闭</view>
     </view>
     <view class="avatar-slot">
       <view class="avatar avatar-sheet">
@@ -107,23 +107,11 @@
       {{copy.profile.profileSave}}
     </button>
   </view>
-</page-container>
-
-<page-container
-  show="{{contactSheetShow}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: auto;"
-  bind:clickoverlay="closeContactSheet"
-  bind:afterleave="closeContactSheet"
->
-  <view class="contact-sheet" catch:tap="noop">
+  <view wx:elif="{{sheet === 'contact'}}" class="contact-sheet" catch:tap="noop">
     <view class="grab"></view>
     <view class="sheet-head">
       <view class="sheet-title">{{copy.profile.contactSheetTitle}}</view>
-      <view class="sheet-close" bind:tap="closeContactSheet">关闭</view>
+      <view class="sheet-close" bind:tap="closeSheet">关闭</view>
     </view>
 
     <view class="sheet-list">
@@ -152,7 +140,7 @@
         <button
           class="sheet-row-hit"
           open-type="contact"
-          bind:tap="closeContactSheet"
+          bind:tap="closeSheet"
           hover-class="none"
         ></button>
       </view>

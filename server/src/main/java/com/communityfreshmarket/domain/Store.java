@@ -22,6 +22,8 @@ public class Store {
   private String homeSubtitle;
   private Integer homeProductCols;
   private String productDetailMode;
+  /** 顾客会员码入口：PROFILE 我的 | TAB 底栏正中 */
+  private String memberCodeEntry;
   private String status;
   /** 店员邀请码；不对外公开店铺摘要接口 */
   private String inviteCode;
@@ -120,6 +122,14 @@ public class Store {
 
   public void setProductDetailMode(String productDetailMode) {
     this.productDetailMode = productDetailMode;
+  }
+
+  public String getMemberCodeEntry() {
+    return memberCodeEntry;
+  }
+
+  public void setMemberCodeEntry(String memberCodeEntry) {
+    this.memberCodeEntry = memberCodeEntry;
   }
 
   public String getStatus() {

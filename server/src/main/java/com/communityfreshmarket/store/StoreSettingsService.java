@@ -89,6 +89,13 @@ public class StoreSettingsService {
       }
       store.setProductDetailMode(mode);
     }
+    if (request.getMemberCodeEntry() != null) {
+      String entry = request.getMemberCodeEntry().trim().toUpperCase();
+      if (!"PROFILE".equals(entry) && !"TAB".equals(entry)) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "会员码入口仅支持我的或底栏");
+      }
+      store.setMemberCodeEntry(entry);
+    }
     if (request.getPointsPerYuan() != null) {
       store.setPointsPerYuan(PointsRatio.require(request.getPointsPerYuan()));
     }

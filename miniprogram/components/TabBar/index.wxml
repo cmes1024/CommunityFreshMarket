@@ -4,6 +4,7 @@
     wx:key="key"
     class="tab {{item.key === current ? 'active' : ''}}"
     data-url="{{item.url}}"
+    data-open="{{item.open}}"
     bind:tap="onTap"
   >
     <image

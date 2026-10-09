@@ -16,6 +16,8 @@ public class StoreSummaryResponse {
   private String homeSubtitle;
   private int homeProductCols = 2;
   private String productDetailMode = "SHEET";
+  /** PROFILE 我的（默认）| TAB 底栏正中 */
+  private String memberCodeEntry = "PROFILE";
   private BigDecimal pointsPerYuan = BigDecimal.ONE;
   private int pickImageTtlMinutes = 15;
 
@@ -105,6 +107,14 @@ public class StoreSummaryResponse {
 
   public void setProductDetailMode(String productDetailMode) {
     this.productDetailMode = productDetailMode;
+  }
+
+  public String getMemberCodeEntry() {
+    return memberCodeEntry;
+  }
+
+  public void setMemberCodeEntry(String memberCodeEntry) {
+    this.memberCodeEntry = memberCodeEntry;
   }
 
   public BigDecimal getPointsPerYuan() {

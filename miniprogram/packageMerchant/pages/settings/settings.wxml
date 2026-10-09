@@ -162,7 +162,7 @@
       <view class="sec-desc">{{copy.settings.pointsHint}}</view>
     </view>
     <view class="group">
-      <view class="cell last">
+      <view class="cell">
         <view class="cell-label">{{copy.settings.pointsPerYuanLabel}}</view>
         <input
           class="cell-input num-input"
@@ -172,6 +172,21 @@
           bindinput="onPoints"
         />
         <text class="cell-unit">{{copy.settings.pointsUnit}}</text>
+      </view>
+      <view class="cell last cols-cell">
+        <view class="cell-label">{{copy.settings.memberCodeEntryLabel}}</view>
+        <view class="cols-row">
+          <view
+            class="cols-opt {{memberCodeEntry === 'PROFILE' ? 'on' : ''}}"
+            data-entry="PROFILE"
+            bind:tap="onMemberCodeEntry"
+          >{{copy.settings.memberCodeEntryProfile}}</view>
+          <view
+            class="cols-opt {{memberCodeEntry === 'TAB' ? 'on' : ''}}"
+            data-entry="TAB"
+            bind:tap="onMemberCodeEntry"
+          >{{copy.settings.memberCodeEntryTab}}</view>
+        </view>
       </view>
     </view>
   </view>

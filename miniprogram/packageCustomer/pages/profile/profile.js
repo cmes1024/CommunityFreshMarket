@@ -2,26 +2,31 @@ const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { setUser } = require("../../../utils/request");
 const { uploadImage, absUrl } = require("../../../utils/upload");
+const { memberCodeEntry } = require("../../../utils/memberCodeEntry");
 
 Page({
   data: {
     user: {},
     avatarText: copy.storeName.slice(0, 1),
     avatarSrc: "",
-    profileSheetShow: false,
+    sheet: "",
+    sheetOpen: false,
     nicknameInput: "",
     draftAvatarSrc: "",
     draftAvatarFile: "",
     draftInitial: "",
     profileSaving: false,
-    contactSheetShow: false,
     contactPhone: "",
+    showMemberCode: true,
   },
   async onShow() {
     try {
       const [user, store] = await Promise.all([api.me(), api.store().catch(() => ({}))]);
       this.applyUser(user);
-      this.setData({ contactPhone: (store && store.contactPhone) || "" });
+      this.setData({
+        contactPhone: (store && store.contactPhone) || "",
+        showMemberCode: memberCodeEntry(store) !== "TAB",
+      });
     } catch (e) {}
   },
   applyUser(user) {
@@ -42,15 +47,19 @@ Page({
     const nick = ((this.data.user && this.data.user.nickname) || "").trim();
     const shown = nick || copy.profile.defaultNickname;
     this.setData({
-      profileSheetShow: true,
+      sheet: "profile",
+      sheetOpen: true,
       nicknameInput: nick,
       draftAvatarSrc: this.data.avatarSrc,
       draftAvatarFile: "",
       draftInitial: shown.slice(0, 1),
     });
   },
-  closeProfileSheet() {
-    if (this.data.profileSheetShow) this.setData({ profileSheetShow: false });
+  closeSheet() {
+    if (this.data.sheetOpen) this.setData({ sheetOpen: false });
+  },
+  onSheetLeave() {
+    if (this.data.sheet || this.data.sheetOpen) this.setData({ sheet: "", sheetOpen: false });
   },
   onChooseAvatar(e) {
     const path = e.detail && e.detail.avatarUrl;
@@ -73,7 +82,7 @@ Page({
       patch.nickname = nickname;
     }
     if (!patch.nickname && !this.data.draftAvatarFile) {
-      this.closeProfileSheet();
+      this.closeSheet();
       return;
     }
     this.setData({ profileSaving: true });
@@ -83,7 +92,7 @@ Page({
       }
       const user = await api.updateMe(patch);
       this.applyUser(user);
-      this.setData({ profileSheetShow: false, draftAvatarFile: "" });
+      this.setData({ sheetOpen: false, draftAvatarFile: "" });
       wx.showToast({ title: copy.profile.profileSaved, icon: "none" });
     } catch (err) {
     } finally {
@@ -109,10 +118,7 @@ Page({
     wx.reLaunch({ url: "/packageMerchant/pages/orders/orders" });
   },
   openContactSheet() {
-    this.setData({ contactSheetShow: true });
-  },
-  closeContactSheet() {
-    if (this.data.contactSheetShow) this.setData({ contactSheetShow: false });
+    this.setData({ sheet: "contact", sheetOpen: true });
   },
   callStore() {
     const phone = (this.data.contactPhone || "").trim();

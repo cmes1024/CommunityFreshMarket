@@ -60,7 +60,7 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 
 | 表 | 要点 |
 |----|------|
-| `store` | 店名、联系方式、`contact_note` 购买须知（可多行）、`min_delivery_fen`（配送起送金额，分，0=不限制；只拦配送提交，按商品合计券前预估比较）、状态、`invite_code`（店员邀请，可轮换）、首页头图、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）；单店时一条记录 |
+| `store` | 店名、联系方式、`contact_note` 购买须知（可多行）、`min_delivery_fen`（配送起送金额，分，0=不限制；只拦配送提交，按商品合计券前预估比较）、状态、`invite_code`（店员邀请，可轮换）、首页头图、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）、会员码入口 `member_code_entry`（PROFILE\|TAB，默认 PROFILE）；单店时一条记录 |
 | `user` | `openid` 唯一、昵称/头像可选 |
 | `store_member` | `user_id + store_id + role`（`OWNER` / `STAFF`）；第一版能力相同 |
 | `category` | `store_id`、名称、排序、启用 |

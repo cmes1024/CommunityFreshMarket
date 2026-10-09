@@ -1,4 +1,15 @@
+const api = require("../../utils/api");
 const { onCartCountChange } = require("../../utils/cartSync");
+const { memberCodeEntry } = require("../../utils/memberCodeEntry");
+
+const MEMBER_CODE_TAB = {
+  key: "memberCode",
+  label: "会员码",
+  url: "/packageCustomer/pages/member-code/member-code",
+  icon: "/images/tab-code.svg",
+  iconActive: "/images/tab-code-active.svg",
+  open: "push",
+};
 
 const CUSTOMER = [
   {
@@ -62,11 +73,17 @@ const MERCHANT = [
   },
 ];
 
-function buildTabs(mode) {
+function customerTabs(entry) {
+  if (entry !== "TAB") return CUSTOMER;
+  return [CUSTOMER[0], CUSTOMER[1], MEMBER_CODE_TAB, CUSTOMER[2], CUSTOMER[3]];
+}
+
+function buildTabs(mode, entry) {
   const app = getApp();
   const cartCount = (app.globalData && app.globalData.cartCount) || 0;
   const urgent = (app.globalData && app.globalData.merchantUrgentCount) || 0;
-  return (mode === "merchant" ? MERCHANT : CUSTOMER).map((t) => {
+  const tabs = mode === "merchant" ? MERCHANT : customerTabs(entry);
+  return tabs.map((t) => {
     let badge = 0;
     if (t.key === "cart") badge = cartCount;
     if (t.key === "orders") badge = urgent;
@@ -104,11 +121,35 @@ Component({
   },
   methods: {
     refreshTabs() {
-      this.setData({ tabs: buildTabs(this.data.mode) });
+      const mode = this.data.mode;
+      const cached = memberCodeEntry({ memberCodeEntry: getApp().globalData.memberCodeEntry });
+      this.setData({ tabs: buildTabs(mode, cached) });
+      if (mode === "merchant") return;
+      const seq = (this._tabSeq = (this._tabSeq || 0) + 1);
+      api
+        .store()
+        .then((store) => {
+          if (seq !== this._tabSeq) return;
+          const entry = memberCodeEntry(store);
+          getApp().globalData.memberCodeEntry = entry;
+          this.setData({ tabs: buildTabs(mode, entry) });
+        })
+        .catch(() => {});
     },
     onTap(e) {
       const url = e.currentTarget.dataset.url;
       if (!url) return;
+      if (e.currentTarget.dataset.open === "push") {
+        if (this._pushing) return;
+        this._pushing = true;
+        wx.navigateTo({
+          url,
+          complete: () => {
+            this._pushing = false;
+          },
+        });
+        return;
+      }
       wx.reLaunch({ url });
     },
   },

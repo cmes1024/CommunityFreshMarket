@@ -16,6 +16,8 @@ let activeCat = "叶菜";
 let watching = false;
 let arrived = false;
 
+let memberCodeEntry = "PROFILE";
+
 const customerTabs = [
   { id: "home", label: "首页", screen: "c-home", icon: "i-home" },
   { id: "category", label: "分类", screen: "c-category", icon: "i-grid" },
@@ -43,6 +45,7 @@ const screenMeta = {
   "c-order-done": { label: "再来一单", mode: "customer" },
   "c-order-pickup": { label: "我到店了", mode: "customer" },
   "c-profile": { label: "我的", mode: "customer" },
+  "c-member-code": { label: "会员码", mode: "customer" },
   "m-orders": { label: "订单台 · 状态导航", mode: "merchant" },
   "m-order-detail": { label: "商家订单详情", mode: "merchant" },
   "m-products": { label: "商品 · 状态卡片", mode: "merchant" },
@@ -229,6 +232,25 @@ function renderCartPage() {
   if (cartCountEl) cartCountEl.textContent = String(cartCount());
 }
 
+function visibleCustomerTabs() {
+  if (memberCodeEntry !== "TAB") return customerTabs;
+  return [
+    customerTabs[0],
+    customerTabs[1],
+    { id: "memberCode", label: "会员码", screen: "c-member-code", icon: "i-code", push: true },
+    customerTabs[2],
+    customerTabs[3],
+  ];
+}
+
+function syncMemberCodeEntry() {
+  const card = $("#protoMemberCode");
+  if (card) card.hidden = memberCodeEntry === "TAB";
+  $$("[data-member-entry]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.memberEntry === memberCodeEntry);
+  });
+}
+
 function renderScreenNav() {
   const nav = $("#screenNav");
   nav.innerHTML = "";
@@ -247,7 +269,7 @@ function renderScreenNav() {
 }
 
 function renderTabs() {
-  const tabs = mode === "customer" ? customerTabs : merchantTabs;
+  const tabs = mode === "customer" ? visibleCustomerTabs() : merchantTabs;
   const screen = document.querySelector(`[data-screen="${current}"]`);
   const activeTab = screen?.dataset.tab;
   const tabbar = $("#tabbar");
@@ -263,7 +285,10 @@ function renderTabs() {
           ? `<span class="dot"></span>`
           : "";
     btn.innerHTML = `<svg class="ico ico-sm" aria-hidden="true"><use href="#${t.icon}"/></svg><span>${t.label}</span>${countBadge}`;
-    btn.addEventListener("click", () => go(t.screen, { resetHistory: true }));
+    btn.addEventListener("click", () => {
+      if (t.push) go(t.screen);
+      else go(t.screen, { resetHistory: true });
+    });
     tabbar.appendChild(btn);
   });
   tabbar.style.display = activeTab ? "flex" : "none";
@@ -312,6 +337,7 @@ function go(id, opts = {}) {
   $("#navCart").hidden = !showCart;
 
   renderTabs();
+  syncMemberCodeEntry();
   renderScreenNav();
   $("#scroll").scrollTop = 0;
   syncCartUI();
@@ -341,6 +367,14 @@ function goBack() {
 $("#navBack").addEventListener("click", goBack);
 
 document.addEventListener("click", (e) => {
+  const entryBtn = e.target.closest("[data-member-entry]");
+  if (entryBtn) {
+    memberCodeEntry = entryBtn.dataset.memberEntry === "TAB" ? "TAB" : "PROFILE";
+    syncMemberCodeEntry();
+    renderTabs();
+    return;
+  }
+
   const sw = e.target.closest("[data-switch]");
   if (sw) {
     e.stopPropagation();
