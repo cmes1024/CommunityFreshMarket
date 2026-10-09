@@ -26,9 +26,13 @@
         <text class="bill-label">{{copy.checkout.couponOff}}</text>
         <text class="bill-money off">-¥{{order.discountYuan}}</text>
       </view>
-      <view class="bill-row pay" wx:if="{{order.discountFen}}">
-        <text class="bill-label">{{copy.checkout.payable}}</text>
-        <text class="bill-money">¥{{order.payYuan}}</text>
+      <view class="bill-row" wx:if="{{order.balanceFen}}">
+        <text class="bill-label">{{copy.checkout.balanceOff}}</text>
+        <text class="bill-money off">-¥{{order.balanceYuan}}</text>
+      </view>
+      <view class="bill-row pay" wx:if="{{order.discountFen || order.balanceFen}}">
+        <text class="bill-label">{{copy.checkout.due}}</text>
+        <text class="bill-money">¥{{order.dueYuan}}</text>
       </view>
     </view>
     <view class="meta" wx:if="{{fulfillText}}">

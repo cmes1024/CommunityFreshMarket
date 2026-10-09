@@ -1,0 +1,18 @@
+<Header pageName="{{copy.titles.balance}}" back="{{true}}" />
+<view class="page-body no-tab wave-page">
+  <view class="card balance-card">
+    <view class="label">{{copy.balance.amount}}</view>
+    <view class="balance-num">¥{{balanceYuan}}</view>
+  </view>
+  <view class="sec-title">{{copy.balance.ledger}}</view>
+  <view class="card">
+    <view class="row" wx:for="{{recent}}" wx:key="id">
+      <view class="grow">
+        <view class="row-title">{{item.reasonText}}{{item.remark ? ' · ' + item.remark : ''}}</view>
+        <view class="muted sm">{{item.timeText}}</view>
+      </view>
+      <view class="delta {{item.plus ? 'plus' : ''}}">{{item.deltaText}}</view>
+    </view>
+    <view wx:if="{{!recent.length}}" class="empty muted">{{copy.balance.emptyLedger}}</view>
+  </view>
+</view>

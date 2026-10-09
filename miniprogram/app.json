@@ -17,6 +17,7 @@
         "pages/profile/profile",
         "pages/join-store/join-store",
         "pages/points/points",
+        "pages/balance/balance",
         "pages/member-code/member-code",
         "pages/coupons/coupons"
       ]
@@ -34,6 +35,7 @@
         "pages/profile/profile",
         "pages/live-photos/live-photos",
         "pages/point-counter/point-counter",
+        "pages/balance-topup/balance-topup",
         "pages/coupons/coupons",
         "pages/point-redeems/point-redeems"
       ]

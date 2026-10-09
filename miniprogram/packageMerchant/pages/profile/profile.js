@@ -100,6 +100,9 @@ Page({
   goCounter() {
     wx.navigateTo({ url: "/packageMerchant/pages/point-counter/point-counter" });
   },
+  goBalance() {
+    wx.navigateTo({ url: "/packageMerchant/pages/balance-topup/balance-topup" });
+  },
   goCoupons() {
     wx.navigateTo({ url: "/packageMerchant/pages/coupons/coupons" });
   },

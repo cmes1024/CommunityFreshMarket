@@ -182,6 +182,13 @@
   background: var(--color-warn-soft);
 }
 
+.mark-yen {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-cta);
+  line-height: 1;
+}
+
 .mark image {
   width: 36rpx;
   height: 36rpx;

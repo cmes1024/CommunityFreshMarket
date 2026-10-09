@@ -1,0 +1,76 @@
+<Header pageName="{{copy.titles.merchantBalance}}" back="{{true}}" />
+<view class="page-body no-tab counter-page">
+  <view class="block">
+    <view class="block-head">
+      <view class="block-title">{{copy.merchantBalance.who}}</view>
+      <view class="bubble-entry" bind:tap="openBubbles">
+        {{copy.merchantBalance.bubbles}}
+        <view wx:if="{{bubbles.length}}" class="bubble-dot"></view>
+      </view>
+    </view>
+    <view class="who" wx:if="{{selected}}">
+      <image wx:if="{{selected.avatarSrc}}" class="who-avatar" src="{{selected.avatarSrc}}" mode="aspectFill" />
+      <view wx:elif="{{selected.initial}}" class="who-fallback">{{selected.initial}}</view>
+      <view class="who-meta">
+        <view class="who-name">{{selected.name}}</view>
+        <view class="who-from" wx:if="{{selected.fromText}}">{{selected.fromText}}</view>
+      </view>
+    </view>
+    <view wx:else class="who-empty">{{copy.merchantBalance.whoEmpty}}</view>
+    <button class="btn btn-ghost scan-btn" bind:tap="scan">{{copy.merchantBalance.scan}}</button>
+  </view>
+
+  <view class="block">
+    <view class="block-title">{{copy.merchantBalance.amount}}</view>
+    <view class="amount">
+      <text class="yen">¥</text>
+      <input
+        class="amount-input"
+        type="digit"
+        placeholder="{{copy.merchantBalance.amountPh}}"
+        placeholder-class="amount-ph"
+        value="{{amountYuan}}"
+        bindinput="onAmount"
+      />
+    </view>
+  </view>
+
+  <button class="btn btn-cta submit" loading="{{submitting}}" disabled="{{submitting}}" bind:tap="submit">
+    {{copy.merchantBalance.submit}}
+  </button>
+</view>
+
+<page-container
+  show="{{bubbleSheet}}"
+  round="{{true}}"
+  overlay="{{true}}"
+  position="bottom"
+  close-on-slide-down="{{true}}"
+  custom-style="height: auto; max-height: 80vh;"
+  bind:clickoverlay="closeBubbles"
+  bind:afterleave="closeBubbles"
+>
+  <view class="bubble-sheet" catch:tap="noop">
+    <view class="grab"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{copy.merchantBalance.bubbles}}</view>
+      <view class="sheet-close" bind:tap="closeBubbles">{{copy.merchantBalance.sheetClose}}</view>
+    </view>
+    <scroll-view scroll-y class="bubble-list">
+      <view class="bubble-row" wx:if="{{bubbles.length}}">
+        <view
+          class="person {{checkinId == item.id ? 'on' : ''}}"
+          wx:for="{{bubbles}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bind:tap="pickBubble"
+        >
+          <image wx:if="{{item.avatarSrc}}" class="person-avatar" src="{{item.avatarSrc}}" mode="aspectFill" />
+          <view wx:else class="person-fallback">{{item.initial}}</view>
+          <view class="person-name">{{item.displayName}}</view>
+        </view>
+      </view>
+      <view wx:else class="empty muted">{{copy.merchantBalance.emptyBubbles}}</view>
+    </scroll-view>
+  </view>
+</page-container>

@@ -60,15 +60,6 @@
   align-items: flex-start;
 }
 
-.shortcut-wide {
-  width: 100%;
-  min-height: 132rpx;
-  flex-direction: row;
-  align-items: center;
-  gap: 20rpx;
-  padding: 24rpx;
-}
-
 .shortcut-on {
   background: var(--color-mist);
 }
@@ -94,12 +85,15 @@
   flex-shrink: 0;
 }
 
-.shortcut-wide .mark {
-  margin-bottom: 0;
-}
-
 .mark-green {
   background: var(--color-mist);
+}
+
+.mark-yen {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-cta);
+  line-height: 1;
 }
 
 .mark-amber {

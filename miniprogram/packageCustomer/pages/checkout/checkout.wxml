@@ -60,15 +60,23 @@
       <text class="bill-label">{{copy.checkout.couponOff}}</text>
       <text class="bill-money off">-¥{{discountYuan}}</text>
     </view>
-    <view class="bill-row pay" wx:if="{{couponClaimId}}">
-      <text class="bill-label">{{copy.checkout.payable}}</text>
-      <text class="bill-money">¥{{payYuan}}</text>
+    <view class="bill-row choice" wx:if="{{showBalance}}" bind:tap="toggleBalance">
+      <text class="bill-label">{{copy.checkout.balance}} ¥{{balanceYuan}}</text>
+      <view class="radio {{useBalance ? 'on' : ''}}"></view>
+    </view>
+    <view class="bill-row" wx:if="{{balanceAppliedFen}}">
+      <text class="bill-label">{{copy.checkout.balanceOff}}</text>
+      <text class="bill-money off">-¥{{balanceAppliedYuan}}</text>
+    </view>
+    <view class="bill-row pay" wx:if="{{showDue}}">
+      <text class="bill-label">{{copy.checkout.due}}</text>
+      <text class="bill-money">¥{{dueYuan}}</text>
     </view>
     <view class="bill-row warn" wx:if="{{deliveryBlocked}}">
       <text class="bill-label">{{deliveryMinText}}</text>
       <text class="bill-money short">{{deliveryShortText}}</text>
     </view>
-    <view class="muted bill-hint">{{copy.pay.offlineHint}}</view>
+    <view class="muted bill-hint">{{billHint || copy.pay.offlineHint}}</view>
   </view>
   <view class="muted subscribe-hint">{{copy.checkout.subscribeHint}}</view>
   <view class="closed" wx:if="{{storeClosed}}">

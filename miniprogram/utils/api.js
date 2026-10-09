@@ -101,6 +101,8 @@ module.exports = {
     get("/api/v1/merchant/coupons/unused", saleId ? { userId, saleId } : { userId }),
 
   merchantCounterPoints: (body) => post("/api/v1/merchant/points/counter", body),
+  merchantBalanceTopup: (body) => post("/api/v1/merchant/balance/topups", body),
+  balanceMe: () => get("/api/v1/balance/me"),
   merchantCheckinsActive: () => get("/api/v1/merchant/checkins/active"),
 };
 

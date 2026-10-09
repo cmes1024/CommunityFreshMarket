@@ -16,6 +16,7 @@ public class SubmitOrderRequest {
   private String remark;
 
   private Long couponClaimId;
+  private Boolean useBalance;
 
   public String getFulfillment() {
     return fulfillment;
@@ -63,5 +64,13 @@ public class SubmitOrderRequest {
 
   public void setCouponClaimId(Long couponClaimId) {
     this.couponClaimId = couponClaimId;
+  }
+
+  public Boolean getUseBalance() {
+    return useBalance;
+  }
+
+  public void setUseBalance(Boolean useBalance) {
+    this.useBalance = useBalance;
   }
 }

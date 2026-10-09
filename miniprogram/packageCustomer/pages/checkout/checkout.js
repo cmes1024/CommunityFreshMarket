@@ -83,6 +83,15 @@ Page({
     couponSummaryKind: "none",
     discountYuan: "0.00",
     payYuan: "0.00",
+    balanceFen: 0,
+    balanceYuan: "0.00",
+    showBalance: false,
+    useBalance: false,
+    balanceAppliedFen: 0,
+    balanceAppliedYuan: "0.00",
+    dueYuan: "0.00",
+    showDue: false,
+    billHint: "",
     minDeliveryFen: 0,
     deliveryMinText: "",
     deliveryShortText: "",
@@ -94,12 +103,13 @@ Page({
   async onShow() {
     const gen = (this._loadGen || 0) + 1;
     this._loadGen = gen;
-    const [cart, addresses, slots, mine, store] = await Promise.all([
+    const [cart, addresses, slots, mine, store, balance] = await Promise.all([
       api.cart(),
       api.addresses(),
       api.pickupSlots(),
       api.couponsMine().catch(() => []),
       api.store().catch(() => ({})),
+      api.balanceMe().catch(() => ({ balanceFen: 0 })),
     ]);
     if (gen !== this._loadGen) return;
     const picked = getApp().globalData.pickedAddress;
@@ -109,6 +119,8 @@ Page({
     const minDeliveryFen = Number(store && store.minDeliveryFen) || 0;
     const coupons = this.buildCoupons(mine, totalFen);
     const couponClaimId = this.pickCouponId(coupons);
+    const balanceFen = (balance && balance.balanceFen) || 0;
+    const useBalance = this.balanceChosen ? this.data.useBalance : balanceFen > 0;
     const lists = phraseLists(store, this.data.deliveryPhrases, this.data.pickupPhrases);
     const phrases = visiblePhrases(this.data.fulfillment, lists.deliveryPhrases, lists.pickupPhrases);
     this.setData({
@@ -125,7 +137,7 @@ Page({
       address,
       slots: (slots || []).map((s) => ({ ...s, ...splitSlotLabel(s.label) })),
       pickupSlotId: this.data.pickupSlotId || (slots[0] && slots[0].id) || 0,
-      ...this.payView(coupons, couponClaimId, totalFen),
+      ...this.payView(coupons, couponClaimId, totalFen, balanceFen, useBalance),
       ...deliveryView(this.data.fulfillment, totalFen, minDeliveryFen),
       storeClosed:
         String((store && store.homeKicker) || "").trim() === copy.settings.kickerClosed,
@@ -166,7 +178,7 @@ Page({
     const best = coupons.find((c) => c.eligible);
     return best ? best.id : 0;
   },
-  payView(coupons, couponClaimId, totalFen) {
+  payView(coupons, couponClaimId, totalFen, balanceFen, useBalance) {
     const coupon = (coupons || []).find((c) => c.id === couponClaimId && c.eligible);
     const discountFen = coupon ? coupon.discountFen : 0;
     const eligibleCount = (coupons || []).filter((c) => c.eligible).length;
@@ -179,9 +191,26 @@ Page({
       couponSummary = copy.format(copy.checkout.available, { n: eligibleCount });
       couponSummaryKind = "avail";
     }
+    const payable = Math.max(0, (totalFen || 0) - discountFen);
+    const balance = Math.max(0, Number(balanceFen) || 0);
+    const wantBalance = !!useBalance && balance > 0;
+    const applied = wantBalance ? Math.min(balance, payable) : 0;
+    const due = Math.max(0, payable - applied);
+    let billHint = copy.pay.offlineHint;
+    if (applied > 0 && due === 0) billHint = copy.checkout.balanceCovered;
+    else if (applied > 0) billHint = copy.checkout.balancePartial;
     return {
       discountYuan: fenToYuan(discountFen),
-      payYuan: fenToYuan(Math.max(0, (totalFen || 0) - discountFen)),
+      payYuan: fenToYuan(payable),
+      balanceFen: balance,
+      balanceYuan: fenToYuan(balance),
+      showBalance: balance > 0,
+      useBalance: wantBalance,
+      balanceAppliedFen: applied,
+      balanceAppliedYuan: fenToYuan(applied),
+      dueYuan: fenToYuan(due),
+      showDue: discountFen > 0 || applied > 0,
+      billHint,
       couponTitle: coupon ? coupon.title : "",
       couponSummary,
       couponSummaryKind,
@@ -207,7 +236,13 @@ Page({
     this.setData({
       couponClaimId: id,
       couponSheet: false,
-      ...this.payView(this.data.coupons, id, this.data.totalFen),
+      ...this.payView(
+        this.data.coupons,
+        id,
+        this.data.totalFen,
+        this.data.balanceFen,
+        this.data.useBalance
+      ),
     });
   },
   switchF(e) {
@@ -234,6 +269,18 @@ Page({
     const extra = phrases.filter((p) => p.on).map((p) => p.text).join("，");
     const key = this.data.fulfillment === "PICKUP" ? "pickupPhrases" : "deliveryPhrases";
     this.setData({ phrases, [key]: phrases, remark: extra });
+  },
+  toggleBalance() {
+    this.balanceChosen = true;
+    this.setData(
+      this.payView(
+        this.data.coupons,
+        this.data.couponClaimId,
+        this.data.totalFen,
+        this.data.balanceFen,
+        !this.data.useBalance
+      )
+    );
   },
   onRemark(e) {
     this.setData({ remark: e.detail.value });
@@ -266,6 +313,9 @@ Page({
     }
     if (this.data.couponClaimId) {
       body.couponClaimId = this.data.couponClaimId;
+    }
+    if (this.data.useBalance) {
+      body.useBalance = true;
     }
     this.setData({ submitting: true });
     try {

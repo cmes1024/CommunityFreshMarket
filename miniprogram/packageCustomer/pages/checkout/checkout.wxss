@@ -175,6 +175,9 @@
   align-items: baseline;
   justify-content: space-between;
 }
+.bill-row.choice {
+  align-items: center;
+}
 .bill-row + .bill-row {
   margin-top: 10rpx;
 }

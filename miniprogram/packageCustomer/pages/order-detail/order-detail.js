@@ -43,7 +43,13 @@ Page({
         ...order,
         totalYuan: fenToYuan(order.totalAmountFen),
         discountYuan: fenToYuan(order.discountFen || 0),
+        balanceYuan: fenToYuan(order.balanceFen || 0),
         payYuan: fenToYuan(order.payFen != null ? order.payFen : order.totalAmountFen),
+        dueYuan: fenToYuan(
+          order.dueFen != null
+            ? order.dueFen
+            : Math.max(0, (order.payFen != null ? order.payFen : order.totalAmountFen) - (order.balanceFen || 0))
+        ),
       },
       stepList: codes.map((code, i) => ({
         code,
@@ -56,9 +62,13 @@ Page({
     });
   },
   async cancel() {
-    await requestSubscribe(["cancelTemplateId"]);
-    await api.cancelOrder(this.id, "顾客取消");
-    await this.refresh();
+    const ok = await askCancel();
+    if (!ok) return;
+    try {
+      await requestSubscribe(["cancelTemplateId"]);
+      await api.cancelOrder(this.id, "顾客取消");
+      await this.refresh();
+    } catch (e) {}
   },
   async arrive() {
     await requestSubscribe(["arrivedTemplateId"]);
@@ -74,3 +84,17 @@ Page({
     wx.reLaunch({ url: "/packageCustomer/pages/cart/cart" });
   },
 });
+
+function askCancel() {
+  return new Promise((resolve) => {
+    wx.showModal({
+      title: copy.order.cancelConfirmTitle,
+      content: copy.order.cancelConfirm,
+      confirmText: copy.order.cancelConfirmOk,
+      cancelText: copy.order.cancelConfirmBack,
+      confirmColor: "#DC2626",
+      success: (res) => resolve(!!res.confirm),
+      fail: () => resolve(false),
+    });
+  });
+}

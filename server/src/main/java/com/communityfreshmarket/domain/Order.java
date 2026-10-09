@@ -22,6 +22,7 @@ public class Order {
   private Integer totalAmountFen;
   private Long couponClaimId;
   private Integer discountFen;
+  private Integer balanceFen;
   private Boolean merchantUnread;
   private LocalDateTime customerArrivedAt;
   private String cancelBy;
@@ -132,6 +133,14 @@ public class Order {
 
   public void setDiscountFen(Integer discountFen) {
     this.discountFen = discountFen;
+  }
+
+  public Integer getBalanceFen() {
+    return balanceFen;
+  }
+
+  public void setBalanceFen(Integer balanceFen) {
+    this.balanceFen = balanceFen;
   }
 
   public Boolean getMerchantUnread() {

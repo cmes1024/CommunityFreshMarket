@@ -1,6 +1,7 @@
 const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
+const { format } = require("../../../utils/copy");
 const {
   label,
   steps,
@@ -10,6 +11,16 @@ const {
   contactLine,
 } = require("../../../utils/orderStatus");
 const { requestSubscribe } = require("../../../utils/subscribe");
+
+function payNote(order) {
+  const balanceFen = order.balanceFen || 0;
+  const dueFen = order.dueFen != null
+    ? order.dueFen
+    : Math.max(0, (order.payFen != null ? order.payFen : order.totalAmountFen || 0) - balanceFen);
+  if (balanceFen > 0 && dueFen === 0) return copy.merchant.balanceCovered;
+  if (balanceFen > 0) return format(copy.merchant.balancePartial, { yuan: fenToYuan(balanceFen) });
+  return copy.merchant.offlinePay;
+}
 
 Page({
   data: {
@@ -34,7 +45,14 @@ Page({
         ...order,
         totalYuan: fenToYuan(order.totalAmountFen),
         discountYuan: fenToYuan(order.discountFen || 0),
+        balanceYuan: fenToYuan(order.balanceFen || 0),
         payYuan: fenToYuan(order.payFen != null ? order.payFen : order.totalAmountFen),
+        dueYuan: fenToYuan(
+          order.dueFen != null
+            ? order.dueFen
+            : Math.max(0, (order.payFen != null ? order.payFen : order.totalAmountFen) - (order.balanceFen || 0))
+        ),
+        payNote: payNote(order),
       },
       stepList: codes.map((code, i) => ({
         code,

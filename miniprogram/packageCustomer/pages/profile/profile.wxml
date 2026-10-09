@@ -34,6 +34,13 @@
         <view class="shortcut-sub">{{copy.profile.pointsSub}}</view>
       </view>
     </view>
+    <view class="shortcut" hover-class="shortcut-on" bind:tap="goBalance">
+      <view class="mark mark-green"><text class="mark-yen">¥</text></view>
+      <view class="shortcut-copy">
+        <view class="shortcut-title">{{copy.profile.balance}}</view>
+        <view class="shortcut-sub">{{copy.profile.balanceSub}}</view>
+      </view>
+    </view>
     <view class="shortcut" hover-class="shortcut-on" bind:tap="goCoupons">
       <view class="mark"><image src="/images/profile-coupon.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">

@@ -102,6 +102,9 @@ Page({
   goPoints() {
     wx.navigateTo({ url: "/packageCustomer/pages/points/points" });
   },
+  goBalance() {
+    wx.navigateTo({ url: "/packageCustomer/pages/balance/balance" });
+  },
   goCoupons() {
     wx.navigateTo({ url: "/packageCustomer/pages/coupons/coupons" });
   },

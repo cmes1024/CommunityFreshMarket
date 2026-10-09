@@ -3,6 +3,7 @@ package com.communityfreshmarket.order;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.communityfreshmarket.address.AddressService;
+import com.communityfreshmarket.balance.OrderBalance;
 import com.communityfreshmarket.auth.UserContext;
 import com.communityfreshmarket.cart.CartService;
 import com.communityfreshmarket.cart.dto.CartLineResponse;
@@ -60,6 +61,7 @@ public class OrderService {
   private final PointsService pointsService;
   private final CouponService couponService;
   private final StoreMapper storeMapper;
+  private final OrderBalance orderBalance;
 
   public OrderService(
       OrderMapper orderMapper,
@@ -73,7 +75,8 @@ public class OrderService {
       StockInventoryService stockInventoryService,
       PointsService pointsService,
       CouponService couponService,
-      StoreMapper storeMapper) {
+      StoreMapper storeMapper,
+      OrderBalance orderBalance) {
     this.orderMapper = orderMapper;
     this.orderItemMapper = orderItemMapper;
     this.cartService = cartService;
@@ -86,6 +89,7 @@ public class OrderService {
     this.pointsService = pointsService;
     this.couponService = couponService;
     this.storeMapper = storeMapper;
+    this.orderBalance = orderBalance;
   }
 
   @Transactional
@@ -166,12 +170,24 @@ public class OrderService {
     }
     order.setTotalAmountFen(total);
     order.setDiscountFen(0);
+    order.setBalanceFen(0);
     orderMapper.insert(order);
     if (request.getCouponClaimId() != null) {
       int discount = couponService.reserveForOrder(
           request.getCouponClaimId(), userId, storeId, order.getId(), total);
       order.setCouponClaimId(request.getCouponClaimId());
       order.setDiscountFen(discount);
+      orderMapper.updateById(order);
+    }
+    int payable = Math.max(0, total - (order.getDiscountFen() == null ? 0 : order.getDiscountFen()));
+    int applied = orderBalance.apply(
+        order.getId(),
+        userId,
+        storeId,
+        payable,
+        Boolean.TRUE.equals(request.getUseBalance()));
+    if (applied > 0) {
+      order.setBalanceFen(applied);
       orderMapper.updateById(order);
     }
 
@@ -352,6 +368,7 @@ public class OrderService {
     }
     restoreStock(order.getId(), order.getStoreId());
     couponService.releaseByOrder(order.getId());
+    orderBalance.refund(order.getId(), order.getUserId(), order.getStoreId());
     log.info("order cancelled id={} by={}", order.getId(), by);
     Order fresh = orderMapper.selectById(order.getId());
     if (fresh != null) {
