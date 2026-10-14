@@ -5,12 +5,26 @@ ARG HTTP_PROXY
 ENV HTTPS_PROXY=${HTTPS_PROXY} HTTP_PROXY=${HTTP_PROXY}
 COPY pom.xml .
 COPY src ./src
-# 构建阶段与运行时一样：容器直连 Maven Central 会 TLS 握手失败，有代理则走代理。
+# 容器直连 Maven Central 会 TLS 握手失败。Maven 3.9 默认传输不看 MAVEN_OPTS 里的 proxyHost，要写 settings.xml。
 RUN if [ -n "$HTTPS_PROXY" ]; then \
-      host=$(printf '%s' "$HTTPS_PROXY" | sed -E 's#https?://([^:/]+).*#\1#'); \
-      port=$(printf '%s' "$HTTPS_PROXY" | sed -E 's#https?://[^:/]+:([0-9]+).*#\1#'); \
-      case "$port" in ''|http*) port=80;; esac; \
-      export MAVEN_OPTS="-Dhttps.proxyHost=$host -Dhttps.proxyPort=$port -Dhttp.proxyHost=$host -Dhttp.proxyPort=$port"; \
+      rest="${HTTPS_PROXY#*://}"; \
+      rest="${rest%%/*}"; \
+      host="${rest%%:*}"; \
+      port="${rest##*:}"; \
+      if [ "$port" = "$rest" ]; then port=80; fi; \
+      echo "maven via proxy ${host}:${port}"; \
+      mkdir -p /root/.m2; \
+      printf '%s\n' \
+        '<settings>' \
+        '  <proxies>' \
+        '    <proxy><id>http</id><active>true</active><protocol>http</protocol>' \
+        "      <host>${host}</host><port>${port}</port>" \
+        '    </proxy>' \
+        '    <proxy><id>https</id><active>true</active><protocol>https</protocol>' \
+        "      <host>${host}</host><port>${port}</port>" \
+        '    </proxy>' \
+        '  </proxies>' \
+        '</settings>' > /root/.m2/settings.xml; \
     fi; \
     mvn -q -DskipTests package
 
