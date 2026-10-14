@@ -67,11 +67,7 @@ Page({
   },
   /** 须用户点击触发；onShow 弹订阅框不可靠，未授权则服务端无法推新单 */
   async enableNotify() {
-    await requestSubscribe([
-      "newOrderTemplateId",
-      "cancelTemplateId",
-      "arrivedTemplateId",
-    ]);
+    await requestSubscribe(["newOrderTemplateId", "cancelTemplateId"]);
     wx.showToast({ title: copy.merchant.notifyDone, icon: "none" });
   },
   async reload() {

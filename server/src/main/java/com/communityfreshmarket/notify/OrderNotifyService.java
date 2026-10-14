@@ -37,25 +37,22 @@ public class OrderNotifyService {
   }
 
   public void notifyCancel(Order order, String by) {
+    if (!"CUSTOMER".equals(by)) {
+      return;
+    }
     String summary = orderSummary(order);
-    if ("CUSTOMER".equals(by)) {
-      for (String openid : memberOpenids(order.getStoreId())) {
-        subscribeMessageService.sendCancel(openid, summary, MERCHANT_ORDERS);
-      }
-    } else {
-      String openid = userOpenid(order.getUserId());
-      if (openid != null) {
-        subscribeMessageService.sendCancel(
-            openid, summary, CUSTOMER_ORDER + order.getId());
-      }
+    for (String openid : memberOpenids(order.getStoreId())) {
+      subscribeMessageService.sendCancel(openid, summary, MERCHANT_ORDERS);
     }
   }
 
-  public void notifyCustomerArrived(Order order) {
-    String summary = orderSummary(order);
-    for (String openid : memberOpenids(order.getStoreId())) {
-      subscribeMessageService.sendCustomerArrived(openid, summary, MERCHANT_ORDERS);
+  public void notifyDelivering(Order order) {
+    String openid = userOpenid(order.getUserId());
+    if (openid == null) {
+      return;
     }
+    subscribeMessageService.sendDelivering(
+        openid, orderSummary(order), CUSTOMER_ORDER + order.getId());
   }
 
   private List<String> memberOpenids(long storeId) {

@@ -78,7 +78,7 @@
     </view>
     <view class="muted bill-hint">{{billHint || copy.pay.offlineHint}}</view>
   </view>
-  <view class="muted subscribe-hint">{{copy.checkout.subscribeHint}}</view>
+  <view class="muted subscribe-hint" wx:if="{{fulfillment === 'DELIVERY'}}">{{copy.checkout.subscribeHint}}</view>
   <view class="closed" wx:if="{{storeClosed}}">
     <view class="closed-title">{{copy.checkout.closedTitle}}</view>
     <view class="closed-sub">{{copy.checkout.closedHint}}</view>

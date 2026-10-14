@@ -3,11 +3,7 @@ package com.communityfreshmarket.upload;
 import com.communityfreshmarket.common.ApiResponse;
 import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
-import com.communityfreshmarket.config.AppProperties;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -25,10 +21,10 @@ public class UploadController {
   private static final Set<String> ALLOWED =
       Set.of("jpg", "jpeg", "png", "webp", "gif");
 
-  private final AppProperties appProperties;
+  private final MinioImageStorage imageStorage;
 
-  public UploadController(AppProperties appProperties) {
-    this.appProperties = appProperties;
+  public UploadController(MinioImageStorage imageStorage) {
+    this.imageStorage = imageStorage;
   }
 
   @PostMapping("/image")
@@ -49,17 +45,21 @@ public class UploadController {
     }
 
     String filename = UUID.randomUUID().toString().replace("-", "") + "." + ext;
-    Path dir = Path.of(appProperties.getUploadDir());
     try {
-      Files.createDirectories(dir);
-      Path target = dir.resolve(filename);
-      Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+      imageStorage.put(filename, file.getBytes(), contentType(ext));
     } catch (IOException ex) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "上传失败，请重试");
     }
+    return ApiResponse.ok(Map.of("url", imageStorage.publicUrl(filename)));
+  }
 
-    String url = appProperties.getUploadPublicBase() + "/" + filename;
-    return ApiResponse.ok(Map.of("url", url));
+  private static String contentType(String ext) {
+    return switch (ext) {
+      case "png" -> "image/png";
+      case "webp" -> "image/webp";
+      case "gif" -> "image/gif";
+      default -> "image/jpeg";
+    };
   }
 
   private static String extensionFromContentType(String contentType) {

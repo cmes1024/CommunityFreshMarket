@@ -255,7 +255,6 @@ public class OrderService {
     order.setUpdatedAt(now);
     orderMapper.updateById(order);
     log.info("customer arrived orderId={}", id);
-    orderNotifyService.notifyCustomerArrived(order);
     return toResponse(order);
   }
 
@@ -335,6 +334,9 @@ public class OrderService {
     if (OrderStatus.require(fresh.getStatus()) == OrderStatus.COMPLETED) {
       couponService.useByOrder(fresh.getId());
       pointsService.awardOrderComplete(fresh);
+    }
+    if (OrderStatus.require(fresh.getStatus()) == OrderStatus.DELIVERING) {
+      orderNotifyService.notifyDelivering(fresh);
     }
     return toResponse(fresh);
   }

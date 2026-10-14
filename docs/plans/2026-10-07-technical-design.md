@@ -14,8 +14,7 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 
 ```text
 微信小程序 ──HTTPS──▶ Nginx ──/api──▶ Spring Boot API ──▶ MySQL 8
-                         │
-                         └──/uploads──▶ 本地卷（商品图）
+                                              └──上传──▶ MinIO（商品图，公开读）
 ```
 
 单机 Docker Compose 即可跑通；业务不走微信云函数，避免调用次数限制。
@@ -28,10 +27,10 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 | API | Spring Boot 3 + Java 17 | REST + JSON |
 | ORM | MyBatis-Plus | 与表结构映射清晰 |
 | 数据库 | MySQL 8 | Compose 内部署 |
-| 反向代理 | Nginx | HTTPS、反代、静态图 |
+| 反向代理 | Nginx | 只反代 `/api/`。图片不经过它 |
 | 鉴权 | 微信 `code` → openid → JWT | 无账密；权限看店铺成员 |
 | 缓存 | 第一波不上 Redis | JWT + DB 足够 |
-| 对象存储 | 第一波本地卷；接口预留 OSS | 少外部依赖 |
+| 对象存储 | MinIO | 商品图、头图、头像写入已有桶，公开 URL 给小程序 |
 | 构建 | Maven（后端）；微信开发者工具（前端） | — |
 
 ### 1.3 仓库结构（目标）
@@ -92,7 +91,7 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 ### 2.2 红点与订阅
 
 - 商家待处理：订单列表按状态排序 + `merchant_unread`（或等价标记）
-- 订阅消息：下单/取消时服务端调用；失败只记日志，不阻断主流程
+- 订阅消息：下单、顾客取消、进入配送中时服务端调用；失败只记日志，不阻断主流程
 - 不单建复杂消息中心
 
 ---
@@ -127,10 +126,10 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 |----------|------------------|--------------|----------|--------|
 | `WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID` | `restockTemplateId` | 顾客「到货提醒我」 | 改回有货 | 该顾客 |
 | `WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID` | `newOrderTemplateId` | 店员订单台「开启订单通知」 | 顾客提交预约 | **已授权**的本店成员 |
-| `WX_SUBSCRIBE_CANCEL_TEMPLATE_ID` | `cancelTemplateId` | 顾客「提交预约」/取消；店员取消前 | 订单取消 | 对端（且须已授权） |
-| `WX_SUBSCRIBE_ARRIVED_TEMPLATE_ID` | `arrivedTemplateId` | 「我到店了」或店员「开启订单通知」 | 顾客报到 | **已授权**店员 |
+| `WX_SUBSCRIBE_CANCEL_TEMPLATE_ID` | `cancelTemplateId` | 店员订单台「开启订单通知」或取消前 | 顾客取消订单 | **已授权**的本店成员 |
+| `WX_SUBSCRIBE_DELIVERING_TEMPLATE_ID` | `deliveringTemplateId` | 顾客提交上门配送 | 店员推进到「配送中」 | 该顾客 |
 
-发送体：`thing1` 摘要、`thing2` 提示。
+发送体：`thing1` 摘要、`thing2` 提示。到货提醒为 `thing1` 商品名、`thing2` 门店名、`thing3`「已到货，可继续预约」。公众平台选用关键词的顺序须与此一致。
 
 **顾客商品列表**：`GET /api/v1/products` 可选 `categoryId`、`homeRecommended=true`（首页推荐区）；始终仅返回已上架。
 
@@ -274,3 +273,6 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 | 2026-10-09 | 店铺 `remark_phrases`：结算备注短语按店配置，接口随店铺摘要与门店设置读写 |
 | 2026-10-09 | 备注短语拆成 `delivery_remark_phrases` 与 `pickup_remark_phrases`；原列复制到两套后删除 |
 | 2026-10-09 | 店铺 `hero_image_urls`（≤3，封面仍写 `hero_image_url`）与 `home_notice`；顾客首页轮播与跑马灯 |
+| 2026-10-14 | 订阅：到店模板改为配送出发；顾客取消只通知店员；我到店了只留红点 |
+| 2026-10-14 | 到货提醒增加门店名：`thing1` 商品名、`thing2` 门店名、`thing3` 提示 |
+| 2026-10-14 | 图片改存 MinIO。Nginx 只反代接口，不再托管 `/uploads/` |

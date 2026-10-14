@@ -28,13 +28,17 @@ app:
   wx-appid: ${WX_APPID:}
   wx-secret: ${WX_SECRET:}
   bootstrap-owner-openid: ${BOOTSTRAP_OWNER_OPENID:}
-  upload-dir: ${UPLOAD_DIR:/app/uploads}
-  upload-public-base: ${UPLOAD_PUBLIC_BASE:http://127.0.0.1:8088/uploads}
+  minio-endpoint: ${MINIO_ENDPOINT:}
+  minio-access-key: ${MINIO_ACCESS_KEY:}
+  minio-secret-key: ${MINIO_SECRET_KEY:}
+  minio-bucket: ${MINIO_BUCKET:cfm}
+  # 手机能打开的图片前缀。须与小程序 downloadFile 域名一致。
+  upload-public-base: ${UPLOAD_PUBLIC_BASE:}
   # 订阅消息模板（见 deploy/.env.example 注释）；空=只日志不发送
   subscribe-restock-template-id: ${WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID:}       # 到货提醒 → 顾客
   subscribe-new-order-template-id: ${WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID:}   # 新预约 → 店员
-  subscribe-cancel-template-id: ${WX_SUBSCRIBE_CANCEL_TEMPLATE_ID:}         # 取消 → 对端
-  subscribe-arrived-template-id: ${WX_SUBSCRIBE_ARRIVED_TEMPLATE_ID:}       # 到店 → 店员
+  subscribe-cancel-template-id: ${WX_SUBSCRIBE_CANCEL_TEMPLATE_ID:}         # 顾客取消 → 店员
+  subscribe-delivering-template-id: ${WX_SUBSCRIBE_DELIVERING_TEMPLATE_ID:} # 配送出发 → 顾客
   # 邀请普通链接前缀（?code=邀请码）；公众平台配置扫该链接打开小程序
   invite-link-base: ${INVITE_LINK_BASE:}
 

@@ -5,7 +5,7 @@ const config = require("./config");
  * - restockTemplateId
  * - newOrderTemplateId
  * - cancelTemplateId
- * - arrivedTemplateId
+ * - deliveringTemplateId
  */
 function collectIds(keys) {
   const ids = [];

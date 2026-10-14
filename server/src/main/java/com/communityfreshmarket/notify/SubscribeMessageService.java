@@ -21,10 +21,11 @@ import org.springframework.web.client.RestClient;
  * <ul>
  *   <li>restock — 到货提醒 → 顾客
  *   <li>new-order — 新预约 → 店员
- *   <li>cancel — 取消 → 对端
- *   <li>arrived — 顾客到店 → 店员
+ *   <li>cancel — 顾客取消 → 店员
+ *   <li>delivering — 开始配送 → 顾客
  * </ul>
- * 发送字段约定：thing1=摘要，thing2=提示语（与公众平台模板关键词对齐后可改）。
+ * 发送字段约定：thing1=摘要，thing2=提示语。到货提醒多一个门店名：
+ * thing1=商品名，thing2=门店名，thing3=提示语。关键词顺序须与此一致。
  */
 @Service
 public class SubscribeMessageService {
@@ -46,14 +47,17 @@ public class SubscribeMessageService {
     this.restClient = WechatHttp.client();
   }
 
-  public void sendRestock(String openid, String productName) {
+  public void sendRestock(String openid, String productName, String storeName) {
+    Map<String, String> fields = new LinkedHashMap<>();
+    fields.put("thing1", truncate(productName, 20));
+    fields.put("thing2", truncate(storeLabel(storeName), 20));
+    fields.put("thing3", "已到货，可继续预约");
     send(
         "restock",
         appProperties.getSubscribeRestockTemplateId(),
         openid,
         "packageCustomer/pages/home/home",
-        truncate(productName, 20),
-        "已到货，可继续预约");
+        fields);
   }
 
   public void sendNewOrder(String openid, String summary, String page) {
@@ -76,30 +80,41 @@ public class SubscribeMessageService {
         "订单已取消");
   }
 
-  public void sendCustomerArrived(String openid, String summary, String page) {
+  public void sendDelivering(String openid, String summary, String page) {
     send(
-        "arrived",
-        appProperties.getSubscribeArrivedTemplateId(),
+        "delivering",
+        appProperties.getSubscribeDeliveringTemplateId(),
         openid,
         page,
         truncate(summary, 20),
-        "顾客已到店，请接待");
+        "正在配送，请留意收货");
   }
 
   private void send(
       String kind, String templateId, String openid, String page, String thing1, String thing2) {
+    Map<String, String> fields = new LinkedHashMap<>();
+    fields.put("thing1", thing1);
+    fields.put("thing2", truncate(thing2, 20));
+    send(kind, templateId, openid, page, fields);
+  }
+
+  private void send(
+      String kind, String templateId, String openid, String page, Map<String, String> fields) {
     if (!StringUtils.hasText(openid)) {
       return;
     }
     if (!StringUtils.hasText(templateId)) {
-      log.info("subscribe {} skipped (no template): openid={} thing1={}", kind, openid, thing1);
+      log.info(
+          "subscribe {} skipped (no template): openid={} thing1={}",
+          kind,
+          openid,
+          fields.get("thing1"));
       return;
     }
     try {
       String accessToken = accessTokenService.requireAccessToken();
       Map<String, Object> data = new LinkedHashMap<>();
-      data.put("thing1", Map.of("value", thing1));
-      data.put("thing2", Map.of("value", truncate(thing2, 20)));
+      fields.forEach((key, value) -> data.put(key, Map.of("value", value == null ? "" : value)));
       Map<String, Object> body = new LinkedHashMap<>();
       body.put("touser", openid);
       body.put("template_id", templateId);
@@ -119,6 +134,10 @@ public class SubscribeMessageService {
     } catch (Exception ex) {
       log.warn("subscribe {} send error: {}", kind, ex.getMessage());
     }
+  }
+
+  private static String storeLabel(String storeName) {
+    return StringUtils.hasText(storeName) ? storeName.trim() : "本店";
   }
 
   private static String truncate(String value, int max) {

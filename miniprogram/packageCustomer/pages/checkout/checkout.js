@@ -319,7 +319,9 @@ Page({
     }
     this.setData({ submitting: true });
     try {
-      await requestSubscribe(["cancelTemplateId"]);
+      if (this.data.fulfillment === "DELIVERY") {
+        await requestSubscribe(["deliveringTemplateId"]);
+      }
       const order = await api.submitOrder(body);
       await syncCartCount();
       wx.showToast({ title: copy.checkout.submittedToast, icon: "none" });

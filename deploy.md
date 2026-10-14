@@ -18,12 +18,12 @@
     │  HTTP 127.0.0.1:8088
     ▼
 容器 cfm-nginx ── /api/ ──▶ 容器 cfm-api（Spring Boot :8080）──▶ 容器 cfm-mysql
-              └── /uploads/ ──▶ 卷 cfm_uploads（商品图、头像）
+                                              └── 上传 ──▶ 已有 MinIO（商品图、头像）
 ```
 
 - 业务在 Java 服务里，不用微信云开发、不用云函数。
 - 数据库结构由 Flyway 在 API 第一次启动时自动建好，并写入默认店（`id = 1`，店名「绿意鲜生」）和一批示例分类、商品、自提时段。
-- 仓库内的 Nginx（`deploy/nginx/nginx.conf`）只监听 HTTP，负责反代 `/api/` 和托管 `/uploads/`。正式环境的 HTTPS 加在宿主机前面，不改这段容器配置也能上线。
+- 仓库内的 Nginx（`deploy/nginx/nginx.conf`）只监听 HTTP，只反代 `/api/`。图片在 MinIO，手机直接向 MinIO 的公开地址取图。正式环境的 HTTPS 加在宿主机前面，不用为图片改宿主机 Nginx。
 - 收款在线下完成，部署时不要接微信支付。
 
 ---
@@ -148,20 +148,25 @@ DEFAULT_STORE_ID=1
 # 店主还没登录过，这里先留空。第 12 节再写。
 BOOTSTRAP_OWNER_OPENID=
 
-# 必须是手机能打开的 HTTPS 地址，末尾不要加斜杠以外的路径
-UPLOAD_PUBLIC_BASE=https://api.example.com/uploads
+# 使用服务器上已有的 MinIO。容器走内网地址，手机走公开 HTTPS 地址。
+MINIO_ENDPOINT=http://host.docker.internal:9000
+MINIO_ACCESS_KEY=<MinIO Access Key>
+MINIO_SECRET_KEY=<MinIO Secret Key>
+MINIO_BUCKET=cfm
+# 公开前缀，末尾不要斜杠。主机名列入小程序 downloadFile 合法域名。
+UPLOAD_PUBLIC_BASE=https://minio.example.com/cfm
 
 # 四个模板还没申请就先留空。申请后把模板 ID 填进来，并与小程序 config.js 保持一致。
 WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID=
 WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID=
 WX_SUBSCRIBE_CANCEL_TEMPLATE_ID=
-WX_SUBSCRIBE_ARRIVED_TEMPLATE_ID=
+WX_SUBSCRIBE_DELIVERING_TEMPLATE_ID=
 
 # 与公众平台「扫普通链接二维码打开小程序」的链接前缀一致，不要带 ?code=
 INVITE_LINK_BASE=https://api.example.com/cfm/join
 
 # 只给本机反代用。不要改成对公网发布。
-MYSQL_PORT=3306
+MYSQL_PORT=3307
 HTTP_PORT=8088
 ```
 
@@ -172,7 +177,9 @@ HTTP_PORT=8088
 | `WX_APPID` / `WX_SECRET` | 用 `wx.login` 的 code 向微信换 openid。空着或填错时，小程序登录失败 |
 | `JWT_SECRET` | 签发登录令牌。换掉它会使所有人重新登录 |
 | `BOOTSTRAP_OWNER_OPENID` | 该微信号登录后成为默认店店主。空着时任何人登录都只是顾客 |
-| `UPLOAD_PUBLIC_BASE` | 图片 URL 前缀。必须和 `downloadFile` 合法域名一致，否则商品图、头像在手机上打不开 |
+| `MINIO_ENDPOINT` | API 容器访问 MinIO 的地址。同一台机器上已有 MinIO 时，用 `http://host.docker.internal:9000` |
+| `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` / `MINIO_BUCKET` | 写入图片的桶。启动时若桶不存在会创建，并设为公开读 |
+| `UPLOAD_PUBLIC_BASE` | 手机打开图片的 URL 前缀。必须是 HTTPS，主机名与 `downloadFile` 合法域名一致 |
 | `INVITE_LINK_BASE` | 店员邀请二维码里的链接前缀。服务端把邀请码拼成 `{前缀}?code=邀请码` |
 | `HTTPS_PROXY` | 容器访问微信和构建时访问 Maven 的代理。正常云主机留空 |
 | `JWT_EXPIRE_SECONDS` | 可选，默认 604800（7 天），一般不用写进 `.env` |
@@ -183,11 +190,11 @@ HTTP_PORT=8088
 
 ## 8. 让管理端口只监听本机
 
-编辑服务器上的 `deploy/docker-compose.yml`，把两个 `ports` 改成只绑定回环地址，避免 3306 / 8088 绕过防火墙：
+编辑服务器上的 `deploy/docker-compose.yml`，把两个 `ports` 改成只绑定回环地址。宿主机 3306 常被面板自带的 MySQL 占用，本项目用 3307；容器内部仍是 3306。
 
 ```yaml
 # mysql.ports
-- "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+- "127.0.0.1:${MYSQL_PORT:-3307}:3306"
 
 # nginx.ports
 - "127.0.0.1:${HTTP_PORT:-8088}:80"
@@ -295,9 +302,9 @@ docker run --rm curlimages/curl -sI https://api.weixin.qq.com | head -n 5
 |------|------|
 | request 合法域名 | `https://api.example.com` |
 | uploadFile 合法域名 | `https://api.example.com` |
-| downloadFile 合法域名 | `https://api.example.com` |
+| downloadFile 合法域名 | `UPLOAD_PUBLIC_BASE` 的主机名，例如 `https://minio.example.com` |
 
-不要填 IP，不要带端口，不要带路径。三个都要填：接口走 request，传图走 uploadFile，商品图和头像走 downloadFile。
+不要填 IP，不要带端口，不要带路径。三个都要填：接口走 request，传图走 uploadFile（仍是 API 域名），商品图和头像走 downloadFile（MinIO 的公开域名）。两个域名相同时各填同一个。
 
 socket 合法域名、业务域名留空即可。本项目没有 websocket，也没有 web-view。
 
@@ -323,21 +330,29 @@ socket 合法域名、业务域名留空即可。本项目没有 websocket，也
 
 「功能 → 订阅消息」里选用**已选类目**下的公共模板，各申请一个（也可以四个变量填同一个模板 ID）。添加后复制模板 ID。
 
-服务端写死了字段名，模板的两个关键词必须正好是：
+服务端写死了字段名。新预约、取消、配送出发各两个关键词，且必须都是「事物」：
 
 | 字段 | 类型 | 内容 |
 |------|------|------|
-| `thing1` | 事物 | 摘要（商品名或订单摘要，最长 20 字） |
+| `thing1` | 事物 | 订单摘要 `#订单号 ¥金额`（最长 20 字） |
 | `thing2` | 事物 | 提示语（最长 20 字） |
 
-关键词名字不是 `thing1` / `thing2` 时，微信会拒绝发送，业务本身不会回滚。
+到货提醒三个关键词，顺序不能换，且都必须是「事物」：
+
+| 顺序 | 建议关键词 | 字段 | 内容 |
+|------|------------|------|------|
+| 1 | 商品名称 | `thing1` | 商品名 |
+| 2 | 门店名称 | `thing2` | 店铺名称，空则写「本店」 |
+| 3 | 备注 | `thing3` | 已到货，可继续预约 |
+
+关键词类型或顺序对不上时，微信会拒绝发送，业务本身不会回滚。
 
 | 环境变量 | 小程序 `config.js` | 谁授权 | 何时发送 | 发给谁 |
 |----------|---------------------|--------|----------|--------|
 | `WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID` | `restockTemplateId` | 顾客点「到货提醒我」 | 商品改回有货 | 该顾客 |
 | `WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID` | `newOrderTemplateId` | 店员点「开启订单通知」 | 顾客提交预约 | 已授权的本店成员 |
-| `WX_SUBSCRIBE_CANCEL_TEMPLATE_ID` | `cancelTemplateId` | 顾客提交/取消，或店员取消前 | 订单取消 | 对端里已授权的人 |
-| `WX_SUBSCRIBE_ARRIVED_TEMPLATE_ID` | `arrivedTemplateId` | 顾客「我到店了」或店员「开启订单通知」 | 顾客报到 | 已授权的店员 |
+| `WX_SUBSCRIBE_CANCEL_TEMPLATE_ID` | `cancelTemplateId` | 店员点「开启订单通知」或取消前 | 顾客取消订单 | 已授权的店员 |
+| `WX_SUBSCRIBE_DELIVERING_TEMPLATE_ID` | `deliveringTemplateId` | 顾客提交上门配送 | 店员推进到配送中 | 该顾客 |
 
 填进服务器 `deploy/.env` 后执行 `docker compose up -d api` 使 API 读到新值。小程序侧在下一节改 `config.js`，两边字符串必须相同。
 
@@ -393,7 +408,7 @@ module.exports = {
   restockTemplateId: "<与 WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID 相同>",
   newOrderTemplateId: "<与 WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID 相同>",
   cancelTemplateId: "<与 WX_SUBSCRIBE_CANCEL_TEMPLATE_ID 相同>",
-  arrivedTemplateId: "<与 WX_SUBSCRIBE_ARRIVED_TEMPLATE_ID 相同>",
+  deliveringTemplateId: "<与 WX_SUBSCRIBE_DELIVERING_TEMPLATE_ID 相同>",
 };
 ```
 
@@ -458,11 +473,11 @@ docker exec cfm-mysql mysql -ucfm -p'<DB_PASSWORD>' cfm -e \
 用体验版或正式版，在手机上走一遍（开发者工具勾选「不校验合法域名」不算数）：
 
 1. 顾客打开即登录，首页能看到商品。
-2. 商家上传一张商品图，顾客端能显示（验证 `UPLOAD_PUBLIC_BASE` 与 downloadFile 域名）。
+2. 商家上传一张商品图，顾客端能显示（图片地址在 MinIO，downloadFile 域名覆盖该主机名）。
 3. 顾客加购、填地址、提交一笔配送预约；再提交一笔自提预约。
 4. 店主在订单台看到新单，把状态推到完成；未完成单可以取消。
 5. 订单详情「微信客服」能进会话。
-6. 若已配订阅模板：顾客提交时出现订阅弹窗；店员点「开启订单通知」后，再下一单能收到服务通知。
+6. 若已配订阅模板：顾客提交配送预约时出现订阅弹窗，自提不弹；店员点「开启订单通知」后，再下一单能收到服务通知。店员把该配送单推进「配送中」后，已允许的顾客收到一条通知。
 7. 商家生成邀请二维码，另一个微信号扫码后「我的」出现商家工作台。
 
 接口抽查（令牌从小程序登录响应里取，仅排错时用）：
@@ -485,27 +500,22 @@ cd deploy
 docker compose up -d --build
 ```
 
-Flyway 会在 API 启动时补迁移。不要删除 Docker 卷，否则数据库和图片一起没了。
+Flyway 会在 API 启动时补迁移。不要删除 Docker 卷，否则数据库没了。图片在 MinIO 自己的数据目录里。
 
 小程序有界面或 `config.js` 改动时，需要重新上传并发布，只重启服务器不会更新手机上的正式版。
 
 ### 备份
 
-卷名以 `docker volume ls` 为准，Compose 项目目录是 `deploy` 时通常是 `deploy_cfm_mysql_data`、`deploy_cfm_uploads`。
+卷名以 `docker volume ls` 为准，Compose 项目目录是 `deploy` 时数据库卷通常是 `deploy_cfm_mysql_data`。图片在既有 MinIO 里，跟 MinIO 的数据一起备份。
 
 ```bash
 mkdir -p /var/backups/cfm
 docker exec cfm-mysql mysqldump -ucfm -p'<DB_PASSWORD>' \
   --single-transaction --routines cfm \
   > /var/backups/cfm/cfm-$(date +%F).sql
-
-docker run --rm \
-  -v deploy_cfm_uploads:/data:ro \
-  -v /var/backups/cfm:/backup \
-  alpine tar czf /backup/uploads-$(date +%F).tgz -C /data .
 ```
 
-把这两份文件拷离这台机器。恢复数据库前先停 API：`docker compose stop api`，导入后再启动。
+把备份拷离这台机器。恢复数据库前先停 API：`docker compose stop api`，导入后再启动。
 
 ### 日志
 
@@ -525,14 +535,14 @@ docker compose logs --tail=100 nginx
 
 - [ ] 域名已解析并备案（大陆服务器）
 - [ ] `https://api.example.com/api/v1/health` 返回 `db: UP`
-- [ ] 3306 与 8088 只监听 `127.0.0.1`，防火墙未放行
+- [ ] 数据库宿主机端口（默认 3307）与 8088 只监听 `127.0.0.1`，防火墙未放行
 - [ ] `JWT_SECRET`、数据库密码、AppSecret 已换成随机值，且不在 Git 里
 - [ ] `WX_APPID` / `WX_SECRET` 与公众平台一致
-- [ ] `UPLOAD_PUBLIC_BASE=https://api.example.com/uploads`
+- [ ] `MINIO_*` 指向已有 MinIO，`UPLOAD_PUBLIC_BASE` 是手机能打开的 HTTPS 前缀
 - [ ] request、uploadFile、downloadFile 三个合法域名都已保存
 - [ ] 隐私指引已声明相册、摄像头、昵称头像
 - [ ] 客服已添加
-- [ ] 订阅模板字段为 `thing1`、`thing2`，ID 已同时写入 `.env` 与 `config.js`（或明确留空）
+- [ ] 订阅模板字段与顺序已对齐（到货提醒为商品名、门店名、提示；其余为摘要、提示），ID 已同时写入 `.env` 与 `config.js`（或明确留空）
 - [ ] 邀请链接校验文件可通过 HTTPS 打开，规则已发布
 - [ ] `project.config.json` 的 AppID、`config.js` 的 `apiHost` 已换成新环境
 - [ ] `BOOTSTRAP_OWNER_OPENID` 已填并重启过 API，店主能进商家工作台

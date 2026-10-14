@@ -6,9 +6,11 @@ import com.communityfreshmarket.common.BizException;
 import com.communityfreshmarket.common.ErrorCodes;
 import com.communityfreshmarket.domain.Product;
 import com.communityfreshmarket.domain.RestockWatch;
+import com.communityfreshmarket.domain.Store;
 import com.communityfreshmarket.domain.User;
 import com.communityfreshmarket.mapper.ProductMapper;
 import com.communityfreshmarket.mapper.RestockWatchMapper;
+import com.communityfreshmarket.mapper.StoreMapper;
 import com.communityfreshmarket.mapper.UserMapper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,16 +28,19 @@ public class RestockWatchService {
   private final RestockWatchMapper restockWatchMapper;
   private final ProductMapper productMapper;
   private final UserMapper userMapper;
+  private final StoreMapper storeMapper;
   private final SubscribeMessageService subscribeMessageService;
 
   public RestockWatchService(
       RestockWatchMapper restockWatchMapper,
       ProductMapper productMapper,
       UserMapper userMapper,
+      StoreMapper storeMapper,
       SubscribeMessageService subscribeMessageService) {
     this.restockWatchMapper = restockWatchMapper;
     this.productMapper = productMapper;
     this.userMapper = userMapper;
+    this.storeMapper = storeMapper;
     this.subscribeMessageService = subscribeMessageService;
   }
 
@@ -121,10 +126,12 @@ public class RestockWatchService {
           .eq(RestockWatch::getProductId, product.getId())
           .eq(RestockWatch::getStatus, "WATCHING"));
       LocalDateTime now = LocalDateTime.now();
+      Store store = storeMapper.selectById(product.getStoreId());
+      String storeName = store == null ? null : store.getName();
       for (RestockWatch watch : watchers) {
         User user = userMapper.selectById(watch.getUserId());
         if (user != null && user.getOpenid() != null) {
-          subscribeMessageService.sendRestock(user.getOpenid(), product.getName());
+          subscribeMessageService.sendRestock(user.getOpenid(), product.getName(), storeName);
         }
         watch.setStatus("NOTIFIED");
         watch.setNotifiedAt(now);

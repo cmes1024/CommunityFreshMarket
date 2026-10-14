@@ -12,16 +12,21 @@ public class AppProperties {
   private String wxSecret = "";
   /** 店主冷启动：该微信 openid 登录时自动写入默认店 OWNER（与环境无关） */
   private String bootstrapOwnerOpenid = "";
-  private String uploadDir = "/app/uploads";
-  private String uploadPublicBase = "/uploads";
+  /** 容器访问 MinIO 的内网地址，如 http://host.docker.internal:9000 */
+  private String minioEndpoint = "";
+  private String minioAccessKey = "";
+  private String minioSecretKey = "";
+  private String minioBucket = "cfm";
+  /** 手机打开图片的 URL 前缀，不含末尾文件名 */
+  private String uploadPublicBase = "";
   /** 到货提醒：售罄订阅后，改回有货发给顾客 */
   private String subscribeRestockTemplateId = "";
   /** 新预约：顾客下单后发给本店成员 */
   private String subscribeNewOrderTemplateId = "";
-  /** 取消：顾客取消→店员，店员取消→顾客 */
+  /** 取消：顾客取消后发给已授权的本店成员 */
   private String subscribeCancelTemplateId = "";
-  /** 顾客到店：待自提报到后发给本店成员 */
-  private String subscribeArrivedTemplateId = "";
+  /** 配送出发：配送单进入配送中后发给下单顾客 */
+  private String subscribeDeliveringTemplateId = "";
   /**
    * 邀请普通链接前缀（不含 code）。扫码打开小程序时由公众平台配置。
    * 例：https://your.domain/cfm/join → 实际链接 https://your.domain/cfm/join?code=AB12CD
@@ -76,12 +81,36 @@ public class AppProperties {
     this.bootstrapOwnerOpenid = bootstrapOwnerOpenid;
   }
 
-  public String getUploadDir() {
-    return uploadDir;
+  public String getMinioEndpoint() {
+    return minioEndpoint;
   }
 
-  public void setUploadDir(String uploadDir) {
-    this.uploadDir = uploadDir;
+  public void setMinioEndpoint(String minioEndpoint) {
+    this.minioEndpoint = minioEndpoint;
+  }
+
+  public String getMinioAccessKey() {
+    return minioAccessKey;
+  }
+
+  public void setMinioAccessKey(String minioAccessKey) {
+    this.minioAccessKey = minioAccessKey;
+  }
+
+  public String getMinioSecretKey() {
+    return minioSecretKey;
+  }
+
+  public void setMinioSecretKey(String minioSecretKey) {
+    this.minioSecretKey = minioSecretKey;
+  }
+
+  public String getMinioBucket() {
+    return minioBucket;
+  }
+
+  public void setMinioBucket(String minioBucket) {
+    this.minioBucket = minioBucket;
   }
 
   public String getUploadPublicBase() {
@@ -116,12 +145,12 @@ public class AppProperties {
     this.subscribeCancelTemplateId = subscribeCancelTemplateId;
   }
 
-  public String getSubscribeArrivedTemplateId() {
-    return subscribeArrivedTemplateId;
+  public String getSubscribeDeliveringTemplateId() {
+    return subscribeDeliveringTemplateId;
   }
 
-  public void setSubscribeArrivedTemplateId(String subscribeArrivedTemplateId) {
-    this.subscribeArrivedTemplateId = subscribeArrivedTemplateId;
+  public void setSubscribeDeliveringTemplateId(String subscribeDeliveringTemplateId) {
+    this.subscribeDeliveringTemplateId = subscribeDeliveringTemplateId;
   }
 
   public String getInviteLinkBase() {

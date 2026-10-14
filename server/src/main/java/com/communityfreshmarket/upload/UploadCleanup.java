@@ -6,32 +6,31 @@ import com.communityfreshmarket.domain.Product;
 import com.communityfreshmarket.domain.Store;
 import com.communityfreshmarket.mapper.ProductMapper;
 import com.communityfreshmarket.mapper.StoreMapper;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-/** 本服务上传的图片不再被商品图、实景图或首页头图引用时，从磁盘删除。 */
+/** 本服务上传的图片不再被商品图、实景图或首页头图引用时，从 MinIO 删除。 */
 @Service
 public class UploadCleanup {
 
-  private static final Logger log = LoggerFactory.getLogger(UploadCleanup.class);
   private static final Pattern FILE_NAME = Pattern.compile("[A-Za-z0-9._-]+");
 
   private final AppProperties appProperties;
   private final ProductMapper productMapper;
   private final StoreMapper storeMapper;
+  private final MinioImageStorage imageStorage;
 
   public UploadCleanup(
-      AppProperties appProperties, ProductMapper productMapper, StoreMapper storeMapper) {
+      AppProperties appProperties,
+      ProductMapper productMapper,
+      StoreMapper storeMapper,
+      MinioImageStorage imageStorage) {
     this.appProperties = appProperties;
     this.productMapper = productMapper;
     this.storeMapper = storeMapper;
+    this.imageStorage = imageStorage;
   }
 
   public void release(Collection<String> urls) {
@@ -48,16 +47,7 @@ public class UploadCleanup {
     if (filename == null || stillReferenced(url.trim())) {
       return;
     }
-    Path dir = Path.of(appProperties.getUploadDir()).toAbsolutePath().normalize();
-    Path file = dir.resolve(filename).normalize();
-    if (!file.startsWith(dir)) {
-      return;
-    }
-    try {
-      Files.deleteIfExists(file);
-    } catch (IOException ex) {
-      log.warn("删除未引用图片失败: {}", filename);
-    }
+    imageStorage.remove(filename);
   }
 
   private boolean stillReferenced(String url) {

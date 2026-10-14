@@ -3,7 +3,6 @@ const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const { label, steps } = require("../../../utils/orderStatus");
 const { syncCartCount } = require("../../../utils/cartSync");
-const { requestSubscribe } = require("../../../utils/subscribe");
 
 function fmtTime(iso) {
   if (!iso) return "";
@@ -65,13 +64,11 @@ Page({
     const ok = await askCancel();
     if (!ok) return;
     try {
-      await requestSubscribe(["cancelTemplateId"]);
       await api.cancelOrder(this.id, "顾客取消");
       await this.refresh();
     } catch (e) {}
   },
   async arrive() {
-    await requestSubscribe(["arrivedTemplateId"]);
     await api.arriveOrder(this.id);
     await this.refresh();
   },
