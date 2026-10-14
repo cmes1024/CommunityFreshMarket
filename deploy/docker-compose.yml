@@ -15,6 +15,20 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    container_name: cfm-redis
+    restart: unless-stopped
+    # 6379 已被宿主机占用，不映射端口。只在 Compose 网络里给 cfm-api 用。
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - cfm_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   minio:
     build:
       context: .
@@ -26,6 +40,9 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-cfm}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-cfm_dev_password}
+    ports:
+      # 宿主机 9000 已被占用。只绑回环。图片路径就是桶名 communityfreshmarket。
+      - "127.0.0.1:${MINIO_API_PORT:-9002}:9000"
     volumes:
       - cfm_minio_data:/data
     healthcheck:
@@ -49,6 +66,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       minio:
         condition: service_healthy
     environment:
@@ -59,7 +78,8 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/cfm
       DB_USER: cfm
       DB_PASSWORD: ${DB_PASSWORD:-cfm_dev_password}
-      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-32bytes!!}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       WX_APPID: ${WX_APPID:-}
       WX_SECRET: ${WX_SECRET:-}
       DEFAULT_STORE_ID: ${DEFAULT_STORE_ID:-1}
@@ -67,8 +87,8 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-cfm}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-cfm_dev_password}
-      MINIO_BUCKET: cfm
-      UPLOAD_PUBLIC_BASE: ${UPLOAD_PUBLIC_BASE:-http://127.0.0.1:8088/files}
+      MINIO_BUCKET: communityfreshmarket
+      UPLOAD_PUBLIC_BASE: ${UPLOAD_PUBLIC_BASE:-http://127.0.0.1:9002/communityfreshmarket}
       WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID: ${WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID:-}
       WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID: ${WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID:-}
       WX_SUBSCRIBE_CANCEL_TEMPLATE_ID: ${WX_SUBSCRIBE_CANCEL_TEMPLATE_ID:-}
@@ -76,21 +96,10 @@ services:
       INVITE_LINK_BASE: ${INVITE_LINK_BASE:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    expose:
-      - "8080"
-
-  nginx:
-    image: nginx:1.27-alpine
-    container_name: cfm-nginx
-    restart: unless-stopped
-    depends_on:
-      - api
-      - minio
     ports:
-      - "127.0.0.1:${HTTP_PORT:-8088}:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - "127.0.0.1:${HTTP_PORT:-8088}:8088"
 
 volumes:
   cfm_pg_data:
+  cfm_redis_data:
   cfm_minio_data:

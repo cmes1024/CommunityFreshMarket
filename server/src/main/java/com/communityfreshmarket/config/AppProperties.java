@@ -6,8 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AppProperties {
 
   private long defaultStoreId = 1L;
-  private String jwtSecret = "";
-  private long jwtExpireSeconds = 604800L;
+  private long sessionExpireSeconds = 604800L;
   private String wxAppid = "";
   private String wxSecret = "";
   /** 店主冷启动：该微信 openid 登录时自动写入默认店 OWNER（与环境无关） */
@@ -16,7 +15,7 @@ public class AppProperties {
   private String minioEndpoint = "";
   private String minioAccessKey = "";
   private String minioSecretKey = "";
-  private String minioBucket = "cfm";
+  private String minioBucket = "communityfreshmarket";
   /** 手机打开图片的 URL 前缀，不含末尾文件名 */
   private String uploadPublicBase = "";
   /** 到货提醒：售罄订阅后，改回有货发给顾客 */
@@ -41,20 +40,12 @@ public class AppProperties {
     this.defaultStoreId = defaultStoreId;
   }
 
-  public String getJwtSecret() {
-    return jwtSecret;
+  public long getSessionExpireSeconds() {
+    return sessionExpireSeconds;
   }
 
-  public void setJwtSecret(String jwtSecret) {
-    this.jwtSecret = jwtSecret;
-  }
-
-  public long getJwtExpireSeconds() {
-    return jwtExpireSeconds;
-  }
-
-  public void setJwtExpireSeconds(long jwtExpireSeconds) {
-    this.jwtExpireSeconds = jwtExpireSeconds;
+  public void setSessionExpireSeconds(long sessionExpireSeconds) {
+    this.sessionExpireSeconds = sessionExpireSeconds;
   }
 
   public String getWxAppid() {

@@ -4,29 +4,33 @@ import com.communityfreshmarket.config.AppProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
-import java.util.concurrent.atomic.AtomicReference;
+import java.time.Duration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
 public class WechatAccessTokenService {
 
+  static final String KEY = "cfm:wx:access_token";
+
   private final AppProperties appProperties;
   private final ObjectMapper objectMapper;
+  private final StringRedisTemplate redis;
   private final RestClient restClient;
-  private final AtomicReference<CachedToken> tokenCache = new AtomicReference<>();
 
-  public WechatAccessTokenService(AppProperties appProperties, ObjectMapper objectMapper) {
+  public WechatAccessTokenService(
+      AppProperties appProperties, ObjectMapper objectMapper, StringRedisTemplate redis) {
     this.appProperties = appProperties;
     this.objectMapper = objectMapper;
+    this.redis = redis;
     this.restClient = WechatHttp.client();
   }
 
   public String requireAccessToken() throws Exception {
-    CachedToken cached = tokenCache.get();
-    long now = System.currentTimeMillis();
-    if (cached != null && cached.expireAtMs > now + 60_000) {
-      return cached.token;
+    String cached = redis.opsForValue().get(KEY);
+    if (cached != null && !cached.isBlank()) {
+      return cached;
     }
     String appid = appProperties.getWxAppid();
     String secret = appProperties.getWxSecret();
@@ -42,9 +46,8 @@ public class WechatAccessTokenService {
     if (token == null || token.isBlank()) {
       throw new IllegalStateException("cannot get access_token: " + resp);
     }
-    tokenCache.set(new CachedToken(token, now + expiresIn * 1000L));
+    long ttl = Math.max(60, expiresIn - 60L);
+    redis.opsForValue().set(KEY, token, Duration.ofSeconds(ttl));
     return token;
   }
-
-  private record CachedToken(String token, long expireAtMs) {}
 }

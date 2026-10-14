@@ -29,7 +29,7 @@ public class AuthService {
 
   private final AppProperties appProperties;
   private final WechatClient wechatClient;
-  private final JwtService jwtService;
+  private final SessionService sessionService;
   private final UserMapper userMapper;
   private final StoreMemberMapper storeMemberMapper;
   private final UploadCleanup uploadCleanup;
@@ -38,14 +38,14 @@ public class AuthService {
   public AuthService(
       AppProperties appProperties,
       WechatClient wechatClient,
-      JwtService jwtService,
+      SessionService sessionService,
       UserMapper userMapper,
       StoreMemberMapper storeMemberMapper,
       UploadCleanup uploadCleanup,
       PlatformTransactionManager transactionManager) {
     this.appProperties = appProperties;
     this.wechatClient = wechatClient;
-    this.jwtService = jwtService;
+    this.sessionService = sessionService;
     this.userMapper = userMapper;
     this.storeMemberMapper = storeMemberMapper;
     this.uploadCleanup = uploadCleanup;
@@ -81,8 +81,8 @@ public class AuthService {
 
     ensureBootstrapOwner(user);
 
-    String token = jwtService.issue(user.getId());
-    return new LoginResponse(token, jwtService.expireSeconds(), toProfile(user));
+    String token = sessionService.issue(user.getId());
+    return new LoginResponse(token, sessionService.expireSeconds(), toProfile(user));
   }
 
   @org.springframework.transaction.annotation.Transactional

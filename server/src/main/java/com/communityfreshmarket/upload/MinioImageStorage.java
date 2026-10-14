@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-/** 图片放在本项目自己的 MinIO 桶里，公开读。手机经本站 /files/ 打开。 */
+/** 图片放在本项目自己的 MinIO 桶 communityfreshmarket 里，公开读。地址前缀与桶名相同。 */
 @Service
 public class MinioImageStorage {
 

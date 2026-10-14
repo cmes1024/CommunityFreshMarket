@@ -14,16 +14,17 @@
 顾客 / 店员手机
     │  HTTPS（微信要求）
     ▼
-宿主机 Caddy 或 Nginx（证书、80/443）
-    │  HTTP 127.0.0.1:8088
-    ▼
-容器 cfm-nginx ── /api/ ──▶ 容器 cfm-api（Spring Boot :8080）──▶ 容器 cfm-postgres（库 cfm）
-              └── /files/ ──▶ 容器 cfm-minio（商品图、头像）
+宿主机反代（宝塔 Nginx，证书、80/443）
+    ├── /api/   ──▶ 127.0.0.1:8088  容器 cfm-api（Spring Boot）
+    │                                  ├── 容器 cfm-postgres（库 cfm）
+    │                                  └── 容器 cfm-redis（登录会话、微信 access_token）
+    └── /communityfreshmarket/ ──▶ 127.0.0.1:9002  容器 cfm-minio 的桶 communityfreshmarket
 ```
 
 - 业务在 Java 服务里，不用微信云开发、不用云函数。
 - 数据库结构由 Flyway 在 API 第一次启动时自动建好，并写入默认店（`id = 1`，店名「绿意鲜生」）和一批示例分类、商品、自提时段。
-- 仓库内的 Nginx（`deploy/nginx/nginx.conf`）只监听 HTTP：`/api/` 转到接口，`/files/` 转到本项目的 MinIO。正式环境的 HTTPS 加在宿主机前面，宿主机整站反代到 `127.0.0.1:8088` 即可，不用再为图片单独加一条。
+- 不再使用项目内的 Nginx 容器。接口自己发布在 `127.0.0.1:8088`。图片地址是 `https://你的域名/communityfreshmarket/文件名`，路径与桶名相同。
+- Redis 只在 Compose 网络里，不映射宿主机端口。登录令牌是随机串，用户编号放在 Redis，有效期 7 天。
 - 收款在线下完成，部署时不要接微信支付。
 
 ---
@@ -100,7 +101,7 @@ sudo ufw enable
 sudo ufw status
 ```
 
-不要执行 `ufw allow 8088`。数据库和 MinIO 不映射到宿主机端口。
+不要执行 `ufw allow 8088`，也不要放行 `9002`。Postgres 和 Redis 不映射到宿主机端口。MinIO 只绑 `127.0.0.1:9002`。
 
 ---
 
@@ -124,18 +125,16 @@ cd /opt/community-fresh-market/deploy
 cp .env.example .env
 ```
 
-生成两段随机口令（各执行一次，分别用作数据库密码和 JWT）：
+生成数据库口令：
 
 ```bash
 openssl rand -base64 24
-openssl rand -base64 48
 ```
 
 编辑 `deploy/.env`，按下面填写。`.env` 已在忽略列表里，不要提交。
 
 ```bash
-DB_PASSWORD=<第一段随机口令>
-JWT_SECRET=<openssl rand -base64 48 的结果>
+DB_PASSWORD=<随机口令>
 
 WX_APPID=<小程序 AppID>
 WX_SECRET=<小程序 AppSecret>
@@ -148,7 +147,8 @@ DEFAULT_STORE_ID=1
 BOOTSTRAP_OWNER_OPENID=
 
 # 公开前缀，末尾不要斜杠。主机名列入小程序 downloadFile 合法域名。
-UPLOAD_PUBLIC_BASE=https://api.example.com/files
+# 开发者工具用 http://127.0.0.1:9002/communityfreshmarket
+UPLOAD_PUBLIC_BASE=https://api.example.com/communityfreshmarket
 
 # 四个模板还没申请就先留空。申请后把模板 ID 填进来，并与小程序 config.js 保持一致。
 WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID=
@@ -161,6 +161,7 @@ INVITE_LINK_BASE=https://api.example.com/cfm/join
 
 # 只给本机反代用。不要改成对公网发布。
 HTTP_PORT=8088
+MINIO_API_PORT=9002
 ```
 
 说明：
@@ -168,65 +169,80 @@ HTTP_PORT=8088
 | 变量 | 作用 |
 |------|------|
 | `WX_APPID` / `WX_SECRET` | 用 `wx.login` 的 code 向微信换 openid。空着或填错时，小程序登录失败 |
-| `JWT_SECRET` | 签发登录令牌。换掉它会使所有人重新登录 |
 | `BOOTSTRAP_OWNER_OPENID` | 该微信号登录后成为默认店店主。空着时任何人登录都只是顾客 |
 | `DB_PASSWORD` | 本项目 Postgres 容器和 API 共用的口令。改它之后要重建数据库卷，或同时改已有库里的角色密码 |
-| `UPLOAD_PUBLIC_BASE` | 手机打开图片的 URL 前缀。必须是 HTTPS，主机名与 `downloadFile` 合法域名一致。图片由本项目 Nginx 的 `/files/` 转到自己的 MinIO |
+| `UPLOAD_PUBLIC_BASE` | 手机打开图片的 URL 前缀，与桶名相同。正式环境必须是 HTTPS，主机名与 `downloadFile` 合法域名一致。例：`https://cfm.zfqwjs.com/communityfreshmarket`。开发者工具用 `http://127.0.0.1:9002/communityfreshmarket` |
 | `INVITE_LINK_BASE` | 店员邀请二维码里的链接前缀。服务端把邀请码拼成 `{前缀}?code=邀请码` |
 | `HTTPS_PROXY` | 容器访问微信和构建时访问 Maven 的代理。正常云主机留空 |
-| `JWT_EXPIRE_SECONDS` | 可选，默认 604800（7 天），一般不用写进 `.env` |
+| `SESSION_EXPIRE_SECONDS` | 可选，登录会话有效期，默认 604800（7 天），一般不用写进 `.env` |
+| `HTTP_PORT` / `MINIO_API_PORT` | 宿主机回环端口。接口 `8088`，MinIO `9002`。不要对公网放行 |
 
 四个订阅模板可以先空着上线：主流程（登录、下单、接单）仍可用，服务端只打日志、不发微信通知。订单台红点不依赖模板。
 
 ---
 
-## 8. 让接口端口只监听本机
+## 8. 让接口和图片只监听本机
 
-Postgres 和 MinIO 只在 Compose 网络里，不映射到宿主机。只把 Nginx 收成回环地址，公网通过宿主机反代进来：
+仓库里的 `deploy/docker-compose.yml` 已经写成：
 
-```yaml
-# nginx.ports
-- "127.0.0.1:${HTTP_PORT:-8088}:80"
-```
+- `cfm-api` 发布 `127.0.0.1:8088` → 容器内 `8088`
+- `cfm-minio` 发布 `127.0.0.1:9002` → 容器内 `9000`（宿主机 `9000` 留给别的程序）
+- `cfm-postgres`、`cfm-redis` 不映射宿主机端口
+
+不要把这些端口改成 `0.0.0.0`。
 
 ---
 
-## 9. 用 Caddy 提供 HTTPS
+## 9. 补生鲜自己的站点文件
 
-小程序体验版和正式版只接受 HTTPS，且不能写端口号。在宿主机安装 Caddy，由它申请并续期证书，再转到本机 `8088`。
+小程序体验版和正式版只接受 HTTPS，且不能写端口号。证书已经是 `hs-cfm.zfqwjs.com.pem`，主配置和原来的站点都不用动。只重写 `/www/server/panel/vhost/nginx/cfm.zfqwjs.com.conf`，结构和 HomeStocker 的 `hs.zfqwjs.com.conf` 相同：`/` 转到接口，图片路径转到 MinIO，上传限制 `10m`。
+
+在服务器上粘贴整段。检查失败会自动恢复原文件：
 
 ```bash
-sudo apt-get install -y debian-keyring debian-archive-keyring apt-transport-https curl
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
-sudo apt-get update
-sudo apt-get install -y caddy
-```
-
-写入 `/etc/caddy/Caddyfile`（把域名换成你的）：
-
-```caddyfile
-api.example.com {
-	encode gzip
-
-	# 微信「扫普通链接二维码」的校验文件。文件名以公众平台下载的为准。
-	handle /WW_verify_*.txt {
-		root * /var/www/cfm-verify
-		file_server
-	}
-
-	handle {
-		reverse_proxy 127.0.0.1:8088
-	}
+CONF=/www/server/panel/vhost/nginx/cfm.zfqwjs.com.conf
+cp -a "$CONF" "$CONF.bak"
+cat > "$CONF" << 'EOF'
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name cfm.zfqwjs.com;
+    client_max_body_size 10m;
+    ssl_certificate /www/server/panel/vhost/cert/hs-cfm.zfqwjs.com.pem;
+    ssl_certificate_key /www/server/panel/vhost/cert/hs-cfm.zfqwjs.com.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    location ^~ /.well-known/acme-challenge/ {
+        default_type "text/plain";
+        alias /www/wwwroot/acme-webroot/.well-known/acme-challenge/;
+    }
+    location ^~ /communityfreshmarket/ {
+        proxy_pass http://127.0.0.1:9002;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    location / {
+        proxy_pass http://127.0.0.1:8088;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 }
+EOF
+if /www/server/nginx/sbin/nginx -t; then
+  /www/server/nginx/sbin/nginx -s reload
+else
+  cp -a "$CONF.bak" "$CONF"
+  echo "检查失败，已恢复原文件"
+  exit 1
+fi
 ```
 
-```bash
-sudo mkdir -p /var/www/cfm-verify
-sudo systemctl reload caddy
-```
+`/communityfreshmarket/abc.jpg` 原样到达 MinIO 桶 `communityfreshmarket`。校验文件仍走 `/.well-known/`，不进接口。MinIO 还没在 `9002` 监听时，图片地址会是 502，接口起来后健康检查走 `8088`。
 
-先确认证书和反代（此时后面的 API 还没启动，`/api/v1/health` 会是 502，这是正常的；首页应返回容器 Nginx 的纯文本，等第 10 节起来之后才有）：
+先确认证书和反代（此时后面的 API 还没启动，`/api/v1/health` 会是 502，这是正常的）：
 
 ```bash
 curl -sI https://api.example.com
@@ -234,7 +250,7 @@ curl -sI https://api.example.com
 
 若证书申请失败，先查：80/443 是否放行、域名是否已经解析到本机、大陆机器是否已备案。
 
-也可以改用你熟悉的宿主机 Nginx + certbot，反代目标同样是 `127.0.0.1:8088`。校验文件同样放在宿主机上直接返回，不要指望容器里的 `location /`（它只返回一行固定文字）。
+校验文件放在宿主机上直接返回。
 
 ---
 
@@ -247,7 +263,7 @@ cd /opt/community-fresh-market/deploy
 docker compose up -d --build
 ```
 
-第一次会拉取 Nginx、PostgreSQL、JDK 镜像，编自己的 MinIO 镜像，并在容器内执行 `mvn package`，可能要十几分钟。完成后：
+第一次会拉取 Redis、PostgreSQL、JDK 镜像，编自己的 MinIO 镜像，并在容器内执行 `mvn package`，可能要十几分钟。完成后：
 
 ```bash
 docker compose ps
@@ -291,7 +307,7 @@ docker run --rm curlimages/curl -sI https://api.weixin.qq.com | head -n 5
 | uploadFile 合法域名 | `https://api.example.com` |
 | downloadFile 合法域名 | `https://api.example.com`（与 `UPLOAD_PUBLIC_BASE` 同一主机名） |
 
-不要填 IP，不要带端口，不要带路径。三个都填同一个域名：接口走 request，传图走 uploadFile，商品图和头像走 downloadFile（`/files/`）。
+不要填 IP，不要带端口，不要带路径。三个都填同一个域名：接口走 request，传图走 uploadFile，商品图和头像走 downloadFile（`/communityfreshmarket/`）。
 
 socket 合法域名、业务域名留空即可。本项目没有 websocket，也没有 web-view。
 
@@ -363,8 +379,9 @@ https://api.example.com/cfm/join?code=<邀请码>
 
 保存前微信会让你下载校验文件（文件名类似 `WW_verify_xxxx.txt`）：
 
+把文件放到宝塔该站点的网站目录（由站点直接返回，不要转到 `8088` 或 `9002`），然后确认：
+
 ```bash
-sudo cp ~/WW_verify_xxxx.txt /var/www/cfm-verify/
 curl -sI https://api.example.com/WW_verify_xxxx.txt
 ```
 
@@ -471,7 +488,7 @@ docker exec cfm-postgres psql -U cfm -d cfm -c \
 
 ```bash
 curl -s https://api.example.com/api/v1/health
-curl -s https://api.example.com/api/v1/me -H "Authorization: Bearer <JWT>"
+curl -s https://api.example.com/api/v1/me -H "Authorization: Bearer <登录令牌>"
 ```
 
 ---
@@ -508,7 +525,7 @@ docker exec cfm-postgres pg_dump -U cfm -d cfm \
 ```bash
 cd /opt/community-fresh-market/deploy
 docker compose logs -f api
-docker compose logs --tail=100 nginx
+docker compose logs --tail=100 redis
 ```
 
 登录失败看 API 日志里访问 `api.weixin.qq.com` 的报错。订阅发送失败会有 `subscribe ... send failed`，主流程仍应成功。
@@ -521,10 +538,11 @@ docker compose logs --tail=100 nginx
 
 - [ ] 域名已解析并备案（大陆服务器）
 - [ ] `https://api.example.com/api/v1/health` 返回 `db: UP`
-- [ ] 8088 只监听 `127.0.0.1`，防火墙未放行。Postgres 和 MinIO 没有映射到宿主机
-- [ ] `JWT_SECRET`、数据库密码、AppSecret 已换成随机值，且不在 Git 里
+- [ ] `8088` 和 `9002` 只监听 `127.0.0.1`，防火墙未放行。Postgres 和 Redis 没有映射到宿主机
+- [ ] 数据库密码、AppSecret 已换成随机值，且不在 Git 里。`.env` 里没有 `JWT_SECRET`
+- [ ] 只改了 `cfm.zfqwjs.com.conf`：`/` 到 `127.0.0.1:8088`，`/communityfreshmarket/` 到 `127.0.0.1:9002`，`client_max_body_size 10m`，并已 `nginx -s reload`
 - [ ] `WX_APPID` / `WX_SECRET` 与公众平台一致
-- [ ] `UPLOAD_PUBLIC_BASE` 是 `https://` 加本站域名再加 `/files`
+- [ ] `UPLOAD_PUBLIC_BASE` 是 `https://` 加本站域名再加 `/communityfreshmarket`
 - [ ] request、uploadFile、downloadFile 三个合法域名都已保存
 - [ ] 隐私指引已声明相册、摄像头、昵称头像
 - [ ] 客服已添加

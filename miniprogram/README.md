@@ -5,7 +5,7 @@
 ## 联调
 
 1. 详情 → 本地设置：勾选 **不校验合法域名**（`project.config.json` 已 `urlCheck: false`）
-2. `utils/config.js`：`apiHost` 模拟器可用 `http://127.0.0.1:8088`；真机改成电脑局域网 IP
+2. `utils/config.js`：`apiHost` 模拟器可用 `http://127.0.0.1:8088`；真机改成电脑局域网 IP。开发者工具里的图片地址来自 `UPLOAD_PUBLIC_BASE=http://127.0.0.1:9002/communityfreshmarket`
 3. 登录一律 `wx.login` → 后端换 openid（需配置 `WX_APPID` / `WX_SECRET`）
 4. 店主：在 `deploy/.env` 配置 `BOOTSTRAP_OWNER_OPENID`（见 `deploy/README.md`），登录后「我的」出现商家工作台
 

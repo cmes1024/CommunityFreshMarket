@@ -13,11 +13,11 @@ public class AuthInterceptor implements HandlerInterceptor {
 
   public static final String HEADER_STORE_ID = "X-Store-Id";
 
-  private final JwtService jwtService;
+  private final SessionService sessionService;
   private final AppProperties appProperties;
 
-  public AuthInterceptor(JwtService jwtService, AppProperties appProperties) {
-    this.jwtService = jwtService;
+  public AuthInterceptor(SessionService sessionService, AppProperties appProperties) {
+    this.sessionService = sessionService;
     this.appProperties = appProperties;
   }
 
@@ -31,7 +31,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     if (token.isEmpty()) {
       throw new BizException(ErrorCodes.UNAUTHORIZED, "未登录");
     }
-    long userId = jwtService.parseUserId(token);
+    long userId = sessionService.parseUserId(token);
     long storeId = resolveStoreId(request);
     UserContext.set(userId, storeId);
     return true;

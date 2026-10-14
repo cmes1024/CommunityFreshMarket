@@ -3,28 +3,19 @@
 # Usage: bash scripts/smoke-wave23.sh
 set -euo pipefail
 BASE="${BASE:-http://127.0.0.1:8088}"
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-eval "$(python3 - <<PY
-import hmac, hashlib, json, base64, time
-secret = [l.split('=',1)[1].strip() for l in open('$ROOT/deploy/.env') if l.startswith('JWT_SECRET=')][0]
+issue_token() {
+  local uid="$1"
+  local token
+  token="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+  docker exec cfm-redis redis-cli SET "cfm:session:${token}" "$uid" EX 86400 >/dev/null
+  printf '%s' "$token"
+}
 
-def b64url(data: bytes) -> str:
-    return base64.urlsafe_b64encode(data).rstrip(b'=').decode()
-
-def issue(uid: int) -> str:
-    header = b64url(json.dumps({"alg":"HS256","typ":"JWT"}, separators=(',',':')).encode())
-    now = int(time.time())
-    payload = b64url(json.dumps({"sub":str(uid),"iat":now,"exp":now+86400}, separators=(',',':')).encode())
-    sig = hmac.new(secret.encode(), f"{header}.{payload}".encode(), hashlib.sha256).digest()
-    return f"{header}.{payload}.{b64url(sig)}"
-
-print(f"OWNER_TOKEN={issue(6)}")
-print(f"CUST_TOKEN={issue(2)}")
-print(f"CUST2_TOKEN={issue(3)}")
-print(f"STAFF_TOKEN={issue(1)}")
-PY
-)"
+OWNER_TOKEN="$(issue_token 6)"
+CUST_TOKEN="$(issue_token 2)"
+CUST2_TOKEN="$(issue_token 3)"
+STAFF_TOKEN="$(issue_token 1)"
 
 pass=0
 fail=0

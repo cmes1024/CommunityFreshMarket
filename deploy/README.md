@@ -43,7 +43,13 @@ INSERT INTO store_member (store_id, user_id, role, created_at, updated_at)
 VALUES (1, <user_id>, 'OWNER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 ```
 
-## 接口抽查（需小程序登录后的 JWT）
+## 图片地址
+
+正式环境 `UPLOAD_PUBLIC_BASE=https://cfm.zfqwjs.com/communityfreshmarket`。路径就是桶名，和 HomeStocker 的 `/homestocker/` 一样。宝塔反向代理目录 `/communityfreshmarket`，目标 `http://127.0.0.1:9002`。
+
+开发者工具把同一项改成 `http://127.0.0.1:9002/communityfreshmarket`，图片直接打开 MinIO，不经过接口。
+
+## 接口抽查（需小程序登录后的令牌）
 
 ```bash
 TOKEN=...
@@ -75,4 +81,4 @@ curl -s http://127.0.0.1:8088/api/v1/merchant/products \
 | 小程序页面 | `packageCustomer/pages/join-store/join-store` |
 | 参数名 | `code`（邀请码） |
 
-生产务必更换 `JWT_SECRET`、数据库密码，并配置真实微信密钥与订阅模板 ID；小程序 `utils/config.js` 须与 `.env` 中模板 ID 一致。
+生产务必更换数据库密码，并配置真实微信密钥与订阅模板 ID；小程序 `utils/config.js` 须与 `.env` 中模板 ID 一致。登录态在 `cfm-redis`，不映射宿主机端口。

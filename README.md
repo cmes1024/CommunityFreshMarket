@@ -35,7 +35,7 @@ curl -s http://127.0.0.1:8088/api/v1/health
 | 客户端 | 原生微信小程序；顾客 / 商家分包（底座：自有空白模板，去云开发） |
 | 服务端 | Spring Boot 3 + Java 17 + MyBatis-Plus（非云函数） |
 | 数据 | PostgreSQL；按 `storeId` 隔离。本项目自己的库 `cfm` |
-| 部署 | Docker Compose：PostgreSQL + MinIO + API + Nginx |
+| 部署 | Docker Compose：PostgreSQL + Redis + MinIO + API。HTTPS 由宿主机反代 |
 
 ## 分期概要
 
