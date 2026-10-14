@@ -67,7 +67,7 @@
       <view class="section-title">{{copy.home.sectionWant}}</view>
       <view class="linkish" bind:tap="goAll">{{copy.home.all}}</view>
     </view>
-    <scroll-view scroll-x class="chip-scroll" enable-flex>
+    <scroll-view wx:if="{{products.length}}" scroll-x class="chip-scroll" enable-flex>
       <view
         class="chip-nav"
         wx:for="{{categories}}"
@@ -110,7 +110,9 @@
       </view>
     </view>
 
-    <view wx:if="{{!products.length}}" class="empty-reco">{{copy.home.emptyReco}}</view>
+    <view wx:if="{{!products.length}}" class="empty-reco" bind:tap="goAll">
+      <text>{{copy.home.emptyReco}}</text><text class="empty-reco-action">{{copy.home.emptyRecoAction}}</text>
+    </view>
   </view>
 </view>
 <ProductSheet

@@ -3,7 +3,7 @@ const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const { syncCartCount } = require("../../../utils/cartSync");
 
-/** 价格后后缀：份 · 约 10 枚 / 斤 · 当面称重结 */
+/** 价格后后缀：份 · 约 10 枚 / 斤 · 以实际重量为准 */
 function priceHint(item) {
   const label = (item && item.unitLabel) || "";
   const note = item && item.specNote && String(item.specNote).trim();

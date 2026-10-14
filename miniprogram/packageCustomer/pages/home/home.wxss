@@ -187,12 +187,14 @@
 .home-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: flex-start;
   margin-top: 8rpx;
 }
 .home-card {
   position: relative;
-  width: calc(50% - 10rpx);
+  flex-grow: 0;
+  flex-shrink: 0;
   margin-bottom: 20rpx;
   background: var(--color-surface);
   border: 1rpx solid var(--color-line);
@@ -278,6 +280,9 @@
 /* 1 列通栏 */
 .home-grid.cols-1 .home-card {
   width: 100%;
+  flex-basis: 100%;
+  max-width: 100%;
+  margin-right: 0;
   display: flex;
   align-items: center;
   margin-bottom: 16rpx;
@@ -313,15 +318,27 @@
   padding: 0 20rpx 0 8rpx;
 }
 
-/* 2 列（默认宽度已在 .home-card） */
+/* 2 列：不用 calc，避免 flex 子项宽度失效后被挤缩 */
 .home-grid.cols-2 .home-card {
-  width: calc(50% - 10rpx);
+  width: 48%;
+  flex-basis: 48%;
+  max-width: 48%;
+  margin-right: 4%;
+}
+.home-grid.cols-2 .home-card:nth-child(2n) {
+  margin-right: 0;
 }
 
 /* 3 列 */
 .home-grid.cols-3 .home-card {
-  width: calc(33.333% - 8rpx);
+  width: 32%;
+  flex-basis: 32%;
+  max-width: 32%;
+  margin-right: 2%;
   margin-bottom: 16rpx;
+}
+.home-grid.cols-3 .home-card:nth-child(3n) {
+  margin-right: 0;
 }
 .home-grid.cols-3 .meta {
   padding: 10rpx 10rpx 40rpx;
@@ -356,4 +373,8 @@
   border: 1rpx dashed var(--color-line);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.55);
+}
+.empty-reco-action {
+  color: var(--color-primary);
+  font-weight: 600;
 }

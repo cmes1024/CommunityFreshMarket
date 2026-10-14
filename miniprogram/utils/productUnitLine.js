@@ -5,7 +5,7 @@ function trimNote(product) {
   return note && String(note).trim() ? String(note).trim() : "";
 }
 
-/** 详情 / 半屏：单位：斤 · 约 1 斤 · 当面称重为准 */
+/** 详情 / 半屏：单位：斤 · 约 1 斤 · 以实际重量为准 */
 function detailUnitLine(product) {
   const label = (product && product.unitLabel) || "";
   const parts = [`单位：${label}`];
@@ -19,7 +19,7 @@ function detailUnitLine(product) {
   return parts.join(" · ");
 }
 
-/** 首页 / 分类列表：斤 · 当面称重结 / 份 · 约 10 枚 */
+/** 首页 / 分类列表：斤 · 以实际重量为准 / 份 · 约 10 枚 */
 function listUnitLine(product) {
   const label = (product && product.unitLabel) || "";
   if (!product || !product.inStock) {

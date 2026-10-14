@@ -20,10 +20,11 @@ const copy = {
     pickup: "自提",
     pickupSubFallback: "选时段到店",
     sectionWant: "门店推荐",
-    all: "全部",
-    weighHint: "当面称重结",
+    all: "查看全部",
+    weighHint: "以实际重量为准",
     soldOutToday: "今日已售完",
-    emptyReco: "暂无推荐，去分类逛逛",
+    emptyReco: "暂无推荐，",
+    emptyRecoAction: "去分类逛逛",
   },
 
   stock: {
@@ -42,7 +43,7 @@ const copy = {
     pickMinHint: "起购 {min} {unit}",
     restockTitle: "想买可以先预约提醒",
     restockBody: "店员重新标「有货」时，用微信订阅消息通知你。",
-    unitWeigh: "当面称重为准",
+    unitWeigh: "以实际重量为准",
     soldOutToday: "今日已售完",
     addCart: "加入商品篮",
     watchMe: "到货提醒我",
