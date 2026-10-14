@@ -13,8 +13,8 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 ### 1.1 形态
 
 ```text
-微信小程序 ──HTTPS──▶ Nginx ──/api──▶ Spring Boot API ──▶ MySQL 8
-                                              └──上传──▶ MinIO（商品图，公开读）
+微信小程序 ──HTTPS──▶ Nginx ──/api──▶ Spring Boot API ──▶ PostgreSQL（本项目容器，库 cfm）
+                         └──/files──▶ MinIO（本项目容器，商品图公开读）
 ```
 
 单机 Docker Compose 即可跑通；业务不走微信云函数，避免调用次数限制。
@@ -26,11 +26,11 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 | 小程序 | 原生微信小程序 | 顾客 / 商家分包；底座来自自有空白模板 |
 | API | Spring Boot 3 + Java 17 | REST + JSON |
 | ORM | MyBatis-Plus | 与表结构映射清晰 |
-| 数据库 | MySQL 8 | Compose 内部署 |
-| 反向代理 | Nginx | 只反代 `/api/`。图片不经过它 |
+| 数据库 | PostgreSQL 16 | 本项目自己的容器，库名 `cfm` |
+| 反向代理 | Nginx | `/api/` 到接口，`/files/` 到本项目 MinIO |
 | 鉴权 | 微信 `code` → openid → JWT | 无账密；权限看店铺成员 |
 | 缓存 | 第一波不上 Redis | JWT + DB 足够 |
-| 对象存储 | MinIO | 商品图、头图、头像写入已有桶，公开 URL 给小程序 |
+| 对象存储 | MinIO | 本项目自己的容器。商品图、头图、头像写入桶 `cfm` |
 | 构建 | Maven（后端）；微信开发者工具（前端） | — |
 
 ### 1.3 仓库结构（目标）
@@ -47,7 +47,7 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 
 ### 1.4 部署
 
-- **本地**：`docker compose up` 起 MySQL + API（+ Nginx）
+- **本地 / 服务器**：`docker compose up` 起 PostgreSQL、MinIO、API、Nginx
 - **上线**：云主机装 Docker，同一套 Compose；证书挂 Nginx
 - **环境变量**：`WX_APPID`、`WX_SECRET`、JWT 密钥、DB 密码、单店默认 `DEFAULT_STORE_ID`、店主冷启动 `BOOTSTRAP_OWNER_OPENID`
 
@@ -239,7 +239,7 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 ## 7. 验收标准
 
-1. Compose 一键起 API + MySQL（+ Nginx）
+1. Compose 一键起 PostgreSQL、MinIO、API、Nginx
 2. 小程序微信登录拿到 JWT
 3. 店主（刷库）可上架分类/商品、配置自提时段
 4. 顾客可加购、维护地址、预约配送与自提各至少一单
@@ -251,7 +251,7 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 ## 8. 建议落地顺序（脚手架之后）
 
-1. `server` 空工程 + 健康检查 + Docker Compose + MySQL 迁移  
+1. `server` 空工程 + 健康检查 + Docker Compose + PostgreSQL 迁移  
 2. 微信登录 + JWT + `store` / `user` / `store_member`  
 3. 自模板裁剪 `miniprogram`，打通登录与请求头  
 4. 商品/分类/地址/篮 → 下单与状态机 → 商家订单台  
@@ -276,3 +276,4 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 | 2026-10-14 | 订阅：到店模板改为配送出发；顾客取消只通知店员；我到店了只留红点 |
 | 2026-10-14 | 到货提醒增加门店名：`thing1` 商品名、`thing2` 门店名、`thing3` 提示 |
 | 2026-10-14 | 图片改存 MinIO。Nginx 只反代接口，不再托管 `/uploads/` |
+| 2026-10-14 | 数据库改为 PostgreSQL，库名 `cfm`。与 MinIO 都是本项目自己的容器 |

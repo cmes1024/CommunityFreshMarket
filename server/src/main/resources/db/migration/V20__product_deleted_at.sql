@@ -1,3 +1,4 @@
 ALTER TABLE product
-  ADD COLUMN deleted_at DATETIME(3) NULL AFTER updated_at,
-  ADD KEY idx_product_store_deleted (store_id, deleted_at);
+  ADD COLUMN deleted_at TIMESTAMP(3) NULL;
+
+CREATE INDEX idx_product_store_deleted ON product (store_id, deleted_at);

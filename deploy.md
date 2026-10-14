@@ -17,13 +17,13 @@
 宿主机 Caddy 或 Nginx（证书、80/443）
     │  HTTP 127.0.0.1:8088
     ▼
-容器 cfm-nginx ── /api/ ──▶ 容器 cfm-api（Spring Boot :8080）──▶ 容器 cfm-mysql
-                                              └── 上传 ──▶ 已有 MinIO（商品图、头像）
+容器 cfm-nginx ── /api/ ──▶ 容器 cfm-api（Spring Boot :8080）──▶ 容器 cfm-postgres（库 cfm）
+              └── /files/ ──▶ 容器 cfm-minio（商品图、头像）
 ```
 
 - 业务在 Java 服务里，不用微信云开发、不用云函数。
 - 数据库结构由 Flyway 在 API 第一次启动时自动建好，并写入默认店（`id = 1`，店名「绿意鲜生」）和一批示例分类、商品、自提时段。
-- 仓库内的 Nginx（`deploy/nginx/nginx.conf`）只监听 HTTP，只反代 `/api/`。图片在 MinIO，手机直接向 MinIO 的公开地址取图。正式环境的 HTTPS 加在宿主机前面，不用为图片改宿主机 Nginx。
+- 仓库内的 Nginx（`deploy/nginx/nginx.conf`）只监听 HTTP：`/api/` 转到接口，`/files/` 转到本项目的 MinIO。正式环境的 HTTPS 加在宿主机前面，宿主机整站反代到 `127.0.0.1:8088` 即可，不用再为图片单独加一条。
 - 收款在线下完成，部署时不要接微信支付。
 
 ---
@@ -100,7 +100,7 @@ sudo ufw enable
 sudo ufw status
 ```
 
-不要执行 `ufw allow 3306` 或 `ufw allow 8088`。
+不要执行 `ufw allow 8088`。数据库和 MinIO 不映射到宿主机端口。
 
 ---
 
@@ -134,8 +134,7 @@ openssl rand -base64 48
 编辑 `deploy/.env`，按下面填写。`.env` 已在忽略列表里，不要提交。
 
 ```bash
-MYSQL_ROOT_PASSWORD=<第一段随机口令>
-DB_PASSWORD=<再生成一段，与 root 不同>
+DB_PASSWORD=<第一段随机口令>
 JWT_SECRET=<openssl rand -base64 48 的结果>
 
 WX_APPID=<小程序 AppID>
@@ -148,13 +147,8 @@ DEFAULT_STORE_ID=1
 # 店主还没登录过，这里先留空。第 12 节再写。
 BOOTSTRAP_OWNER_OPENID=
 
-# 使用服务器上已有的 MinIO。容器走内网地址，手机走公开 HTTPS 地址。
-MINIO_ENDPOINT=http://host.docker.internal:9000
-MINIO_ACCESS_KEY=<MinIO Access Key>
-MINIO_SECRET_KEY=<MinIO Secret Key>
-MINIO_BUCKET=cfm
 # 公开前缀，末尾不要斜杠。主机名列入小程序 downloadFile 合法域名。
-UPLOAD_PUBLIC_BASE=https://minio.example.com/cfm
+UPLOAD_PUBLIC_BASE=https://api.example.com/files
 
 # 四个模板还没申请就先留空。申请后把模板 ID 填进来，并与小程序 config.js 保持一致。
 WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID=
@@ -166,7 +160,6 @@ WX_SUBSCRIBE_DELIVERING_TEMPLATE_ID=
 INVITE_LINK_BASE=https://api.example.com/cfm/join
 
 # 只给本机反代用。不要改成对公网发布。
-MYSQL_PORT=3307
 HTTP_PORT=8088
 ```
 
@@ -177,9 +170,8 @@ HTTP_PORT=8088
 | `WX_APPID` / `WX_SECRET` | 用 `wx.login` 的 code 向微信换 openid。空着或填错时，小程序登录失败 |
 | `JWT_SECRET` | 签发登录令牌。换掉它会使所有人重新登录 |
 | `BOOTSTRAP_OWNER_OPENID` | 该微信号登录后成为默认店店主。空着时任何人登录都只是顾客 |
-| `MINIO_ENDPOINT` | API 容器访问 MinIO 的地址。同一台机器上已有 MinIO 时，用 `http://host.docker.internal:9000` |
-| `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` / `MINIO_BUCKET` | 写入图片的桶。启动时若桶不存在会创建，并设为公开读 |
-| `UPLOAD_PUBLIC_BASE` | 手机打开图片的 URL 前缀。必须是 HTTPS，主机名与 `downloadFile` 合法域名一致 |
+| `DB_PASSWORD` | 本项目 Postgres 容器和 API 共用的口令。改它之后要重建数据库卷，或同时改已有库里的角色密码 |
+| `UPLOAD_PUBLIC_BASE` | 手机打开图片的 URL 前缀。必须是 HTTPS，主机名与 `downloadFile` 合法域名一致。图片由本项目 Nginx 的 `/files/` 转到自己的 MinIO |
 | `INVITE_LINK_BASE` | 店员邀请二维码里的链接前缀。服务端把邀请码拼成 `{前缀}?code=邀请码` |
 | `HTTPS_PROXY` | 容器访问微信和构建时访问 Maven 的代理。正常云主机留空 |
 | `JWT_EXPIRE_SECONDS` | 可选，默认 604800（7 天），一般不用写进 `.env` |
@@ -188,19 +180,14 @@ HTTP_PORT=8088
 
 ---
 
-## 8. 让管理端口只监听本机
+## 8. 让接口端口只监听本机
 
-编辑服务器上的 `deploy/docker-compose.yml`，把两个 `ports` 改成只绑定回环地址。宿主机 3306 常被面板自带的 MySQL 占用，本项目用 3307；容器内部仍是 3306。
+Postgres 和 MinIO 只在 Compose 网络里，不映射到宿主机。只把 Nginx 收成回环地址，公网通过宿主机反代进来：
 
 ```yaml
-# mysql.ports
-- "127.0.0.1:${MYSQL_PORT:-3307}:3306"
-
 # nginx.ports
 - "127.0.0.1:${HTTP_PORT:-8088}:80"
 ```
-
-这是这台生产机上的收紧，不是功能改动。容器之间仍走 Docker 网络，不受影响。
 
 ---
 
@@ -260,7 +247,7 @@ cd /opt/community-fresh-market/deploy
 docker compose up -d --build
 ```
 
-第一次会拉取 MySQL、Nginx、JDK 镜像，并在容器内执行 `mvn package`，可能要十几分钟。完成后：
+第一次会拉取 Nginx、PostgreSQL、JDK 镜像，编自己的 MinIO 镜像，并在容器内执行 `mvn package`，可能要十几分钟。完成后：
 
 ```bash
 docker compose ps
@@ -280,7 +267,7 @@ API 起不来时：
 docker compose logs -f api
 ```
 
-常见原因：`.env` 里数据库密码和 MySQL 首次初始化时不一致（改密码后旧数据卷仍用旧密码）、内存不足导致 Maven 被杀掉、构建时访问不了 Maven Central。
+常见原因：内存不足导致 Maven 被杀掉、构建时访问不了 Maven Central 或 GitHub（MinIO 安装包）、Postgres 还没健康检查通过。
 
 确认这台机器能访问微信（登录依赖它）：
 
@@ -302,9 +289,9 @@ docker run --rm curlimages/curl -sI https://api.weixin.qq.com | head -n 5
 |------|------|
 | request 合法域名 | `https://api.example.com` |
 | uploadFile 合法域名 | `https://api.example.com` |
-| downloadFile 合法域名 | `UPLOAD_PUBLIC_BASE` 的主机名，例如 `https://minio.example.com` |
+| downloadFile 合法域名 | `https://api.example.com`（与 `UPLOAD_PUBLIC_BASE` 同一主机名） |
 
-不要填 IP，不要带端口，不要带路径。三个都要填：接口走 request，传图走 uploadFile（仍是 API 域名），商品图和头像走 downloadFile（MinIO 的公开域名）。两个域名相同时各填同一个。
+不要填 IP，不要带端口，不要带路径。三个都填同一个域名：接口走 request，传图走 uploadFile，商品图和头像走 downloadFile（`/files/`）。
 
 socket 合法域名、业务域名留空即可。本项目没有 websocket，也没有 web-view。
 
@@ -436,8 +423,8 @@ module.exports = {
 ```bash
 cd /opt/community-fresh-market/deploy
 # 把密码换成 .env 里的 DB_PASSWORD
-docker exec cfm-mysql mysql -ucfm -p'<DB_PASSWORD>' cfm \
-  -e "SELECT id, openid, nickname FROM user ORDER BY id;"
+docker exec cfm-postgres psql -U cfm -d cfm \
+  -c 'SELECT id, openid, nickname FROM "user" ORDER BY id;'
 ```
 
 3. 把店主那一行的 `openid` 写入 `deploy/.env`：
@@ -457,9 +444,9 @@ docker compose up -d api
 若 openid 已经写对但仍无入口，可直接插入成员（`user_id` 用上面查询的 `id`）：
 
 ```bash
-docker exec cfm-mysql mysql -ucfm -p'<DB_PASSWORD>' cfm -e \
+docker exec cfm-postgres psql -U cfm -d cfm -c \
   "INSERT INTO store_member (store_id, user_id, role, created_at, updated_at)
-   VALUES (1, <user_id>, 'OWNER', NOW(3), NOW(3));"
+   VALUES (1, <user_id>, 'OWNER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);"
 ```
 
 店主登录后，在商家设置里改掉种子数据：店名、电话（库里初始是 `13800000000`）、购买须知、自提时段，并下架或删掉示例商品（小白菜、生菜、土豆、香蕉、土鸡蛋）。
@@ -500,22 +487,21 @@ cd deploy
 docker compose up -d --build
 ```
 
-Flyway 会在 API 启动时补迁移。不要删除 Docker 卷，否则数据库没了。图片在 MinIO 自己的数据目录里。
+Flyway 会在 API 启动时补迁移。库和图片在本项目的数据卷里，只删容器不会删卷。`docker compose down -v` 会把库和图片一起清掉。
 
 小程序有界面或 `config.js` 改动时，需要重新上传并发布，只重启服务器不会更新手机上的正式版。
 
 ### 备份
 
-卷名以 `docker volume ls` 为准，Compose 项目目录是 `deploy` 时数据库卷通常是 `deploy_cfm_mysql_data`。图片在既有 MinIO 里，跟 MinIO 的数据一起备份。
+库在本项目的 `cfm-postgres` 里。图片在 `cfm-minio` 的数据卷里，备份时把卷一起拷走。
 
 ```bash
 mkdir -p /var/backups/cfm
-docker exec cfm-mysql mysqldump -ucfm -p'<DB_PASSWORD>' \
-  --single-transaction --routines cfm \
+docker exec cfm-postgres pg_dump -U cfm -d cfm \
   > /var/backups/cfm/cfm-$(date +%F).sql
 ```
 
-把备份拷离这台机器。恢复数据库前先停 API：`docker compose stop api`，导入后再启动。
+把备份拷离这台机器。恢复前先停 API：`docker compose stop api`，导入后再启动。
 
 ### 日志
 
@@ -535,10 +521,10 @@ docker compose logs --tail=100 nginx
 
 - [ ] 域名已解析并备案（大陆服务器）
 - [ ] `https://api.example.com/api/v1/health` 返回 `db: UP`
-- [ ] 数据库宿主机端口（默认 3307）与 8088 只监听 `127.0.0.1`，防火墙未放行
+- [ ] 8088 只监听 `127.0.0.1`，防火墙未放行。Postgres 和 MinIO 没有映射到宿主机
 - [ ] `JWT_SECRET`、数据库密码、AppSecret 已换成随机值，且不在 Git 里
 - [ ] `WX_APPID` / `WX_SECRET` 与公众平台一致
-- [ ] `MINIO_*` 指向已有 MinIO，`UPLOAD_PUBLIC_BASE` 是手机能打开的 HTTPS 前缀
+- [ ] `UPLOAD_PUBLIC_BASE` 是 `https://` 加本站域名再加 `/files`
 - [ ] request、uploadFile、downloadFile 三个合法域名都已保存
 - [ ] 隐私指引已声明相册、摄像头、昵称头像
 - [ ] 客服已添加

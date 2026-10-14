@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # 在 Mac 上执行，更新服务器上的社区生鲜接口。
 # 同步 server/ 源码和 deploy/nginx、deploy/.env，只重建并重启 api。
-# 数据库留在原数据卷里，图片在已有 MinIO。新的 Flyway 脚本会在接口启动时自动执行。
+# 数据库和图片都在本项目自己的容器里。新的 Flyway 脚本会在接口启动时自动执行。
 #
 # 会用本机 deploy/.env 覆盖服务器上的同名文件（微信密钥、MinIO、订阅模板等）。
 # 不会覆盖服务器上已有的 deploy/docker-compose.yml（端口只绑 127.0.0.1 等改动留在服务器）。
 # 服务器上还没有这份 compose 时，会先拷过去。
 #
-# 数据库和 nginx 容器需要已经在跑。第一次请先在服务器的 deploy 目录执行：
+# Postgres、MinIO 和 nginx 需要已经在跑。第一次请先在服务器的 deploy 目录执行：
 #   docker compose up -d
 #
 # 用法：
@@ -28,6 +28,9 @@ rsync -av \
 
 rsync -av \
   "${ROOT}/deploy/nginx/" "${HOST}:${REMOTE_DIR}/deploy/nginx/"
+
+rsync -av \
+  "${ROOT}/deploy/Dockerfile.minio" "${HOST}:${REMOTE_DIR}/deploy/Dockerfile.minio"
 
 rsync -av \
   "${ROOT}/deploy/.env" "${HOST}:${REMOTE_DIR}/deploy/.env"

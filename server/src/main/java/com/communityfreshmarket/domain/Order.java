@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.LocalDateTime;
 
-@TableName("`order`")
+@TableName("\"order\"")
 public class Order {
 
   @TableId(type = IdType.AUTO)

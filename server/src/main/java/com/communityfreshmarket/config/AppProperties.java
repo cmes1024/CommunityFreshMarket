@@ -12,7 +12,7 @@ public class AppProperties {
   private String wxSecret = "";
   /** 店主冷启动：该微信 openid 登录时自动写入默认店 OWNER（与环境无关） */
   private String bootstrapOwnerOpenid = "";
-  /** 容器访问 MinIO 的内网地址，如 http://host.docker.internal:9000 */
+  /** 容器访问本项目 MinIO 的内网地址，如 http://minio:9000 */
   private String minioEndpoint = "";
   private String minioAccessKey = "";
   private String minioSecretKey = "";

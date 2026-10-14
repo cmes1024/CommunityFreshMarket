@@ -1,27 +1,39 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: cfm-mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: cfm-postgres
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_dev_password}
-      MYSQL_DATABASE: cfm
-      MYSQL_USER: cfm
-      MYSQL_PASSWORD: ${DB_PASSWORD:-cfm_dev_password}
-    ports:
-      - "${MYSQL_PORT:-3307}:3306"
+      POSTGRES_DB: cfm
+      POSTGRES_USER: cfm
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cfm_dev_password}
     volumes:
-      - cfm_mysql_data:/var/lib/mysql
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --default-time-zone=+08:00
+      - cfm_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      test: ["CMD-SHELL", "pg_isready -U cfm -d cfm"]
       interval: 5s
       timeout: 5s
-      retries: 30
-      start_period: 15s
+      retries: 10
+
+  minio:
+    build:
+      context: .
+      dockerfile: Dockerfile.minio
+    image: cfm-minio:local
+    container_name: cfm-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-cfm}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-cfm_dev_password}
+    volumes:
+      - cfm_minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
 
   api:
     build:
@@ -35,14 +47,16 @@ services:
     container_name: cfm-api
     restart: unless-stopped
     depends_on:
-      mysql:
+      postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     environment:
       TZ: Asia/Shanghai
       JAVA_TOOL_OPTIONS: -Duser.timezone=Asia/Shanghai
       # 本机开了代理时，容器直连微信会 TLS 握手挂起，登录接口无响应。留空则直连。
       HTTPS_PROXY: ${HTTPS_PROXY:-}
-      DB_URL: jdbc:mysql://mysql:3306/cfm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      DB_URL: jdbc:postgresql://postgres:5432/cfm
       DB_USER: cfm
       DB_PASSWORD: ${DB_PASSWORD:-cfm_dev_password}
       JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-32bytes!!}
@@ -50,11 +64,11 @@ services:
       WX_SECRET: ${WX_SECRET:-}
       DEFAULT_STORE_ID: ${DEFAULT_STORE_ID:-1}
       BOOTSTRAP_OWNER_OPENID: ${BOOTSTRAP_OWNER_OPENID:-}
-      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://host.docker.internal:9000}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-}
-      MINIO_BUCKET: ${MINIO_BUCKET:-cfm}
-      UPLOAD_PUBLIC_BASE: ${UPLOAD_PUBLIC_BASE:-}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-cfm}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-cfm_dev_password}
+      MINIO_BUCKET: cfm
+      UPLOAD_PUBLIC_BASE: ${UPLOAD_PUBLIC_BASE:-http://127.0.0.1:8088/files}
       WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID: ${WX_SUBSCRIBE_RESTOCK_TEMPLATE_ID:-}
       WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID: ${WX_SUBSCRIBE_NEW_ORDER_TEMPLATE_ID:-}
       WX_SUBSCRIBE_CANCEL_TEMPLATE_ID: ${WX_SUBSCRIBE_CANCEL_TEMPLATE_ID:-}
@@ -71,10 +85,12 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+      - minio
     ports:
-      - "${HTTP_PORT:-8088}:80"
+      - "127.0.0.1:${HTTP_PORT:-8088}:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
-  cfm_mysql_data:
+  cfm_pg_data:
+  cfm_minio_data:

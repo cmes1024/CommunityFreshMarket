@@ -1,3 +1,3 @@
 ALTER TABLE store
-  MODIFY COLUMN points_per_yuan DECIMAL(5, 2) NOT NULL DEFAULT 1.00
-  COMMENT '0=points off; earn floor(floor(fen/100)*ratio), up to 2 decimals';
+  ALTER COLUMN points_per_yuan TYPE DECIMAL(5, 2) USING points_per_yuan::decimal,
+  ALTER COLUMN points_per_yuan SET DEFAULT 1.00;

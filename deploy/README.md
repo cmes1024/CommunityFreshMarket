@@ -23,8 +23,8 @@ curl -s http://127.0.0.1:8088/api/v1/health
 2. 查 openid：
 
 ```bash
-docker exec -it cfm-mysql mysql -ucfm -p"$DB_PASSWORD" cfm \
-  -e "SELECT id, openid, nickname FROM user ORDER BY id;"
+docker exec -it cfm-postgres psql -U cfm -d cfm \
+  -c 'SELECT id, openid, nickname FROM "user" ORDER BY id;'
 ```
 
 3. 写入 `deploy/.env`：
@@ -40,7 +40,7 @@ BOOTSTRAP_OWNER_OPENID=从上面查到的openid
 
 ```sql
 INSERT INTO store_member (store_id, user_id, role, created_at, updated_at)
-VALUES (1, <user_id>, 'OWNER', NOW(3), NOW(3));
+VALUES (1, <user_id>, 'OWNER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 ```
 
 ## 接口抽查（需小程序登录后的 JWT）

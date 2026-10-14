@@ -1,5 +1,5 @@
 ALTER TABLE product
-  ADD COLUMN spec_note VARCHAR(64) NULL COMMENT '规格说明，如约10枚' AFTER unit;
+  ADD COLUMN spec_note VARCHAR(64) NULL;
 
 UPDATE product
 SET spec_note = '约 10 枚'
