@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.merchantSettings}}" back="{{false}}" toCustomer="{{true}}" />
 <view class="settings-nav" style="top: {{stickyTop}}px;">
   <view class="settings-tab {{settingsTab === 'store' ? 'on' : ''}}" data-tab="store" bind:tap="onSettingsTab">{{copy.settings.tabStore}}</view>
@@ -59,6 +60,38 @@
           auto-height="{{true}}"
           show-confirm-bar="{{false}}"
         />
+      </view>
+    </view>
+    <view class="sec-head">
+      <view class="sec-title">{{copy.settings.themeSec}}</view>
+      <view class="sec-desc">{{copy.settings.themeHint}}</view>
+    </view>
+    <view class="group">
+      <view class="theme-grid">
+        <view
+          class="theme-opt {{themePreset === item.id ? 'on' : ''}}"
+          wx:for="{{themeChoices}}"
+          wx:key="id"
+          data-preset="{{item.id}}"
+          bind:tap="onThemePreset"
+        >
+          <view class="theme-dot {{item.id === 'CUSTOM' ? 'rainbow' : ''}}" style="{{item.swatch ? 'background:' + item.swatch : ''}}"></view>
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+      <view class="theme-custom" wx:if="{{themePreset === 'CUSTOM'}}">
+        <view class="theme-preview" style="background:{{themePrimary}}"></view>
+        <view
+          class="theme-hue"
+          catchtouchstart="onHueStart"
+          catchtouchmove="onHueMove"
+          catchtouchend="onHueEnd"
+          catchtouchcancel="onHueEnd"
+        >
+          <view class="theme-huebar"></view>
+          <view class="theme-hue-thumb" style="left: {{themeHuePercent}};"></view>
+        </view>
+        <view class="theme-custom-hint">{{copy.settings.themeCustomHint}}</view>
       </view>
     </view>
     <view class="phrase-head">

@@ -39,6 +39,13 @@ page {
   --color-ph-deep: #b7d4ce;
   --color-scrim: rgba(19, 78, 74, 0.5);
   --shadow-float: 0 16rpx 48rpx rgba(15, 118, 110, 0.16);
+  --shadow-lift: 0 16rpx 48rpx rgba(15, 118, 110, 0.2);
+  --color-hero-top: rgba(15, 61, 56, 0.28);
+  --color-hero-bottom: rgba(15, 61, 56, 0.55);
+  --color-card-top: rgba(19, 78, 74, 0.08);
+  --color-card-mid: rgba(19, 78, 74, 0.28);
+  --color-card-bottom: rgba(19, 78, 74, 0.78);
+  --color-check-bg: rgba(19, 78, 74, 0.35);
   --radius: 24rpx;
   --radius-pill: 999rpx;
   --space-xs: 8rpx;

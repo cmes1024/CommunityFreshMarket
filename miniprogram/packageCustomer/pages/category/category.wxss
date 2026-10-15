@@ -144,7 +144,7 @@ page {
   align-items: center;
   justify-content: space-between;
   z-index: 15;
-  box-shadow: 0 16rpx 48rpx rgba(15, 118, 110, 0.2);
+  box-shadow: var(--shadow-lift, 0 16rpx 48rpx rgba(15, 118, 110, 0.2));
 }
 
 .mini-bar .price {

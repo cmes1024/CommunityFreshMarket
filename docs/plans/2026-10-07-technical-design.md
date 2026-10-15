@@ -62,7 +62,7 @@ UI 原型：`docs/plans/2026-10-07-ui-prototype.md` · [`docs/prototypes/index.h
 
 | 表 | 要点 |
 |----|------|
-| `store` | 店名、联系方式、`contact_note` 购买须知（可多行）、`delivery_remark_phrases` / `pickup_remark_phrases`（配送、自提各自的结算备注快捷短语，换行分隔，各最多 8 句、每句 8 字；空=该履约方式不显示短语）、`min_delivery_fen`（配送起送金额，分，0=不限制；只拦配送提交，按商品合计券前预估比较）、状态、`invite_code`（店员邀请，可轮换）、首页头图 `hero_image_url`（封面，与列表第一张同步）与 `hero_image_urls`（JSON，最多 3 张）、公告 `home_notice`（最多 80 字，空则不展示）、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）、会员码入口 `member_code_entry`（PROFILE\|TAB，默认 PROFILE）；单店时一条记录 |
+| `store` | 店名、联系方式、`contact_note` 购买须知（可多行）、`delivery_remark_phrases` / `pickup_remark_phrases`（配送、自提各自的结算备注快捷短语，换行分隔，各最多 8 句、每句 8 字；空=该履约方式不显示短语）、`min_delivery_fen`（配送起送金额，分，0=不限制；只拦配送提交，按商品合计券前预估比较）、状态、`invite_code`（店员邀请，可轮换）、首页头图 `hero_image_url`（封面，与列表第一张同步）与 `hero_image_urls`（JSON，最多 3 张）、公告 `home_notice`（最多 80 字，空则不展示）、营业文案/主标题/副标题、首页商品列数（1\|2\|3）、点商品打开方式 `product_detail_mode`（SHEET\|PAGE，默认 SHEET）、会员码入口 `member_code_entry`（PROFILE\|TAB，默认 PROFILE）、主题 `theme_preset`（PRODUCE 青绿默认 / BREAKFAST 赭石 / EATERY 绛红 / MARKET 海蓝 / CUSTOM）与 `theme_primary`（仅自定义时存 `#rrggbb`）；单店时一条记录 |
 | `user` | `openid` 唯一、昵称/头像可选 |
 | `store_member` | `user_id + store_id + role`（`OWNER` / `STAFF`）；第一版能力相同 |
 | `category` | `store_id`、名称、排序、启用 |
@@ -282,3 +282,5 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 | 2026-10-14 | 数据库改为 PostgreSQL，库名 `cfm`。与 MinIO 都是本项目自己的容器 |
 | 2026-10-14 | 去掉项目内 Nginx。接口听 `127.0.0.1:8088`，MinIO 绑 `127.0.0.1:9002`。登录改为 Redis 会话，微信 `access_token` 一并放入；不再使用 JWT |
 | 2026-10-14 | 图片公开路径改为桶名 `communityfreshmarket`，与 HomeStocker 的 `/homestocker/` 相同 |
+| 2026-10-14 | 店铺 `theme_preset` / `theme_primary`。品牌色由小程序生成，价格、待确认、售罄仍是固定语义色 |
+| 2026-10-14 | 主题预设为青绿 / 赭石 / 绛红 / 海蓝。旧值 TEAL、AMBER、BRICK、INK 读出时分别对应这四套 |

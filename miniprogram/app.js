@@ -5,16 +5,24 @@ const { RequestManager } = require("./utils/request");
 const auth = require("./utils/auth");
 const config = require("./utils/config");
 const copy = require("./utils/copy");
+const api = require("./utils/api");
+const themeApply = require("./utils/themeApply");
 
 App({
   onLaunch() {
+    themeApply.hydrate();
     this.globalData.config = config;
     this.globalData.copy = copy;
     this.globalData.request = new RequestManager();
     this.globalData.request.preTreatment({ startRequest: true }, () => {});
-    this.loginPromise = auth.ensureLogin().catch((err) => {
-      console.error("login failed", err);
-    });
+    this.loginPromise = auth.ensureLogin()
+      .then((user) => {
+        api.store().catch((err) => console.error("store theme", err));
+        return user;
+      })
+      .catch((err) => {
+        console.error("login failed", err);
+      });
   },
 
   onShow() {

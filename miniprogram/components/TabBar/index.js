@@ -1,6 +1,7 @@
 const api = require("../../utils/api");
 const { onCartCountChange } = require("../../utils/cartSync");
 const { memberCodeEntry } = require("../../utils/memberCodeEntry");
+const themeApply = require("../../utils/themeApply");
 
 const MEMBER_CODE_TAB = {
   key: "memberCode",
@@ -91,12 +92,60 @@ function buildTabs(mode, entry) {
   });
 }
 
+const svgText = {};
+const tintedFile = {};
+
+function tokenColor(pageStyle, name, fallback) {
+  const matched = new RegExp(name + ":([^;]+)").exec(pageStyle || "");
+  return matched ? matched[1].trim() : fallback;
+}
+
+function readSvg(path) {
+  if (svgText[path]) return svgText[path];
+  const text = wx.getFileSystemManager().readFileSync(path, "utf8");
+  svgText[path] = String(text);
+  return svgText[path];
+}
+
+function toBase64(text) {
+  const bytes = new Uint8Array(text.length);
+  for (let i = 0; i < text.length; i++) bytes[i] = text.charCodeAt(i) & 0xff;
+  return wx.arrayBufferToBase64(bytes.buffer);
+}
+
+function tintedIcon(path, color) {
+  const key = path + "@" + color;
+  if (tintedFile[key]) return tintedFile[key];
+  try {
+    const tinted = readSvg(path).replace(/#(?:0F766E|5B7C78)/gi, color);
+    const uri = "data:image/svg+xml;base64," + toBase64(tinted);
+    tintedFile[key] = uri;
+    return uri;
+  } catch (e) {
+    return path;
+  }
+}
+
+function paintTabs(tabs, pageStyle) {
+  const themePrimary = tokenColor(pageStyle, "--color-primary", "#0F766E");
+  const themeMuted = tokenColor(pageStyle, "--color-muted", "#5B7C78");
+  return {
+    themePrimary,
+    themeMuted,
+    tabs: (tabs || []).map((t) => ({
+      ...t,
+      iconSrc: tintedIcon(t.icon, themeMuted),
+      iconActiveSrc: tintedIcon(t.iconActive, themePrimary),
+    })),
+  };
+}
+
 Component({
   properties: {
     current: { type: String, value: "home" },
     mode: { type: String, value: "customer" },
   },
-  data: { tabs: CUSTOMER },
+  data: { tabs: CUSTOMER, themePrimary: "#0F766E", themeMuted: "#5B7C78" },
   observers: {
     mode() {
       this.refreshTabs();
@@ -111,19 +160,28 @@ Component({
     attached() {
       this.refreshTabs();
       this._offCart = onCartCountChange(() => this.refreshTabs());
+      this._offTheme = themeApply.subscribe((pageStyle) => this.applyTheme(pageStyle));
     },
     detached() {
       if (this._offCart) {
         this._offCart();
         this._offCart = null;
       }
+      if (this._offTheme) {
+        this._offTheme();
+        this._offTheme = null;
+      }
     },
   },
   methods: {
+    applyTheme(pageStyle) {
+      this.setData(paintTabs(this.data.tabs, pageStyle || themeApply.painted()));
+    },
     refreshTabs() {
       const mode = this.data.mode;
       const cached = memberCodeEntry({ memberCodeEntry: getApp().globalData.memberCodeEntry });
-      this.setData({ tabs: buildTabs(mode, cached) });
+      const style = themeApply.painted();
+      this.setData(paintTabs(buildTabs(mode, cached), style));
       if (mode === "merchant") return;
       const seq = (this._tabSeq = (this._tabSeq || 0) + 1);
       api
@@ -132,7 +190,7 @@ Component({
           if (seq !== this._tabSeq) return;
           const entry = memberCodeEntry(store);
           getApp().globalData.memberCodeEntry = entry;
-          this.setData({ tabs: buildTabs(mode, entry) });
+          this.setData(paintTabs(buildTabs(mode, entry), themeApply.painted()));
         })
         .catch(() => {});
     },

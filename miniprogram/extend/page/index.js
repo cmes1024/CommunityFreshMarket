@@ -1,6 +1,7 @@
 const pageBehavior = require("../behaviors/pageBehavior");
 const { getMenuButtonInfo, onMenuButtonInfoChange, offMenuButtonInfoChange } = require("../functions/menuButton");
 const copy = require("../../utils/copy");
+const themeApply = require("../../utils/themeApply");
 
 const pageExtend = Page => {
   return object => {
@@ -29,6 +30,19 @@ const pageExtend = Page => {
     object.data['windowInfo'] = windowInfo
     object.data['deviceInfo'] = deviceInfo
     object.data['systemSetting'] = systemSetting
+    const themePack = themeApply.current();
+    object.data.themePageStyle = themePack.pageStyle;
+    object.data.themeBackground = themePack.background;
+
+    const pageShow = object.onShow;
+    object.onShow = function () {
+      const pack = themeApply.current();
+      const data = this.data || {};
+      if (data.themePageStyle !== pack.pageStyle || data.themeBackground !== pack.background) {
+        this.setData({ themePageStyle: pack.pageStyle, themeBackground: pack.background });
+      }
+      if (typeof pageShow === "function") return pageShow.apply(this, arguments);
+    };
 
     // 挂载登录结果函数到pageRouter上， 登录组件登录结果会触发改函数
     const pageReady = object?.onReady;

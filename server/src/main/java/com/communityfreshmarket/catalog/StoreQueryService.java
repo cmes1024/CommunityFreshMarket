@@ -7,6 +7,7 @@ import com.communityfreshmarket.domain.Store;
 import com.communityfreshmarket.mapper.StoreMapper;
 import com.communityfreshmarket.points.PointsRatio;
 import com.communityfreshmarket.store.RemarkPhrases;
+import com.communityfreshmarket.store.StoreTheme;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,13 @@ public class StoreQueryService {
     r.setPointsPerYuan(ratio == null || ratio.signum() < 0 ? BigDecimal.ONE : PointsRatio.plain(ratio));
     Integer ttl = store.getPickImageTtlMinutes();
     r.setPickImageTtlMinutes(ttl == null || ttl < 1 ? 15 : ttl);
+    String themePreset = StoreTheme.readPreset(store.getThemePreset());
+    String themePrimary = StoreTheme.readPrimary(themePreset, store.getThemePrimary());
+    if (StoreTheme.CUSTOM.equals(themePreset) && themePrimary == null) {
+      themePreset = StoreTheme.PRODUCE;
+    }
+    r.setThemePreset(themePreset);
+    r.setThemePrimary(themePrimary);
     return r;
   }
 

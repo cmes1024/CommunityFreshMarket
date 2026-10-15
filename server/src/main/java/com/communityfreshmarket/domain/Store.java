@@ -47,6 +47,11 @@ public class Store {
   private BigDecimal pointsPerYuan;
   /** 图像选品会话有效分钟数 */
   private Integer pickImageTtlMinutes;
+  /** PRODUCE 青绿（默认）/ BREAKFAST 赭石 / EATERY 绛红 / MARKET 海蓝 / CUSTOM */
+  private String themePreset;
+  /** 自定义主色 #rrggbb；非 CUSTOM 为空 */
+  @TableField(updateStrategy = FieldStrategy.ALWAYS)
+  private String themePrimary;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
@@ -216,6 +221,22 @@ public class Store {
 
   public void setPickImageTtlMinutes(Integer pickImageTtlMinutes) {
     this.pickImageTtlMinutes = pickImageTtlMinutes;
+  }
+
+  public String getThemePreset() {
+    return themePreset;
+  }
+
+  public void setThemePreset(String themePreset) {
+    this.themePreset = themePreset;
+  }
+
+  public String getThemePrimary() {
+    return themePrimary;
+  }
+
+  public void setThemePrimary(String themePrimary) {
+    this.themePrimary = themePrimary;
   }
 
   public LocalDateTime getCreatedAt() {

@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.merchantInbox}}" back="{{true}}" toCustomer="{{true}}" />
 <view class="page-body no-tab wave-page">
   <view class="row-item" wx:for="{{list}}" wx:key="id" data-id="{{item.productId}}" bind:tap="open">

@@ -761,6 +761,18 @@
                 <div class="settings-cell"><label>购买须知</label><input placeholder="如配送范围、当面收款；留空则商详不展示" value="尽快配送 / 可自提" /></div>
               </div>
               <div class="sec-head" style="margin-top:18px">
+                <h3 class="section-title" style="margin:0 0 4px">主题</h3>
+                <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">选一套配色，或只定主色。价格、待确认、售罄不跟着变</p>
+              </div>
+              <div class="settings-group theme-panel">
+                <div id="themeOptions" class="theme-options"></div>
+                <div id="themeCustom" class="theme-custom" hidden>
+                  <span id="themePreview" class="theme-dot"></span>
+                  <input id="themeHue" type="range" min="0" max="359" value="174" aria-label="主色色相" />
+                  <p class="hint">拖动色相。按钮、页面底和文字会跟着变</p>
+                </div>
+              </div>
+              <div class="sec-head" style="margin-top:18px">
                 <h3 class="section-title" style="margin:0">备注短语</h3>
               </div>
               <div class="settings-group">
@@ -781,7 +793,7 @@
               </div>
               </div>
               <div data-settings-panel="home" hidden>
-              <div class="sec-head" style="margin-top:18px">
+              <div class="sec-head">
                 <h3 class="section-title" style="margin:0 0 4px">首页配置</h3>
                 <p class="hint" style="margin:0 0 10px;font-size:12px;color:var(--color-muted)">头图最多 3 张，顾客首页每 2.5 秒轮播；公告留空则不显示</p>
               </div>
@@ -946,6 +958,7 @@
     </main>
   </div>
 
+  <script src="../../miniprogram/utils/theme.js"></script>
   <script src="./proto.js"></script>
 </body>
 </html>

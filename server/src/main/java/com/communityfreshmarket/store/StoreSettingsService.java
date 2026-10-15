@@ -129,10 +129,18 @@ public class StoreSettingsService {
       }
       store.setPickImageTtlMinutes(ttl);
     }
+    boolean clearThemePrimary = false;
+    if (request.getThemePreset() != null) {
+      String preset = StoreTheme.preset(request.getThemePreset());
+      String primary = StoreTheme.primary(preset, request.getThemePrimary());
+      store.setThemePreset(preset);
+      store.setThemePrimary(primary);
+      clearThemePrimary = primary == null;
+    }
     store.setUpdatedAt(LocalDateTime.now());
     storeMapper.updateById(store);
     // updateById 默认跳过 null，清除需显式 set null
-    if (clearHero || clearHeroUrls || clearKicker || clearTitle || clearSubtitle || clearNotice) {
+    if (clearHero || clearHeroUrls || clearKicker || clearTitle || clearSubtitle || clearNotice || clearThemePrimary) {
       LambdaUpdateWrapper<Store> clear =
           new LambdaUpdateWrapper<Store>().eq(Store::getId, storeId);
       if (clearHero) {
@@ -152,6 +160,9 @@ public class StoreSettingsService {
       }
       if (clearNotice) {
         clear.set(Store::getHomeNotice, null);
+      }
+      if (clearThemePrimary) {
+        clear.set(Store::getThemePrimary, null);
       }
       storeMapper.update(null, clear);
     }

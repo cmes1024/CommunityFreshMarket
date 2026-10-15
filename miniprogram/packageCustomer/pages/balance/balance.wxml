@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.balance}}" back="{{true}}" />
 <view class="page-body no-tab wave-page">
   <view class="card balance-card">

@@ -677,6 +677,61 @@ $("#addPhrase")?.addEventListener("click", () => {
 
 renderRemarkPhrases();
 
+let protoThemePreset = "PRODUCE";
+
+function applyProtoTheme(preset, primary, keepSlider) {
+  if (!window.CfmTheme) return;
+  protoThemePreset = preset;
+  const palette = window.CfmTheme.resolve({ themePreset: preset, themePrimary: primary || "" });
+  window.CfmTheme.pageStyle(palette).split(";").forEach((decl) => {
+    const index = decl.indexOf(":");
+    if (index < 1) return;
+    document.documentElement.style.setProperty(decl.slice(0, index).trim(), decl.slice(index + 1).trim());
+  });
+  const custom = $("#themeCustom");
+  if (custom) custom.hidden = preset !== "CUSTOM";
+  const preview = $("#themePreview");
+  if (preview) preview.style.background = palette.primary;
+  const slider = $("#themeHue");
+  if (slider && preset === "CUSTOM" && !keepSlider) {
+    slider.value = String(window.CfmTheme.hueOf(palette.primary));
+  }
+  $$("[data-theme-preset]").forEach((btn) => btn.classList.toggle("on", btn.dataset.themePreset === preset));
+}
+
+function renderThemeOptions() {
+  const box = $("#themeOptions");
+  if (!box || !window.CfmTheme) return;
+  box.innerHTML = window.CfmTheme.choices()
+    .map((item) => {
+      const dot = item.swatch
+        ? `<span class="theme-dot" style="background:${item.swatch}"></span>`
+        : `<span class="theme-dot rainbow"></span>`;
+      const on = item.id === "PRODUCE" ? " on" : "";
+      return `<button type="button" class="theme-opt${on}" data-theme-preset="${item.id}">${dot}<span>${item.name}</span></button>`;
+    })
+    .join("");
+}
+
+renderThemeOptions();
+$("#themeOptions")?.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-theme-preset]");
+  if (!btn || !window.CfmTheme) return;
+  const preset = btn.dataset.themePreset;
+  if (preset === "CUSTOM") {
+    const hue = protoThemePreset === "CUSTOM"
+      ? Number($("#themeHue")?.value || 174)
+      : window.CfmTheme.hueOf(window.CfmTheme.resolve({ themePreset: protoThemePreset }).primary);
+    applyProtoTheme("CUSTOM", window.CfmTheme.primaryFromHue(hue));
+    return;
+  }
+  applyProtoTheme(preset);
+});
+$("#themeHue")?.addEventListener("input", () => {
+  if (!window.CfmTheme) return;
+  applyProtoTheme("CUSTOM", window.CfmTheme.primaryFromHue(Number($("#themeHue").value)), true);
+});
+
 $("#remarkPhrases")?.addEventListener("click", (e) => {
   const btn = e.target.closest(".phrase");
   if (!btn) return;

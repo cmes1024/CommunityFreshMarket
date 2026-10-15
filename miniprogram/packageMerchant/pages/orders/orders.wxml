@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.merchantOrders}}" back="{{false}}" toCustomer="{{true}}" />
 <view class="orders-page">
   <view class="notify-bar">

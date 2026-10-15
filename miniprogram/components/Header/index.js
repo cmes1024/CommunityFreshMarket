@@ -42,7 +42,7 @@ Component({
     headerStyle: String,
     titleStyle: {
       type: String,
-      value: "color:#134E4A;font-weight:600;",
+      value: "color:var(--color-text);font-weight:600;",
     },
     brand: {
       type: Boolean,
@@ -69,7 +69,7 @@ Component({
     ...buildHeaderMetrics(),
     isTitleCenter: true,
     proxyConfig: {
-      themeColor: "#0F766E",
+      themeColor: "",
       policy: {
         title: "隐私协议",
         desc: ["欢迎您使用小程序，请您仔细阅读并充分理解"],

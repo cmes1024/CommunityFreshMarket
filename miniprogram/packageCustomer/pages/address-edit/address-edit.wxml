@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{id ? copy.titles.addressEdit : copy.titles.addressNew}}" back="{{true}}" />
 <view class="page-body no-tab">
   <view class="card">

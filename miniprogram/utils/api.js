@@ -1,10 +1,18 @@
 const { get, post, put, del } = require("./request");
+const themeApply = require("./themeApply");
+
+function withTheme(request) {
+  return request.then((store) => {
+    themeApply.applyStore(store);
+    return store;
+  });
+}
 
 module.exports = {
   me: () => get("/api/v1/me"),
   updateMe: (body) => put("/api/v1/me", body),
   units: () => get("/api/v1/meta/units"),
-  store: () => get("/api/v1/store"),
+  store: () => withTheme(get("/api/v1/store")),
   categories: () => get("/api/v1/categories"),
   products: (categoryIdOrOpts) => {
     let params = {};
@@ -61,7 +69,7 @@ module.exports = {
     put(`/api/v1/merchant/products/${id}/home-recommended`, { value }),
   merchantProductDelete: (id) => del(`/api/v1/merchant/products/${id}`),
   merchantProductBatch: (body) => post("/api/v1/merchant/products/batch", body),
-  merchantUpdateStore: (body) => put("/api/v1/merchant/store", body),
+  merchantUpdateStore: (body) => withTheme(put("/api/v1/merchant/store", body)),
   merchantPickupSlots: () => get("/api/v1/merchant/pickup-slots"),
   merchantPickupSlotCreate: (body) => post("/api/v1/merchant/pickup-slots", body),
   merchantPickupSlotUpdate: (id, body) => put(`/api/v1/merchant/pickup-slots/${id}`, body),

@@ -1,0 +1,3 @@
+ALTER TABLE store
+  ADD COLUMN theme_preset VARCHAR(16) NOT NULL DEFAULT 'TEAL',
+  ADD COLUMN theme_primary VARCHAR(7) NULL;

@@ -148,9 +148,9 @@
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(19, 78, 74, 0.08) 0%,
-    rgba(19, 78, 74, 0.28) 42%,
-    rgba(19, 78, 74, 0.78) 100%
+    var(--color-card-top, rgba(19, 78, 74, 0.08)) 0%,
+    var(--color-card-mid, rgba(19, 78, 74, 0.28)) 42%,
+    var(--color-card-bottom, rgba(19, 78, 74, 0.78)) 100%
   );
 }
 
@@ -242,7 +242,7 @@
   height: 40rpx;
   border-radius: 50%;
   border: 2rpx solid rgba(255, 255, 255, 0.92);
-  background: rgba(19, 78, 74, 0.35);
+  background: var(--color-check-bg, rgba(19, 78, 74, 0.35));
   color: var(--color-on-primary);
   font-size: 24rpx;
   line-height: 36rpx;

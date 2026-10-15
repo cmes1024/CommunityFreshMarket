@@ -39,8 +39,8 @@
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(15, 61, 56, 0.28) 0%,
-    rgba(15, 61, 56, 0.55) 100%
+    var(--color-hero-top, rgba(15, 61, 56, 0.28)) 0%,
+    var(--color-hero-bottom, rgba(15, 61, 56, 0.55)) 100%
   );
 }
 .hero-content {

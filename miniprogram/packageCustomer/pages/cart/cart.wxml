@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.cart}}" back="{{false}}" />
 <view class="page-body cart-page {{cart.itemCount ? 'has-bar' : ''}}">
   <view wx:if="{{!cart.itemCount}}" class="empty-state">

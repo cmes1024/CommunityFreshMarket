@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.merchantProducts}}" back="{{false}}" toCustomer="{{true}}" />
 <view class="page-body products-page {{selecting ? 'is-selecting' : ''}}">
   <view class="m-toolbar">

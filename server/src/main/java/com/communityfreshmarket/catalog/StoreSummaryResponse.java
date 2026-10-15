@@ -27,6 +27,10 @@ public class StoreSummaryResponse {
   private String memberCodeEntry = "PROFILE";
   private BigDecimal pointsPerYuan = BigDecimal.ONE;
   private int pickImageTtlMinutes = 15;
+  /** PRODUCE 青绿（默认）/ BREAKFAST 赭石 / EATERY 绛红 / MARKET 海蓝 / CUSTOM */
+  private String themePreset = "PRODUCE";
+  /** 自定义主色；其余预设为空 */
+  private String themePrimary;
 
   public long getId() {
     return id;
@@ -170,5 +174,21 @@ public class StoreSummaryResponse {
 
   public void setPickImageTtlMinutes(int pickImageTtlMinutes) {
     this.pickImageTtlMinutes = pickImageTtlMinutes;
+  }
+
+  public String getThemePreset() {
+    return themePreset;
+  }
+
+  public void setThemePreset(String themePreset) {
+    this.themePreset = themePreset;
+  }
+
+  public String getThemePrimary() {
+    return themePrimary;
+  }
+
+  public void setThemePrimary(String themePrimary) {
+    this.themePrimary = themePrimary;
   }
 }

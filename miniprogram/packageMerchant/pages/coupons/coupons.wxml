@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.merchantCoupons}}" back="{{true}}" toCustomer="{{true}}" />
 <view class="page-body no-tab form-page">
   <view class="sec-row">

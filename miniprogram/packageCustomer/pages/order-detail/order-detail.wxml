@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.orderDetail}}" back="{{true}}" />
 <view class="page-body no-tab">
   <view class="card status-card">

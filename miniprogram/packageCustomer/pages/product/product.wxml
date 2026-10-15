@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.product}}" back="{{true}}" />
 <view class="page-body no-tab detail">
   <view class="hero {{product.inStock ? 'veg' : 'fruit'}}">

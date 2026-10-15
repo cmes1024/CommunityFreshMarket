@@ -76,6 +76,14 @@ public class StoreUpdateRequest {
   @Max(120)
   private Integer pickImageTtlMinutes;
 
+  /** PRODUCE / BREAKFAST / EATERY / MARKET / CUSTOM */
+  @Size(max = 16)
+  private String themePreset;
+
+  /** 自定义主色；非 CUSTOM 可空 */
+  @Size(max = 7)
+  private String themePrimary;
+
   public String getName() {
     return name;
   }
@@ -210,5 +218,21 @@ public class StoreUpdateRequest {
 
   public void setPickImageTtlMinutes(Integer pickImageTtlMinutes) {
     this.pickImageTtlMinutes = pickImageTtlMinutes;
+  }
+
+  public String getThemePreset() {
+    return themePreset;
+  }
+
+  public void setThemePreset(String themePreset) {
+    this.themePreset = themePreset;
+  }
+
+  public String getThemePrimary() {
+    return themePrimary;
+  }
+
+  public void setThemePrimary(String themePrimary) {
+    this.themePrimary = themePrimary;
   }
 }

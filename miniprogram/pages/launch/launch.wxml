@@ -1,1 +1,2 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <view class="empty">{{enteringText}}</view>

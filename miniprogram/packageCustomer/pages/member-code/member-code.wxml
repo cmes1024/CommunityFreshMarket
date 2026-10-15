@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.memberCode}}" back="{{true}}" />
 <view class="page-body no-tab code-page">
   <view class="card">

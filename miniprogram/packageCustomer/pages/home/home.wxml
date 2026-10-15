@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{displayStoreName}}" back="{{false}}" brand="{{true}}" alignContent="left" />
 <view class="page-body home">
   <view class="hero {{heroImages.length ? 'has-img' : ''}}">

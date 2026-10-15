@@ -5,6 +5,18 @@ const { productDetailMode } = require("../../../utils/productOpen");
 const { memberCodeEntry } = require("../../../utils/memberCodeEntry");
 const { yuanPlain } = require("../../../utils/money");
 const { formatRatio, parseRatio, sanitizeRatioInput } = require("../../../utils/pointsRatio");
+const theme = require("../../../utils/theme");
+const themeApply = require("../../../utils/themeApply");
+
+function hueRatio(hue) {
+  const n = Number(hue);
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(1, Math.max(0, n / 359));
+}
+
+function huePercent(hue) {
+  return (hueRatio(hue) * 100).toFixed(2) + "%";
+}
 
 function stickyTopPx() {
   try {
@@ -78,6 +90,12 @@ Page({
     pickupRemarkPhrases: [],
     deliveryPhraseDraft: "",
     pickupPhraseDraft: "",
+    themeChoices: theme.choices(),
+    themePreset: "PRODUCE",
+    themePrimary: "",
+    themeHue: 174,
+    themeHuePercent: huePercent(174),
+    themeReady: false,
   },
   async onShow() {
     this.setData({ copy, stickyTop: stickyTopPx() });
@@ -85,6 +103,7 @@ Page({
   },
   async reload() {
     const [store, slots] = await Promise.all([api.store(), api.merchantPickupSlots()]);
+    const themeForm = theme.formState(store);
     this.setData({
       store: formStore(store),
       heroImages: heroImagesOf(store),
@@ -100,7 +119,97 @@ Page({
       ),
       deliveryPhraseDraft: "",
       pickupPhraseDraft: "",
+      themePreset: themeForm.themePreset,
+      themePrimary: themeForm.themePrimary,
+      themeHue: themeForm.themeHue,
+      themeHuePercent: huePercent(themeForm.themeHue),
+      themeReady: true,
     });
+  },
+  onThemePreset(e) {
+    if (!this.data.themeReady) return;
+    const preset = String(e.currentTarget.dataset.preset || "");
+    if (!preset) return;
+    let themeHue = this.data.themeHue;
+    let themePrimary = this.data.themePrimary;
+    if (preset === "CUSTOM" && this.data.themePreset !== "CUSTOM") {
+      themeHue = theme.hueOf(theme.resolve({ themePreset: this.data.themePreset }).primary);
+      themePrimary = theme.primaryFromHue(themeHue);
+    }
+    this.previewTheme(preset, themePrimary, themeHue);
+  },
+  onHueStart(e) {
+    if (!this.data.themeReady) return;
+    const touch = e.touches && e.touches[0];
+    if (!touch) return;
+    this._hueDragging = true;
+    this._hueEnded = false;
+    this._hueClientX = touch.clientX;
+    const seq = (this._hueSeq = (this._hueSeq || 0) + 1);
+    this.createSelectorQuery()
+      .select(".theme-hue")
+      .boundingClientRect((rect) => {
+        if (!rect || seq !== this._hueSeq) return;
+        this._hueRect = rect;
+        this.seekHue(this._hueClientX);
+        if (this._hueEnded) this.finishHue();
+      })
+      .exec();
+  },
+  onHueMove(e) {
+    const touch = e.touches && e.touches[0];
+    if (!touch) return;
+    this._hueClientX = touch.clientX;
+    if (!this._hueRect) return;
+    this.seekHue(touch.clientX);
+  },
+  onHueEnd() {
+    this._hueEnded = true;
+    this._hueDragging = false;
+    if (!this._hueRect) return;
+    this.finishHue();
+  },
+  finishHue() {
+    const hue = this._huePending != null ? this._huePending : this._hue;
+    this._huePending = null;
+    this._hueRect = null;
+    if (hue == null) return;
+    const style = this.previewTheme("CUSTOM", theme.primaryFromHue(hue), hue, { quiet: true });
+    themeApply.paint(style);
+  },
+  seekHue(clientX) {
+    const rect = this._hueRect;
+    if (!rect || !rect.width) return;
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const themeHue = Math.round(ratio * 359);
+    if (themeHue === this._hue) return;
+    this._hue = themeHue;
+    const now = Date.now();
+    if (now - (this._huePaintAt || 0) < 48) {
+      this._huePending = themeHue;
+      this.setData({ themeHue, themeHuePercent: huePercent(themeHue) });
+      return;
+    }
+    this._huePending = null;
+    this._huePaintAt = now;
+    this.previewTheme("CUSTOM", theme.primaryFromHue(themeHue), themeHue, { quiet: true });
+  },
+  previewTheme(themePreset, themePrimary, themeHue, opts) {
+    const palette = theme.resolve({
+      themePreset,
+      themePrimary: themePreset === "CUSTOM" ? themePrimary : "",
+    });
+    const themePageStyle = theme.pageStyle(palette);
+    this.setData({
+      themePreset,
+      themePrimary: themePreset === "CUSTOM" ? palette.primary : "",
+      themeHue,
+      themeHuePercent: huePercent(themeHue),
+      themePageStyle,
+      themeBackground: palette.background,
+    });
+    if (!opts || !opts.quiet) themeApply.paint(themePageStyle);
+    return themePageStyle;
   },
   onStore(e) {
     this.setData({ [`store.${e.currentTarget.dataset.k}`]: e.detail.value });
@@ -247,8 +356,13 @@ Page({
       payload.pointsPerYuan = ratio;
     }
     payload.pickImageTtlMinutes = ttl;
+    if (this.data.themeReady) {
+      payload.themePreset = this.data.themePreset || "PRODUCE";
+      if (payload.themePreset === "CUSTOM") payload.themePrimary = this.data.themePrimary;
+    }
     try {
       const store = await api.merchantUpdateStore(payload);
+      const themeForm = theme.formState(store);
       this.setData({
         store: formStore(mergeHomeFields({ ...this.data.store, ...store }, payload)),
         homeProductCols: Object.prototype.hasOwnProperty.call(store, "homeProductCols")
@@ -268,6 +382,10 @@ Page({
           : this.data.pickupRemarkPhrases,
         deliveryPhraseDraft: "",
         pickupPhraseDraft: "",
+        themePreset: themeForm.themePreset,
+        themePrimary: themeForm.themePrimary,
+        themeHue: themeForm.themeHue,
+        themeHuePercent: huePercent(themeForm.themeHue),
       });
       getApp().globalData.memberCodeEntry = Object.prototype.hasOwnProperty.call(store, "memberCodeEntry")
         ? memberCodeEntry(store)

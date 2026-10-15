@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.merchantCategories}}" back="{{true}}" />
 <view class="page-body no-tab">
   <view class="hint">{{copy.merchant.catHint}}</view>

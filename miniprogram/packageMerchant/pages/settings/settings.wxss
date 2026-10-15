@@ -45,7 +45,7 @@
 }
 
 .sec-head {
-  padding: 0 4rpx 16rpx;
+  padding: 28rpx 4rpx 16rpx;
 }
 
 .sec-title {
@@ -453,7 +453,8 @@
   bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   z-index: 20;
   padding: 16rpx 32rpx;
-  background: rgba(240, 253, 250, 0.92);
+  background: var(--color-background);
+  background: color-mix(in srgb, var(--color-background) 92%, transparent);
   border-top: 1rpx solid var(--color-line);
   box-sizing: border-box;
 }
@@ -461,4 +462,108 @@
 .save-btn {
   width: 100%;
   margin: 0;
+}
+
+.theme-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  padding: 24rpx 24rpx 8rpx;
+}
+
+.theme-opt {
+  width: calc((100% - 32rpx) / 3);
+  min-height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  padding: 0 8rpx;
+  font-size: 24rpx;
+  color: var(--color-muted);
+  background: var(--color-background);
+  border: 1rpx solid var(--color-line);
+  border-radius: var(--radius-pill);
+  box-sizing: border-box;
+}
+
+.theme-opt.on {
+  color: var(--color-text);
+  font-weight: 600;
+  border-color: var(--color-primary);
+}
+
+.theme-dot {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  flex: none;
+}
+
+.theme-dot.rainbow {
+  background: conic-gradient(#dc2626, #d97706, #0f766e, #1d4ed8, #7c3aed, #dc2626);
+}
+
+.theme-custom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16rpx;
+  padding: 8rpx 24rpx 24rpx;
+}
+
+.theme-preview {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  flex: none;
+}
+
+.theme-hue {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 64rpx;
+}
+
+.theme-huebar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 16rpx;
+  margin-top: -8rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(
+    90deg,
+    #e11d1d 0%,
+    #e39b12 14%,
+    #c8c20e 28%,
+    #3aaa22 42%,
+    #14b3a2 56%,
+    #2a6fe0 70%,
+    #6d3ae0 84%,
+    #d01278 94%,
+    #e11d1d 100%
+  );
+}
+
+.theme-hue-thumb {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #fff;
+  border: 2rpx solid #fff;
+  box-shadow: 0 2rpx 10rpx rgba(19, 42, 38, 0.28);
+  transform: translate(-50%, -50%);
+}
+
+.theme-custom-hint {
+  flex: 0 0 100%;
+  font-size: 22rpx;
+  color: var(--color-muted);
+  line-height: 1.4;
 }
