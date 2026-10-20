@@ -56,11 +56,6 @@ services:
     build:
       context: ../server
       dockerfile: Dockerfile
-      extra_hosts:
-        - "host.docker.internal:host-gateway"
-      args:
-        HTTPS_PROXY: ${HTTPS_PROXY:-}
-        HTTP_PROXY: ${HTTPS_PROXY:-}
     container_name: cfm-api
     restart: unless-stopped
     depends_on:
@@ -73,8 +68,6 @@ services:
     environment:
       TZ: Asia/Shanghai
       JAVA_TOOL_OPTIONS: -Duser.timezone=Asia/Shanghai
-      # 本机开了代理时，容器直连微信会 TLS 握手挂起，登录接口无响应。留空则直连。
-      HTTPS_PROXY: ${HTTPS_PROXY:-}
       DB_URL: jdbc:postgresql://postgres:5432/cfm
       DB_USER: cfm
       DB_PASSWORD: ${DB_PASSWORD:-cfm_dev_password}
@@ -94,8 +87,6 @@ services:
       WX_SUBSCRIBE_CANCEL_TEMPLATE_ID: ${WX_SUBSCRIBE_CANCEL_TEMPLATE_ID:-}
       WX_SUBSCRIBE_DELIVERING_TEMPLATE_ID: ${WX_SUBSCRIBE_DELIVERING_TEMPLATE_ID:-}
       INVITE_LINK_BASE: ${INVITE_LINK_BASE:-}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:${HTTP_PORT:-8088}:8088"
 

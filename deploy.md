@@ -139,9 +139,6 @@ DB_PASSWORD=<随机口令>
 WX_APPID=<小程序 AppID>
 WX_SECRET=<小程序 AppSecret>
 
-# 全新机器能直接访问微信时留空。只有服务器必须走 HTTP 代理才能访问外网时才填。
-# HTTPS_PROXY=
-
 DEFAULT_STORE_ID=1
 # 店主还没登录过，这里先留空。第 12 节再写。
 BOOTSTRAP_OWNER_OPENID=
@@ -173,7 +170,6 @@ MINIO_API_PORT=9002
 | `DB_PASSWORD` | 本项目 Postgres 容器和 API 共用的口令。改它之后要重建数据库卷，或同时改已有库里的角色密码 |
 | `UPLOAD_PUBLIC_BASE` | 手机打开图片的 URL 前缀，与桶名相同。正式环境必须是 HTTPS，主机名与 `downloadFile` 合法域名一致。例：`https://cfm.zfqwjs.com/communityfreshmarket`。开发者工具用 `http://127.0.0.1:9002/communityfreshmarket` |
 | `INVITE_LINK_BASE` | 店员邀请二维码里的链接前缀。服务端把邀请码拼成 `{前缀}?code=邀请码` |
-| `HTTPS_PROXY` | 容器访问微信和构建时访问 Maven 的代理。正常云主机留空 |
 | `SESSION_EXPIRE_SECONDS` | 可选，登录会话有效期，默认 604800（7 天），一般不用写进 `.env` |
 | `HTTP_PORT` / `MINIO_API_PORT` | 宿主机回环端口。接口 `8088`，MinIO `9002`。不要对公网放行 |
 
