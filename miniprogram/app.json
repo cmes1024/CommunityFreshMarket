@@ -1,20 +1,22 @@
 {
-  "pages": ["pages/launch/launch"],
+  "pages": [
+    "pages/launch/launch",
+    "pages/home/home",
+    "pages/category/category",
+    "pages/cart/cart",
+    "pages/profile/profile"
+  ],
   "subPackages": [
     {
       "root": "packageCustomer",
       "name": "customer",
       "pages": [
-        "pages/home/home",
-        "pages/category/category",
         "pages/product/product",
-        "pages/cart/cart",
         "pages/checkout/checkout",
         "pages/address-list/address-list",
         "pages/address-edit/address-edit",
         "pages/orders/orders",
         "pages/order-detail/order-detail",
-        "pages/profile/profile",
         "pages/join-store/join-store",
         "pages/points/points",
         "pages/balance/balance",
@@ -41,24 +43,33 @@
       ]
     }
   ],
+  "tabBar": {
+    "custom": true,
+    "color": "#5B7C78",
+    "selectedColor": "#0F766E",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/home", "text": "首页" },
+      { "pagePath": "pages/category/category", "text": "分类" },
+      { "pagePath": "pages/cart/cart", "text": "商品篮" },
+      { "pagePath": "pages/profile/profile", "text": "我的" }
+    ]
+  },
   "preloadRule": {
     "pages/launch/launch": {
       "network": "all",
       "packages": ["customer", "merchant"]
     }
   },
-  "usingComponents": {
-    "Header": "/components/Header/index",
-    "TabBar": "/components/TabBar/index",
-    "Stepper": "/components/Stepper/index",
-    "ProductSheet": "/components/ProductSheet/index"
-  },
   "window": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "绿意鲜生",
     "navigationBarBackgroundColor": "#F0FDFA",
     "navigationStyle": "custom",
-    "backgroundColor": "#F0FDFA"
+    "backgroundColor": "#F0FDFA",
+    "backgroundColorTop": "#F0FDFA",
+    "backgroundColorBottom": "#F0FDFA"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",

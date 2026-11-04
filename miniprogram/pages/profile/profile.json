@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "Header": "/components/Header/index"
+  },
+  "navigationStyle": "custom"
+}

@@ -2,14 +2,20 @@ function productDetailMode(store) {
   return store && String(store.productDetailMode).toUpperCase() === "PAGE" ? "PAGE" : "SHEET";
 }
 
-function openProduct(page, id, store) {
+/**
+ * 打开商品详情。SHEET 模式下可带上列表里的商品对象作为预览，
+ * 半屏先渲染已有数据，详情接口回来后再补齐图片 / 备注。
+ */
+function openProduct(page, id, store, preview) {
   const pid = Number(id);
   if (!pid) return;
   if (productDetailMode(store) === "PAGE") {
     wx.navigateTo({ url: `/packageCustomer/pages/product/product?id=${pid}` });
     return;
   }
-  page.setData({ sheetProductId: pid, sheetShow: true });
+  const patch = { sheetProductId: pid, sheetShow: true };
+  if (preview && Number(preview.id) === pid) patch.sheetPreview = preview;
+  page.setData(patch);
 }
 
 module.exports = { productDetailMode, openProduct };

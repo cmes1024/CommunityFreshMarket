@@ -7,6 +7,7 @@ const {
   fulfillLine,
 } = require("../../../utils/orderStatus");
 const { requestSubscribe } = require("../../../utils/subscribe");
+const merchantBadge = require("../../../utils/merchantBadge");
 
 const TAB_DEFS = [
   { key: "urgent", label: copy.merchant.urgentTitle, empty: copy.merchant.urgentEmpty },
@@ -76,7 +77,7 @@ Page({
     const others = (board.others || []).map((o) => mapOrder(o, false));
     const orders = urgent.concat(others);
     const urgentCount = urgent.length;
-    getApp().globalData.merchantUrgentCount = urgentCount;
+    merchantBadge.set({ urgent: urgentCount });
     const tabs = TAB_DEFS.map((t) => ({
       key: t.key,
       label: t.label,

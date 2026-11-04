@@ -5,8 +5,8 @@
   bottom: 0;
   z-index: 20;
   display: flex;
-  background: var(--color-surface);
-  border-top: 1rpx solid var(--color-line);
+  background: var(--color-surface, #ffffff);
+  border-top: 1rpx solid var(--color-line, #cce5e1);
   padding-bottom: env(safe-area-inset-bottom);
   height: calc(116rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
@@ -20,11 +20,11 @@
   justify-content: center;
   gap: 4rpx;
   position: relative;
-  color: var(--color-muted);
+  color: var(--color-muted, #5b7c78);
   font-size: 20rpx;
 }
 .tab.active {
-  color: var(--color-primary);
+  color: var(--color-primary, #0f766e);
   font-weight: 600;
 }
 .ico {
@@ -39,8 +39,8 @@
   height: 28rpx;
   padding: 0 6rpx;
   border-radius: 999rpx;
-  background: var(--color-danger);
-  color: var(--color-on-primary);
+  background: var(--color-danger, #dc2626);
+  color: var(--color-on-primary, #ffffff);
   font-size: 18rpx;
   line-height: 28rpx;
   text-align: center;

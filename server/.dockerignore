@@ -1,0 +1,4 @@
+# 构建上下文只需要 pom.xml 与 src，避免把本机 target/ 整个传给 Docker。
+target
+.DS_Store
+*.log

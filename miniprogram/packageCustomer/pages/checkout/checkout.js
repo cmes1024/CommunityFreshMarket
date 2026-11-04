@@ -1,7 +1,7 @@
 const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
 const { fenToYuan, yuanPlain } = require("../../../utils/money");
-const { syncCartCount } = require("../../../utils/cartSync");
+const { clearCart, lastCart } = require("../../../utils/cartSync");
 const { requestSubscribe } = require("../../../utils/subscribe");
 
 function phrasesFromList(raw, previous) {
@@ -100,7 +100,46 @@ Page({
     submitting: false,
   },
   couponChosen: false,
-  async onShow() {
+  onLoad() {
+    // 首帧用缓存把金额 / 地址 / 时段填上，进结算页不再空一屏
+    const snap = lastCart();
+    const totalFen = (snap && snap.totalFen) || 0;
+    const addresses = api.peekAddresses() || [];
+    const slots = api.peekPickupSlots() || [];
+    const store = api.peekStore() || {};
+    const address = addresses.find((a) => a.isDefault) || addresses[0] || null;
+    this.setData({
+      totalFen,
+      totalYuan: fenToYuan(totalFen),
+      address,
+      slots: (slots || []).map((s) => ({ ...s, ...splitSlotLabel(s.label) })),
+      pickupSlotId: (slots[0] && slots[0].id) || 0,
+      ...deliveryView(this.data.fulfillment, totalFen, store.minDeliveryFen),
+      storeClosed:
+        String((store && store.homeKicker) || "").trim() === copy.settings.kickerClosed,
+    });
+  },
+  onShow() {
+    const app = getApp();
+    const picked = (app.globalData && app.globalData.pickedAddress) || null;
+    if (picked) app.globalData.pickedAddress = null;
+    if (this._pickReturn) {
+      // 只是从地址簿选了地址：改这一行就够，不必重跑六个接口
+      this._pickReturn = false;
+      if (picked) {
+        this.applyAddress(picked);
+        return;
+      }
+    }
+    this.load(picked);
+  },
+  applyAddress(address) {
+    this.setData({
+      address,
+      ...deliveryView(this.data.fulfillment, this.data.totalFen, this.data.minDeliveryFen),
+    });
+  },
+  async load(picked) {
     const gen = (this._loadGen || 0) + 1;
     this._loadGen = gen;
     const [cart, addresses, slots, mine, store, balance] = await Promise.all([
@@ -112,9 +151,7 @@ Page({
       api.balanceMe().catch(() => ({ balanceFen: 0 })),
     ]);
     if (gen !== this._loadGen) return;
-    const picked = getApp().globalData.pickedAddress;
-    const address =
-      picked || addresses.find((a) => a.isDefault) || addresses[0] || null;
+    const address = picked || addresses.find((a) => a.isDefault) || addresses[0] || null;
     const totalFen = cart.totalFen || 0;
     const minDeliveryFen = Number(store && store.minDeliveryFen) || 0;
     const coupons = this.buildCoupons(mine, totalFen);
@@ -258,6 +295,7 @@ Page({
     });
   },
   pickAddress() {
+    this._pickReturn = true;
     wx.navigateTo({ url: "/packageCustomer/pages/address-list/address-list?pick=1" });
   },
   pickSlot(e) {
@@ -323,7 +361,8 @@ Page({
         await requestSubscribe(["deliveringTemplateId"]);
       }
       const order = await api.submitOrder(body);
-      await syncCartCount();
+      // 服务端已清空购物篮，本地直接归零，不再多发一次请求
+      clearCart();
       wx.showToast({ title: copy.checkout.submittedToast, icon: "none" });
       wx.redirectTo({ url: `/packageCustomer/pages/order-detail/order-detail?id=${order.id}` });
     } catch (e) {

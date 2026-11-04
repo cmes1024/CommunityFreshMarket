@@ -1,4 +1,72 @@
-# 部署（本地 / 单机）
+# 部署
+
+## 服务器：一条命令部署与更新
+
+首次部署和后续迭代都用同一个脚本，会自动判断是哪一种：
+
+```bash
+./deploy/deploy.sh             # 自动识别首次 / 更新
+./deploy/deploy.sh --dry-run   # 只打印会同步什么，不改服务器
+```
+
+脚本负责：生产配置校验 → 同步源码 → 构建并重启 api → 等健康检查 → 渲染并安装宝塔 nginx 站点配置 → 公网验一遍反代。
+新机器上的人工前置（装 Docker、域名解析、备案、微信公众平台配置）见 [../deploy.md](../deploy.md)。
+
+| 场景 | 行为 |
+|------|------|
+| 首次（服务器上没有 `deploy/docker-compose.yml`） | 推源码 + `docker-compose.yml` + `Dockerfile.minio` + `deploy/.env` |
+| 更新 | 推源码 + compose + MinIO Dockerfile + nginx 模板（覆盖前留 `.bak.<时间戳>`）；服务器上的 `.env` 保持不动 |
+| `--push-env` | 更新时也用本机 `.env` 覆盖服务器配置，覆盖前留 `.env.bak.<时间戳>` |
+| `--skip-nginx` | 只动容器，不安装站点配置 |
+| `--first` | 强制按首次部署处理 |
+
+常用覆盖项：`CFM_HOST`、`CFM_REMOTE_DIR`、`CFM_ENV_FILE`、`CFM_HEALTH_URL`、`CFM_ALLOW_DEV_ENV=1`（跳过配置校验）、`CFM_STRICT_ENV=1`（把弱口令告警升级为拒绝部署）、`CFM_NGINX_CONF_DIR` / `CFM_SSL_CERT` / `CFM_SSL_CERT_KEY` / `CFM_ACME_ROOT`（非默认站点路径时用）。
+
+`./deploy/update-server.sh` 仍然可用，等价于 `./deploy/deploy.sh`。
+
+**DB_PASSWORD 是「写一次」变量。** 数据卷里的 Postgres 角色密码在首次建库时就固定了，之后只改 `.env` 不会同步过去，
+API 会以 `password authentication failed` 起不来。换密码要走：
+
+```bash
+# 在服务器 /www/wwwroot/cfm/deploy 下
+docker compose exec -T postgres psql -U cfm -d cfm -c "ALTER USER cfm WITH PASSWORD '<新口令>';"
+# 再把新口令写进本机 deploy/.env，重跑 ./deploy/deploy.sh --push-env
+```
+
+## 国内加速（服务器首次构建慢时看）
+
+| 环节 | 现状 | 怎么加速 |
+|------|------|----------|
+| Maven 依赖 | 已固定走 `maven.aliyun.com`（`server/docker-maven-settings.xml`） | 不用配 |
+| Docker 基础镜像 | Docker Hub 官方 tag（postgres / redis / alpine / maven / jre） | 服务器配 `registry-mirrors`，或 `.env` 里设 `IMAGE_PREFIX` |
+| MinIO 二进制 | `dl.min.io`（已从 GitHub releases 换掉） | 慢就设 `MINIO_DOWNLOAD_BASE` 指到镜像站 |
+
+**推荐做法：给 Docker 守护进程配镜像站**，一次配置对本机所有项目生效：
+
+```bash
+sudo tee /etc/docker/daemon.json >/dev/null <<'JSON'
+{
+  "registry-mirrors": ["https://docker.m.daocloud.io"]
+}
+JSON
+sudo systemctl restart docker
+docker info | grep -A2 'Registry Mirrors'
+```
+
+公共镜像站地址常变，用阿里云控制台给的专属加速地址最稳。**注意 `systemctl restart docker` 会让本机所有容器重启**
+（`restart: unless-stopped` 的会自动起来，homestocker / shop 这些会短暂中断几秒）。
+
+不想动 `daemon.json` 时，在 `deploy/.env` 里写前缀代替：
+
+```bash
+IMAGE_PREFIX=docker.m.daocloud.io/library/
+```
+
+留空 = 用官方镜像；配了 `registry-mirrors` 就不要再填它。**前缀必须带 `library/` 段**，否则 `postgres` 这种官方镜像会 404。
+
+`docker system prune -a` 会连 BuildKit 的依赖缓存一起清掉，下次构建是全量下载 Maven 依赖（走阿里云镜像，通常 1～3 分钟）。
+
+## 本地 / 单机
 
 在本目录执行：
 

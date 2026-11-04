@@ -1,6 +1,10 @@
+/**
+ * 主题算法回归测试（node 原生 test，跑法：node scripts/theme.test.js）
+ * 放在仓库根而不是 miniprogram 里，避免被打进小程序包。
+ */
 const assert = require("node:assert/strict");
 const test = require("node:test");
-const theme = require("./theme");
+const theme = require("../miniprogram/utils/theme");
 
 test("produce stays the hand-tuned brand green", () => {
   const palette = theme.resolve(null);
@@ -13,9 +17,11 @@ test("produce stays the hand-tuned brand green", () => {
 test("generated themes keep white button text and body text readable", () => {
   const samples = []
     .concat(["BREAKFAST", "EATERY", "MARKET"].map((id) => theme.resolve({ themePreset: id })))
-    .concat([0, 20, 45, 60, 90, 130, 174, 200, 230, 270, 310, 345].map((hue) => {
-      return theme.resolve({ themePreset: "CUSTOM", themePrimary: theme.primaryFromHue(hue) });
-    }));
+    .concat(
+      [0, 20, 45, 60, 90, 130, 174, 200, 230, 270, 310, 345].map((hue) => {
+        return theme.resolve({ themePreset: "CUSTOM", themePrimary: theme.primaryFromHue(hue) });
+      })
+    );
   samples.forEach((palette) => {
     assert.ok(theme.contrast(palette.primary, "#ffffff") >= 4.5, palette.primary + " on white");
     assert.ok(theme.contrast(palette.text, "#ffffff") >= 4.5, palette.text + " text");

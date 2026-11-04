@@ -59,6 +59,11 @@ function painted() {
 }
 
 function publish(pack) {
+  // 主题没变就什么都不用做：避免每次拉门店都同步写缓存、遍历所有页面
+  const current = appData();
+  if (current && current.pageStyle === pack.pageStyle && current.background === pack.background) {
+    return;
+  }
   try {
     wx.setStorageSync(STORAGE_KEY, pack);
   } catch (e) {}

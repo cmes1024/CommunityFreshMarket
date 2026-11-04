@@ -3,10 +3,14 @@ const api = require("../../../utils/api");
 Page({
   data: { list: [], pick: false },
   onLoad(query) {
-    this.setData({ pick: query.pick === "1" });
+    // 首帧先出上次的地址簿，返回键和选地址都不用等白屏
+    this.setData({ pick: query.pick === "1", list: api.peekAddresses() || [] });
   },
   async onShow() {
-    this.setData({ list: await api.addresses() });
+    try {
+      const list = await api.addresses();
+      if (list) this.setData({ list });
+    } catch (e) {}
   },
   add() {
     wx.navigateTo({ url: "/packageCustomer/pages/address-edit/address-edit" });

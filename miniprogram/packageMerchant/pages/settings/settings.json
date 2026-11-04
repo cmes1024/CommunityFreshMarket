@@ -1,1 +1,7 @@
-{ "usingComponents": {}, "navigationStyle": "custom" }
+{
+  "usingComponents": {
+    "Header": "/components/Header/index",
+    "TabBar": "/components/TabBar/index"
+  },
+  "navigationStyle": "custom"
+}

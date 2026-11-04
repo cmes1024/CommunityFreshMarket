@@ -1,6 +1,8 @@
 const api = require("../../../utils/api");
 const copy = require("../../../utils/copy");
+const merchantBadge = require("../../../utils/merchantBadge");
 const { storeDisplayName } = require("../../../utils/copy");
+const { goTab } = require("../../../utils/nav");
 
 function toQrSrc(res) {
   const b64 = res && res.qrcodeBase64;
@@ -45,7 +47,10 @@ Page({
   async refreshBubbles() {
     try {
       const list = await api.merchantCheckinsActive();
-      this.setData({ bubbleCount: (list || []).length });
+      const count = (list || []).length;
+      this.setData({ bubbleCount: count });
+      // 同步给底栏角标
+      merchantBadge.set({ bubble: count });
     } catch (e) {}
   },
   async loadProfile() {
@@ -66,6 +71,8 @@ Page({
         avatarText: nick.slice(0, 1),
         inboxCount,
       });
+      // 同步给底栏角标
+      merchantBadge.set({ inbox: inboxCount });
     } catch (e) {}
   },
   applyInvite(res) {
@@ -110,7 +117,7 @@ Page({
     wx.navigateTo({ url: "/packageMerchant/pages/point-redeems/point-redeems" });
   },
   backCustomer() {
-    wx.reLaunch({ url: "/packageCustomer/pages/home/home" });
+    goTab("/pages/home/home");
   },
   noop() {},
 });

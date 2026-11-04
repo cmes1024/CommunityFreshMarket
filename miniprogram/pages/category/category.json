@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "Header": "/components/Header/index",
+    "ProductSheet": "/components/ProductSheet/index",
+    "Stepper": "/components/Stepper/index"
+  },
+  "navigationStyle": "custom"
+}

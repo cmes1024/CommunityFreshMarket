@@ -104,10 +104,24 @@
   height: 64rpx;
   overflow: hidden;
 }
+/* 纯 CSS 跑马灯：不再用 setInterval + createAnimation 反复 setData */
 .notice-track {
   display: flex;
   flex-wrap: nowrap;
   height: 64rpx;
+  animation-name: notice-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+@keyframes notice-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 .notice-item {
   flex: none;

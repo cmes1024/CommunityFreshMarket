@@ -1,8 +1,11 @@
 module.exports = {
   version: "0.1.0",
-  env: "dev",
-  /** 模拟器可用本机；真机改为电脑局域网 IP，如 http://192.168.1.8:8088 */
-  apiHost: "http://127.0.0.1:8088",
+  env: "prod",
+  /**
+   * 生产入口：nginx 443 → 127.0.0.1:8091，不要带端口。
+   * 本地联调时临时改回 "http://127.0.0.1:8088"，发布前记得切回来。
+   */
+  apiHost: "https://cfm.zfqwjs.com",
   defaultStoreId: 1,
 
   /**

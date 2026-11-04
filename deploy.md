@@ -38,7 +38,7 @@
 | 域名 | 一条 A 记录指到这台机器，例如 `api.example.com`。下文用这个名字代替你的域名 |
 | 备案 | 服务器在中国大陆时，域名须完成 ICP 备案。未备案的域名不能配进小程序服务器域名 |
 | 微信小程序 | 新注册一个小程序。生鲜经营建议用企业或个体工商户主体；个人主体很多类目、订阅消息和客服开不了 |
-| 本机工具 | 安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)，并用小程序管理员或开发者微信扫码登录 |
+| 本机工具 | 安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)，并用小程序管理员或开发者微信扫码登录。部署还需要 `ssh` 与 `rsync`（macOS 自带） |
 
 小程序管理员在公众平台「成员管理」里把上传代码的人加为开发者。
 
@@ -107,12 +107,14 @@ sudo ufw status
 
 ## 6. 放置代码
 
-```bash
-sudo mkdir -p /opt/community-fresh-market
-sudo chown "$USER" /opt/community-fresh-market
-cd /opt/community-fresh-market
-git clone <你的仓库地址> .
-```
+不用在服务器上 clone 仓库。`deploy/deploy.sh` 会用 rsync 把 `server/` 与 `deploy/` 推到服务器的 `${CFM_REMOTE_DIR:-/www/wwwroot/cfm}`，首次部署时连 `deploy/.env` 一起放上去。
+
+需要满足的只有：
+
+- 本机能 `ssh root@<服务器>`（脚本用 ControlMaster 复用，只会要一次密码）
+- 服务器已装 Docker Engine 与 Compose 插件（第 5 节）
+- 本机仓库里已有 `deploy/.env`（第 7 节）
+- 服务器是宝塔 nginx，站点目录为 `/www/server/panel/vhost/nginx`（第 9 节，脚本会写）
 
 生产机只需要能构建 `server/` 和运行 `deploy/`。小程序代码在你自己的电脑上用开发者工具打开，不必在服务器上跑。
 
@@ -120,9 +122,11 @@ git clone <你的仓库地址> .
 
 ## 7. 填写 `deploy/.env`
 
+**在本地仓库**里填，`deploy.sh` 首次部署时才会推上去：
+
 ```bash
-cd /opt/community-fresh-market/deploy
-cp .env.example .env
+cd <本机仓库根目录>
+cp deploy/.env.example deploy/.env
 ```
 
 生成数据库口令：
@@ -189,11 +193,18 @@ MINIO_API_PORT=9002
 
 ---
 
-## 9. 补生鲜自己的站点文件
+## 9. 生鲜自己的站点文件
 
-小程序体验版和正式版只接受 HTTPS，且不能写端口号。证书已经是 `hs-cfm.zfqwjs.com.pem`，主配置和原来的站点都不用动。只重写 `/www/server/panel/vhost/nginx/cfm.zfqwjs.com.conf`，结构和 HomeStocker 的 `hs.zfqwjs.com.conf` 相同：`/` 转到接口，图片路径转到 MinIO，上传限制 `10m`。
+小程序体验版和正式版只接受 HTTPS，且不能写端口号。证书已经是 `hs-cfm.zfqwjs.com.pem`，主配置和原来的站点都不用动。
 
-在服务器上粘贴整段。检查失败会自动恢复原文件：
+站点配置已收进仓库：`deploy/nginx/cfm.zfqwjs.com.conf.tpl`。`deploy.sh` 会渲染后写到
+`/www/server/panel/vhost/nginx/cfm.zfqwjs.com.conf`，写前备份，`nginx -t` 失败自动回滚，成功后 `nginx -s reload`。**不需要再手工粘贴。**
+
+可用环境变量覆盖默认值：`CFM_NGINX_CONF_DIR`、`CFM_SSL_CERT`、`CFM_SSL_CERT_KEY`、`CFM_ACME_ROOT`。
+不想让脚本碰 nginx 用 `--skip-nginx`；非宝塔机器（目录不存在）会跳过并打印要手工配置的反代目标：
+`/` → `127.0.0.1:8088`、`/communityfreshmarket/` → `127.0.0.1:9002`。
+
+下面这段是等价的**手工排错版本**，仅在脚本装不上或需要临时恢复时使用：
 
 ```bash
 CONF=/www/server/panel/vhost/nginx/cfm.zfqwjs.com.conf
@@ -252,14 +263,15 @@ curl -sI https://api.example.com
 
 ## 10. 启动
 
-在 `deploy/` 目录：
+在**本机**仓库根目录：
 
 ```bash
-cd /opt/community-fresh-market/deploy
-docker compose up -d --build
+./deploy/deploy.sh
 ```
 
-第一次会拉取 Redis、PostgreSQL、JDK 镜像，编自己的 MinIO 镜像，并在容器内执行 `mvn package`，可能要十几分钟。完成后：
+脚本会校验 `deploy/.env`、判断首次还是更新、同步源码、构建并重启 api、等健康检查、装 nginx，最后用公网地址验一遍反代。
+
+第一次会拉取 Redis、PostgreSQL、JDK 镜像，编自己的 MinIO 镜像（同机已有 `hs-minio:local` 时直接复用，省掉从 GitHub 下载），并在容器内执行 `mvn package`，可能要十几分钟。完成后：
 
 ```bash
 docker compose ps
@@ -431,25 +443,23 @@ module.exports = {
 冷启动没有后台账号密码。店主就是某个微信用户。
 
 1. 店主用体验版打开小程序，等待登录完成（能看到首页即可）。此时他还不是店员，「我的」里没有商家工作台。
-2. 在服务器查出 openid：
+2. 在服务器查出 openid（`docker exec` 不依赖当前目录）：
 
 ```bash
-cd /opt/community-fresh-market/deploy
-# 把密码换成 .env 里的 DB_PASSWORD
 docker exec cfm-postgres psql -U cfm -d cfm \
   -c 'SELECT id, openid, nickname FROM "user" ORDER BY id;'
 ```
 
-3. 把店主那一行的 `openid` 写入 `deploy/.env`：
+3. 把店主那一行的 `openid` 写进**本机** `deploy/.env`：
 
 ```bash
 BOOTSTRAP_OWNER_OPENID=oXXXXXXXX
 ```
 
-4. 只重启 API：
+4. 重跑（会推 `.env` 并只重建 API）：
 
 ```bash
-docker compose up -d api
+./deploy/deploy.sh --push-env
 ```
 
 5. 店主完全退出小程序再打开（或下拉触发重新登录）。「我的」出现「商家工作台」。
@@ -493,12 +503,13 @@ curl -s https://api.example.com/api/v1/me -H "Authorization: Bearer <登录令�
 
 ### 更新代码
 
+在**本机**仓库根目录：
+
 ```bash
-cd /opt/community-fresh-market
-git pull
-cd deploy
-docker compose up -d --build
+./deploy/deploy.sh
 ```
+
+它只推源码和 nginx 模板，服务器上的 `.env` / `docker-compose.yml` / `Dockerfile.minio` 保持不动。需要用本机 `.env` 覆盖服务器配置时加 `--push-env`（会留 `.env.bak.<时间戳>`）。
 
 Flyway 会在 API 启动时补迁移。库和图片在本项目的数据卷里，只删容器不会删卷。`docker compose down -v` 会把库和图片一起清掉。
 
@@ -519,7 +530,7 @@ docker exec cfm-postgres pg_dump -U cfm -d cfm \
 ### 日志
 
 ```bash
-cd /opt/community-fresh-market/deploy
+cd /www/wwwroot/cfm/deploy
 docker compose logs -f api
 docker compose logs --tail=100 redis
 ```
@@ -536,7 +547,7 @@ docker compose logs --tail=100 redis
 - [ ] `https://api.example.com/api/v1/health` 返回 `db: UP`
 - [ ] `8088` 和 `9002` 只监听 `127.0.0.1`，防火墙未放行。Postgres 和 Redis 没有映射到宿主机
 - [ ] 数据库密码、AppSecret 已换成随机值，且不在 Git 里。`.env` 里没有 `JWT_SECRET`
-- [ ] 只改了 `cfm.zfqwjs.com.conf`：`/` 到 `127.0.0.1:8088`，`/communityfreshmarket/` 到 `127.0.0.1:9002`，`client_max_body_size 10m`，并已 `nginx -s reload`
+- [ ] `deploy.sh` 已装好 `cfm.zfqwjs.com.conf`（`/` → `127.0.0.1:8088`，`/communityfreshmarket/` → `127.0.0.1:9002`，`client_max_body_size 10m`）并 reload 成功
 - [ ] `WX_APPID` / `WX_SECRET` 与公众平台一致
 - [ ] `UPLOAD_PUBLIC_BASE` 是 `https://` 加本站域名再加 `/communityfreshmarket`
 - [ ] request、uploadFile、downloadFile 三个合法域名都已保存

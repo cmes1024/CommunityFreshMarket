@@ -10,8 +10,7 @@
 >
   <view class="sheet" catch:tap="noop">
     <view class="grab"></view>
-    <view wx:if="{{loading}}" class="loading">加载中…</view>
-    <block wx:elif="{{product}}">
+    <block wx:if="{{product}}">
       <scroll-view scroll-y class="sheet-body">
         <view class="hero {{product.inStock ? 'veg' : 'fruit'}}">
           <swiper
@@ -27,7 +26,6 @@
             <swiper-item wx:for="{{slides}}" wx:key="key">
               <view class="slide">
                 <image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFill" class="hero-img" />
-                <view wx:else class="live-ph">{{copy.livePhoto.placeholder}}</view>
                 <view wx:if="{{item.takenText}}" class="live-time">{{item.takenText}}</view>
                 <view
                   wx:if="{{item.showRequest}}"
@@ -70,5 +68,6 @@
         </button>
       </view>
     </block>
+    <view wx:else class="loading">加载中…</view>
   </view>
 </page-container>

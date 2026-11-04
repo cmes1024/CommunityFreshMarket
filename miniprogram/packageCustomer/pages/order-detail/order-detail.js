@@ -3,6 +3,7 @@ const copy = require("../../../utils/copy");
 const { fenToYuan } = require("../../../utils/money");
 const { label, steps } = require("../../../utils/orderStatus");
 const { syncCartCount } = require("../../../utils/cartSync");
+const { goTab } = require("../../../utils/nav");
 
 function fmtTime(iso) {
   if (!iso) return "";
@@ -78,7 +79,7 @@ Page({
     if (res.skipped && res.skipped.length) {
       wx.showToast({ title: `部分跳过：${res.skipped[0]}`, icon: "none" });
     }
-    wx.reLaunch({ url: "/packageCustomer/pages/cart/cart" });
+    goTab("/pages/cart/cart");
   },
 });
 

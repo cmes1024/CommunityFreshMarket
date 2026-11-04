@@ -35,7 +35,7 @@
   <view class="notice" wx:if="{{homeNotice}}">
     <text class="notice-label">公告</text>
     <view class="notice-window">
-      <view class="notice-track" animation="{{noticeAnim}}">
+      <view class="notice-track" style="animation-duration: {{noticeDurationMs}}ms">
         <view class="notice-item">
           <text class="notice-item-text">{{homeNotice}}</text>
         </view>
@@ -86,7 +86,7 @@
       >
         <view class="home-card-hit" data-id="{{item.id}}" bind:tap="goDetail">
           <view class="thumb {{item.inStock ? 'veg' : 'sold'}}">
-            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="thumb-img" />
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="thumb-img" lazy-load />
             <text wx:if="{{!item.inStock}}" class="sold-tag">{{copy.stock.soldOut}}</text>
           </view>
           <view class="meta">
@@ -119,7 +119,7 @@
 <ProductSheet
   show="{{sheetShow}}"
   productId="{{sheetProductId}}"
+  preview="{{sheetPreview}}"
   bind:close="onSheetClose"
   bind:changed="onSheetChanged"
 />
-<TabBar current="home" />

@@ -18,25 +18,19 @@ Page({
     contactNote: "",
     liveRequesting: false,
   },
-  async onLoad(query) {
+  onLoad(query) {
     this.id = Number(query.id);
+    // 有缓存就先出内容，接口回来再补齐
+    const cached = api.peekProduct(this.id);
+    if (cached) this.paint(cached);
+    this.load();
+  },
+  async load() {
     const [product, store] = await Promise.all([
       api.product(this.id),
       api.store().catch(() => null),
     ]);
-    const bounds = qtyBounds(product, { forDetail: true });
-    this.setData({
-      product: {
-        ...product,
-        priceYuan: fenToYuan(product.priceFen),
-        unitLine: detailUnitLine(product),
-      },
-      slides: gallerySlides(product),
-      contactNote: ((store && store.contactNote) || "").trim(),
-      qty: initialDetailQty(product),
-      qtyMin: bounds.min,
-      qtyMax: bounds.max,
-    });
+    this.paint(product, store);
     if (!product.inStock) {
       try {
         const st = await api.restockStatus(this.id);
@@ -44,14 +38,31 @@ Page({
       } catch (e) {}
     }
   },
+  paint(product, store) {
+    const bounds = qtyBounds(product, { forDetail: true });
+    const patch = {
+      product: {
+        ...product,
+        priceYuan: fenToYuan(product.priceFen),
+        unitLine: detailUnitLine(product),
+      },
+      slides: gallerySlides(product),
+      qtyMin: bounds.min,
+      qtyMax: bounds.max,
+    };
+    if (!this._qtyTouched) patch.qty = initialDetailQty(product);
+    if (store !== undefined) patch.contactNote = ((store && store.contactNote) || "").trim();
+    this.setData(patch);
+  },
   onStepper(e) {
+    this._qtyTouched = true;
     this.setData({ qty: e.detail.value });
   },
   async addCart() {
     const qty = normalizeCartQty(this.data.qty, this.data.qtyMin);
     try {
-      await api.cartAdd(this.id, qty);
-      await syncCartCount();
+      const cart = await api.cartAdd(this.id, qty);
+      await syncCartCount(cart);
       wx.showToast({ title: copy.product.addedToast, icon: "none" });
     } catch (e) {}
   },

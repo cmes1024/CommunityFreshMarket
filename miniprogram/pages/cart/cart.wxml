@@ -32,4 +32,3 @@
   </view>
   <view class="go">{{copy.cart.goCheckout}}</view>
 </view>
-<TabBar current="cart" />

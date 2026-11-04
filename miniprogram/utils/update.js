@@ -1,6 +1,11 @@
+let checked = false
+
 module.exports = {
   autoUpdate: function () {
-    console.log("app update...")
+    // getUpdateManager 的 onCheckForUpdate 每次注册都会累积回调，
+    // 这里只在启动后检查一次
+    if (checked) return
+    checked = true
     // 获取小程序更新机制兼容
     if (wx.canIUse('getUpdateManager')) {
       const updateManager = wx.getUpdateManager()

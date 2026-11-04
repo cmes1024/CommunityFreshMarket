@@ -41,5 +41,9 @@ App({
     request: null,
     cartCount: 0,
     merchantUrgentCount: 0,
+    merchantInboxCount: 0,
+    merchantBubbleCount: 0,
+    /** 首页点分类 → switchTab 不能带参数，用它把选中的分类带过去 */
+    pendingCategoryId: 0,
   },
 });

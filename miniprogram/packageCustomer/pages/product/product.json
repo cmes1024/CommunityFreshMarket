@@ -1,1 +1,7 @@
-{ "usingComponents": {}, "navigationStyle": "custom" }
+{
+  "usingComponents": {
+    "Header": "/components/Header/index",
+    "Stepper": "/components/Stepper/index"
+  },
+  "navigationStyle": "custom"
+}

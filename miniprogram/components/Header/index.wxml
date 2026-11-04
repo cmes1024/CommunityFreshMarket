@@ -11,10 +11,16 @@
     class="header-content"
     style="width:{{menuPositionInfo.left}}px;height: {{menuPositionInfo.height}}px;margin-top:{{menuPositionInfo.top}}px"
   >
-    <view wx:if="{{back}}" class="header-content-left" bind:tap="BackPage">返回</view>
+    <view
+      wx:if="{{back}}"
+      class="header-content-left"
+      hover-class="is-tap"
+      bind:tap="BackPage"
+    >返回</view>
     <view
       wx:elif="{{toCustomer}}"
       class="header-content-left is-customer"
+      hover-class="is-tap"
       bind:tap="GoCustomer"
     >用户端</view>
     <view

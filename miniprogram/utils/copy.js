@@ -403,27 +403,9 @@ const copy = {
   livePhoto: {
     apply: "申请更新图片",
     requested: "已有 {n} 人申请",
-    placeholder: "暂无实景图",
     notified: "已通知商家",
     takenToday: "实景 今天 {time}",
     takenOn: "实景 {date} {time}",
-  },
-
-  pickSession: {
-    waiting: "等待店员上传实景图…",
-    hint: "点击图片标记你想选的位置",
-    saveMarks: "保存标记",
-    saved: "标记已保存",
-    cancel: "取消选品",
-    status: "状态",
-  },
-
-  merchantPick: {
-    empty: "暂无进行中的选品",
-    upload: "上传实景图",
-    confirm: "确认数量",
-    qtyPlaceholder: "确认数量",
-    uploaded: "图片已上传",
   },
 
   memberCode: {

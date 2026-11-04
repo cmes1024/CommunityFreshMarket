@@ -26,7 +26,11 @@ function requestLabel(product) {
   return copy.livePhoto.apply;
 }
 
-/** 详情/半屏图库。封面列表仍用 productImages，不把实景图提前。 */
+/**
+ * 详情/半屏图库。封面列表仍用 productImages，不把实景图提前。
+ * 没有实景图时不单占一张（不显示"暂无实景图"），
+ * 「申请实景图」直接叠在第一张商品图上。
+ */
 function gallerySlides(product) {
   const catalog = productImages(product).map((url, i) => ({
     key: `c${i}`,
@@ -34,17 +38,15 @@ function gallerySlides(product) {
     url,
   }));
   if (!product || !product.livePhotoEnabled) return catalog;
+
   const label = requestLabel(product);
+
   if (!product.livePhotoUrl) {
-    return [
-      {
-        key: "live",
-        kind: "placeholder",
-        showRequest: true,
-        requestLabel: label,
-      },
-    ].concat(catalog);
+    return catalog.map((slide, i) =>
+      i === 0 ? { ...slide, showRequest: true, requestLabel: label } : slide
+    );
   }
+
   return [
     {
       key: "live",

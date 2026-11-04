@@ -14,7 +14,7 @@
     <view class="product-row {{item.inStock ? '' : 'is-sold'}}" wx:for="{{products}}" wx:key="id">
       <view class="hit grow" data-id="{{item.id}}" bind:tap="goDetail">
         <view class="thumb {{item.inStock ? 'veg' : 'sold'}}">
-          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="thumb-img" />
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="thumb-img" lazy-load />
           <text wx:if="{{!item.inStock}}" class="sold-tag">{{copy.stock.soldOut}}</text>
         </view>
         <view class="meta">
@@ -49,7 +49,7 @@
 <ProductSheet
   show="{{sheetShow}}"
   productId="{{sheetProductId}}"
+  preview="{{sheetPreview}}"
   bind:close="onSheetClose"
   bind:changed="onSheetChanged"
 />
-<TabBar current="category" />

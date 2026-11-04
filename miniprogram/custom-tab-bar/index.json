@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "TabBar": "/components/TabBar/index"
+  }
+}

@@ -15,7 +15,6 @@
       <swiper-item wx:for="{{slides}}" wx:key="key">
         <view class="slide">
           <image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFill" class="hero-img" />
-          <view wx:else class="live-ph">{{copy.livePhoto.placeholder}}</view>
           <view wx:if="{{item.takenText}}" class="live-time">{{item.takenText}}</view>
           <view
             wx:if="{{item.showRequest}}"

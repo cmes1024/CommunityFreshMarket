@@ -1,9 +1,9 @@
-const api = require("../../../utils/api");
-const copy = require("../../../utils/copy");
-const { setUser } = require("../../../utils/request");
-const { uploadImage, absUrl } = require("../../../utils/upload");
-const { fenToYuan } = require("../../../utils/money");
-const { memberCodeEntry } = require("../../../utils/memberCodeEntry");
+const api = require("../../utils/api");
+const copy = require("../../utils/copy");
+const { setUser, getUser } = require("../../utils/request");
+const { uploadImage, absUrl } = require("../../utils/upload");
+const { fenToYuan } = require("../../utils/money");
+const { memberCodeEntry } = require("../../utils/memberCodeEntry");
 
 function greetName(name) {
   const hour = new Date().getHours();
@@ -29,6 +29,20 @@ Page({
     showMemberCode: true,
     pointsValue: 0,
     balanceYuan: "0.00",
+  },
+  onLoad() {
+    // 首帧用本地用户和缓存数据渲染，切 tab 不白屏
+    const cached = getUser();
+    if (cached) this.applyUser(cached);
+    const store = api.peekStore();
+    const points = api.peekPoints();
+    const balance = api.peekBalance();
+    this.setData({
+      contactPhone: (store && store.contactPhone) || "",
+      showMemberCode: store ? memberCodeEntry(store) !== "TAB" : true,
+      pointsValue: points && points.balance != null ? points.balance : 0,
+      balanceYuan: fenToYuan(balance && balance.balanceFen),
+    });
   },
   async onShow() {
     try {

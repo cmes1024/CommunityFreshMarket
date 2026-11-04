@@ -43,6 +43,16 @@
       color: var(--color-primary, #0f766e);
       font-size: 28rpx;
       font-weight: 500;
+      /* 视觉宽度不改，热区四周各放大 16rpx，避免点不准像"没反应" */
+      position: relative;
+      &::after {
+        content: "";
+        position: absolute;
+        top: -16rpx;
+        bottom: -16rpx;
+        left: -16rpx;
+        right: -16rpx;
+      }
       .back-icon {
         margin: auto 12rpx auto 0;
       }
@@ -81,6 +91,10 @@
     .text-align-right {
       text-align: right;
     }
+  }
+
+  .is-tap {
+    opacity: 0.55;
   }
 
   /* 相对整屏居中（不受胶囊 / 左侧按钮宽度影响） */

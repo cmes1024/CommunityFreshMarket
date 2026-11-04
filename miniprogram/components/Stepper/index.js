@@ -1,4 +1,7 @@
 Component({
+  // 列表里实例数量多，不需要 windowInfo / deviceInfo 这类全局信息，
+  // 关掉全局注入，省掉每个实例的初始 data 与传输
+  skipSystemData: true,
   properties: {
     value: { type: Number, value: 0 },
     min: { type: Number, value: 0 },
@@ -8,13 +11,6 @@ Component({
     /** md 默认；sm 用于三列卡等紧凑场景 */
     size: { type: String, value: "md" },
   },
-  observers: {
-    value(v) {
-      const n = Number(v) || 0;
-      this.setData({ display: Number.isInteger(n) ? String(n) : n.toFixed(2) });
-    },
-  },
-  data: { display: "0" },
   methods: {
     onMinus() {
       if (this.data.disabled) return;

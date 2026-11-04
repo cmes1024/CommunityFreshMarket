@@ -1,4 +1,5 @@
 const { getMenuButtonInfo } = require("../../extend/functions/menuButton");
+const { goTab } = require("../../utils/nav");
 
 function buildHeaderMetrics() {
   const menu = getMenuButtonInfo() || {};
@@ -88,7 +89,16 @@ Component({
 
   lifetimes: {
     attached() {
-      this.setData(buildHeaderMetrics());
+      // 初始 data 已算过一次，胶囊位置没变就不再 setData，少一次首屏渲染
+      const next = buildHeaderMetrics();
+      const cur = this.data.menuPositionInfo || {};
+      if (
+        next.headerHeightPx !== this.data.headerHeightPx ||
+        next.menuPositionInfo.top !== cur.top ||
+        next.menuPositionInfo.left !== cur.left
+      ) {
+        this.setData(next);
+      }
     },
   },
 
@@ -96,13 +106,14 @@ Component({
     BackPage() {
       const pages = getCurrentPages();
       if (pages.length <= 1) {
-        wx.reLaunch({ url: "/packageCustomer/pages/home/home" });
+        // 首页是 tabBar 页，只能 switchTab
+        goTab("/pages/home/home");
       } else {
         wx.navigateBack();
       }
     },
     GoCustomer() {
-      wx.reLaunch({ url: "/packageCustomer/pages/home/home" });
+      goTab("/pages/home/home");
     },
     currentPage() {
       const pages = getCurrentPages();

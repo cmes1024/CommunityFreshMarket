@@ -1,16 +1,17 @@
-<view class="tabbar">
+<view class="tabbar" style="border-top-color: {{themeLine}}">
   <view
     wx:for="{{tabs}}"
     wx:key="key"
-    class="tab {{item.key === current ? 'active' : ''}}"
-    style="color: {{item.key === current ? themePrimary : themeMuted}}"
+    class="tab {{item.key === activeKey ? 'active' : ''}}"
+    style="color: {{item.key === activeKey ? themePrimary : themeMuted}}"
     data-url="{{item.url}}"
     data-open="{{item.open}}"
+    data-key="{{item.key}}"
     bind:tap="onTap"
   >
     <image
       class="ico"
-      src="{{item.key === current ? (item.iconActiveSrc || item.iconActive) : (item.iconSrc || item.icon)}}"
+      src="{{item.key === activeKey ? (item.iconActiveSrc || item.iconActive) : (item.iconSrc || item.icon)}}"
       mode="aspectFit"
     />
     <view class="label">{{item.label}}</view>

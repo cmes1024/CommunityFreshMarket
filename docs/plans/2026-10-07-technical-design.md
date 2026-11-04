@@ -186,9 +186,14 @@ PENDING_CONFIRM → PREPARING → DELIVERING | READY_PICKUP → COMPLETED
 
 | 包 | 内容 |
 |----|------|
-| 主包 | 启动、登录编排、公共组件与 utils |
-| `packageCustomer` | 首页、分类、商品篮、我的、地址、订单 |
+| 主包 | 启动、登录编排、公共组件与 utils、**四个顾客 tab 页（首页 / 分类 / 商品篮 / 我的）** |
+| `packageCustomer` | 商品详情、结算、地址、订单、积分/余额/券等二级页 |
 | `packageMerchant` | 订单台、商品、履约/店铺设置 |
+
+四个 tab 页必须在主包并在 `app.json` 声明 `tabBar`（`custom: true`，外观仍由 `components/TabBar` 渲染，
+`custom-tab-bar/` 只做挂载与选中态推导），切 tab 用 `wx.switchTab`（统一走 `utils/nav.goTab`）。
+原因：原先用 `wx.reLaunch` 模拟 tab 切换，页面反复销毁重建，切页白屏且长时使用后越用越卡。
+商家端四个页面不是 tabBar 页，仍用 `<TabBar mode="merchant">` 组件 + `reLaunch` 互相切换。
 
 模板中已有的 `ProductCard`、`CartBar`、`OrderCard`、`Stepper` 等，第一波可按需接入并改数据源。
 

@@ -1,8 +1,19 @@
+# Docker 默认的 json-file 日志没有上限，跑久了能把磁盘吃满。
+# 每个容器保留最近 3 个 10MB 文件，单项目日志上限约 30MB。
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   postgres:
-    image: postgres:16-alpine
+    # IMAGE_PREFIX 留空时直接用官方镜像；服务器没配 registry-mirrors 时，
+    # 可在 .env 里写 docker.m.daocloud.io/library/ 之类的国内前缀。
+    image: ${IMAGE_PREFIX:-}postgres:16-alpine
     container_name: cfm-postgres
     restart: unless-stopped
+    logging: *default-logging
     environment:
       POSTGRES_DB: cfm
       POSTGRES_USER: cfm
@@ -16,9 +27,10 @@ services:
       retries: 10
 
   redis:
-    image: redis:7-alpine
+    image: ${IMAGE_PREFIX:-}redis:7-alpine
     container_name: cfm-redis
     restart: unless-stopped
+    logging: *default-logging
     # 6379 已被宿主机占用，不映射端口。只在 Compose 网络里给 cfm-api 用。
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
@@ -33,9 +45,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.minio
+      args:
+        BASE_IMAGE: ${IMAGE_PREFIX:-}alpine:3.20
+        # 默认走 MinIO 官方 CDN；国内拉不动时改成镜像站或自建反代。
+        MINIO_DOWNLOAD_BASE: ${MINIO_DOWNLOAD_BASE:-https://dl.min.io/server/minio/release/linux-amd64/archive}
     image: cfm-minio:local
     container_name: cfm-minio
     restart: unless-stopped
+    logging: *default-logging
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-cfm}
@@ -56,8 +73,16 @@ services:
     build:
       context: ../server
       dockerfile: Dockerfile
+      args:
+        # 没单独指定时跟随 IMAGE_PREFIX，省得只加速了一半。
+        MAVEN_IMAGE: ${MAVEN_IMAGE:-${IMAGE_PREFIX:-}maven:3.9.9-eclipse-temurin-17}
+        JRE_IMAGE: ${JRE_IMAGE:-${IMAGE_PREFIX:-}eclipse-temurin:17-jre-alpine}
+    # 显式命名，和 hs-api / shop-api / cfm-minio:local 保持同一风格；
+    # 不写的话 compose 会按目录名生成 deploy-api。
+    image: cfm-api:local
     container_name: cfm-api
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       postgres:
         condition: service_healthy
