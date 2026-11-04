@@ -11,3 +11,6 @@ deploy/uploads/
 miniprogram/node_modules/
 miniprogram/miniprogram_npm/
 miniprogram/project.private.config.json
+
+# 造数据用的脚本 / SQL / AI 图片，只在本机用，不入库
+seed-data/

@@ -4,6 +4,7 @@ const { syncCartCount, qtyMap, lastCart, setQty } = require("../../utils/cartSyn
 const { listUnitLine } = require("../../utils/productUnitLine");
 const { openProduct } = require("../../utils/productOpen");
 const { qtyBounds, normalizeCartQty } = require("../../utils/productQty");
+const { syncTabBar } = require("../../utils/tabbar");
 
 function decorate(products, qtys) {
   return (products || []).map((p) => {
@@ -61,6 +62,7 @@ Page({
     });
   },
   async onShow() {
+    syncTabBar(this, "category");
     // 从首页点某个分类进来时，switchTab 不能带参数，从 globalData 取
     const app = getApp();
     const pending = app.globalData && app.globalData.pendingCategoryId;

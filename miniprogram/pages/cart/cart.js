@@ -3,6 +3,7 @@ const copy = require("../../utils/copy");
 const { fenToYuan } = require("../../utils/money");
 const { syncCartCount, lastCart, setQty } = require("../../utils/cartSync");
 const { goTab } = require("../../utils/nav");
+const { syncTabBar } = require("../../utils/tabbar");
 
 /** 价格后后缀：份 · 约 10 枚 / 斤 · 以实际重量为准 */
 function priceHint(item) {
@@ -50,6 +51,7 @@ Page({
     if (snap) this.setData({ cart: decorate(snap) });
   },
   onShow() {
+    syncTabBar(this, "cart");
     this.refresh();
   },
   async refresh() {

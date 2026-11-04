@@ -4,6 +4,7 @@ const { setUser, getUser } = require("../../utils/request");
 const { uploadImage, absUrl } = require("../../utils/upload");
 const { fenToYuan } = require("../../utils/money");
 const { memberCodeEntry } = require("../../utils/memberCodeEntry");
+const { syncTabBar } = require("../../utils/tabbar");
 
 function greetName(name) {
   const hour = new Date().getHours();
@@ -45,6 +46,7 @@ Page({
     });
   },
   async onShow() {
+    syncTabBar(this, "profile");
     try {
       const [user, store, points, balance] = await Promise.all([
         api.me(),

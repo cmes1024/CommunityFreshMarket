@@ -1,1 +1,1 @@
-<TabBar current="{{activeKey}}" />
+<TabBar id="tabbar" current="{{activeKey}}" />

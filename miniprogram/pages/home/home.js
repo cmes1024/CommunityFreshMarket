@@ -6,6 +6,7 @@ const { listUnitLine } = require("../../utils/productUnitLine");
 const { openProduct } = require("../../utils/productOpen");
 const { qtyBounds, normalizeCartQty } = require("../../utils/productQty");
 const { goTab } = require("../../utils/nav");
+const { syncTabBar } = require("../../utils/tabbar");
 const { storeDisplayName } = copy;
 
 function heroImagesOf(store) {
@@ -97,6 +98,7 @@ Page({
     this.setData(buildHomeView(store, categories, products, slots, lastCart()));
   },
   onShow() {
+    syncTabBar(this, "home");
     this.load();
   },
   async load() {
