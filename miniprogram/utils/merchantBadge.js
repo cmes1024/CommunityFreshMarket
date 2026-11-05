@@ -54,15 +54,30 @@ function set(part) {
 }
 
 /** 拉一次站内信 + 冒泡数量（订单数由订单台写入，接口太重不轮询） */
-async function pull() {
-  const [bubbles, requests] = await Promise.all([
-    api.merchantCheckinsActive().catch(() => null),
-    api.merchantLivePhotoRequests().catch(() => null),
-  ]);
-  const part = {};
-  if (Array.isArray(bubbles)) part.bubble = bubbles.length;
-  if (Array.isArray(requests)) part.inbox = requests.length;
-  return set(part);
+let pulling = null;
+let lastPullAt = 0;
+const PULL_MIN_INTERVAL = 1000;
+
+function pull() {
+  // 同一时刻 TabBar 轮询、多个页面 show 会重复调 pull；复用在途请求并做短间隔去重
+  if (pulling) return pulling;
+  if (Date.now() - lastPullAt < PULL_MIN_INTERVAL) return Promise.resolve(snapshot());
+  lastPullAt = Date.now();
+  pulling = (async () => {
+    try {
+      const [bubbles, requests] = await Promise.all([
+        api.merchantCheckinsActive().catch(() => null),
+        api.merchantLivePhotoRequests().catch(() => null),
+      ]);
+      const part = {};
+      if (Array.isArray(bubbles)) part.bubble = bubbles.length;
+      if (Array.isArray(requests)) part.inbox = requests.length;
+      return set(part);
+    } finally {
+      pulling = null;
+    }
+  })();
+  return pulling;
 }
 
 function onChange(fn) {

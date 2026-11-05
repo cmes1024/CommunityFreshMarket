@@ -56,11 +56,19 @@ Page({
       app.globalData.isStoreMember = !!user.storeMember;
       app.globalData.manageStoreId = user.manageStoreId || null;
       wx.showToast({ title: copy.joinStore.ok, icon: "none" });
-      setTimeout(() => {
+      if (this._jumpTimer) clearTimeout(this._jumpTimer);
+      this._jumpTimer = setTimeout(() => {
+        this._jumpTimer = null;
         wx.reLaunch({ url: "/packageMerchant/pages/orders/orders" });
       }, 400);
     } catch (e) {
       this.setData({ joining: false });
+    }
+  },
+  onUnload() {
+    if (this._jumpTimer) {
+      clearTimeout(this._jumpTimer);
+      this._jumpTimer = null;
     }
   },
 });

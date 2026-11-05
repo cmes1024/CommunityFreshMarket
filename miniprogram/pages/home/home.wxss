@@ -392,3 +392,18 @@
   color: var(--color-primary);
   font-weight: 600;
 }
+
+/* 真机取证面板（临时） */
+.hud {
+  position: fixed;
+  left: 16rpx;
+  bottom: 220rpx;
+  z-index: 9999;
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 20rpx;
+  line-height: 1.5;
+  pointer-events: none;
+}

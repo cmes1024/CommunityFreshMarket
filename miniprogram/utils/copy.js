@@ -11,6 +11,13 @@ const copy = {
     entering: "正在进入{storeName}…",
   },
 
+  common: {
+    loading: "加载中…",
+    loadFailed: "加载失败，点此重试",
+    orderLoadFailed: "订单加载失败",
+    reload: "重新加载",
+  },
+
   home: {
     kicker: "今日营业中 · 当面收款",
     heroDesc: "预约配送或到店自提，店员备好再联系你",
@@ -125,6 +132,7 @@ const copy = {
     avatarHint: "点头像更换",
     profileSave: "保存",
     profileSaved: "已保存",
+    profileSaveFailed: "保存失败，请重试",
     nicknameRequired: "请填写昵称",
     memberHint: "店铺成员 · 可进工作台",
     guestHint: "默认身份：顾客",

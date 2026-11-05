@@ -27,13 +27,19 @@ function fulfillParts(order) {
 }
 
 Page({
-  data: { order: {}, stepList: [], fulfillLabel: "", fulfillText: "" },
+  data: { order: {}, stepList: [], fulfillLabel: "", fulfillText: "", loadError: false },
   async onLoad(query) {
     this.id = Number(query.id);
     await this.refresh();
   },
   async refresh() {
-    const order = await api.order(this.id);
+    let order;
+    try {
+      order = await api.order(this.id);
+    } catch (e) {
+      this.setData({ loadError: true });
+      return;
+    }
     const codes = steps(order.fulfillment);
     const idx = codes.indexOf(order.status);
     const cancelled = order.status === "CANCELLED";
@@ -59,6 +65,7 @@ Page({
         reached: !cancelled && i > 0 && (completed || i <= idx),
       })),
       ...fulfillParts(order),
+      loadError: false,
     });
   },
   async cancel() {

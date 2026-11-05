@@ -19,7 +19,7 @@
   </view>
   <view class="order-list {{activeTab === 'urgent' ? 'is-urgent' : ''}}">
     <view
-      class="order-card {{item.isUrgent ? 'urgent' : ''}} {{item.pulse ? 'pulse' : ''}}"
+      class="order-card {{item.isUrgent ? 'urgent' : ''}} {{item.pulse && pageVisible ? 'pulse' : ''}}"
       wx:for="{{visible}}"
       wx:key="id"
       data-id="{{item.id}}"
@@ -27,7 +27,7 @@
     >
       <view class="top">
         <text>#{{item.id}}</text>
-        <text class="chip {{item.chipWarn ? 'warn' : ''}} {{item.chipPulse ? 'pulse-chip' : ''}}">{{item.chipLabel}}</text>
+        <text class="chip {{item.chipWarn ? 'warn' : ''}} {{item.chipPulse && pageVisible ? 'pulse-chip' : ''}}">{{item.chipLabel}}</text>
       </view>
       <view class="items">{{item.itemsText}}</view>
       <view class="fulfill">{{item.fulfillText}}</view>

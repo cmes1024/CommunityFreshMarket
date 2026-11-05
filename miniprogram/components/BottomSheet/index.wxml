@@ -1,0 +1,14 @@
+<view
+  wx:if="{{mounted}}"
+  class="bs-mask {{open ? 'open' : ''}}"
+  style="z-index:{{zIndex}}"
+  bind:tap="onMaskTap"
+  catch:touchmove="noop"
+></view>
+<view
+  wx:if="{{mounted}}"
+  class="bs-panel {{open ? 'open' : ''}}"
+  style="z-index:{{zIndex + 1}};{{panelStyle}}"
+>
+  <slot></slot>
+</view>

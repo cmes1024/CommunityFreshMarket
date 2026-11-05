@@ -1,7 +1,7 @@
 const api = require("../../../utils/api");
 
 Page({
-  data: { list: [], name: "", adding: false },
+  data: { list: [], draftName: "", adding: false },
   async onShow() {
     await this.reload();
   },
@@ -9,17 +9,17 @@ Page({
     this.setData({ list: await api.merchantCategories() });
   },
   onName(e) {
-    this.setData({ name: e.detail.value });
+    this.setData({ draftName: e.detail.value });
   },
   showAdd() {
     this.setData({ adding: true });
   },
   async add() {
-    const name = (this.data.name || "").trim();
+    const name = (this.data.draftName || "").trim();
     if (!name) return;
     try {
       await api.merchantCategoryCreate({ name, enabled: true });
-      this.setData({ name: "", adding: false });
+      this.setData({ draftName: "", adding: false });
       await this.reload();
     } catch (e) {}
   },

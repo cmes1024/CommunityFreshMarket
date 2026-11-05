@@ -60,6 +60,10 @@
     "pages/launch/launch": {
       "network": "all",
       "packages": ["customer", "merchant"]
+    },
+    "pages/home/home": {
+      "network": "all",
+      "packages": ["customer", "merchant"]
     }
   },
   "window": {

@@ -98,7 +98,10 @@ Page({
     themeReady: false,
   },
   async onShow() {
-    this.setData({ copy, stickyTop: stickyTopPx() });
+    // copy 由 extend/page 在 data 初始化时注入，每次进页面再推一遍整本文案
+    // 只是白占一次桥接，这里只补真正会变的 stickyTop
+    const top = stickyTopPx();
+    if (top !== this.data.stickyTop) this.setData({ stickyTop: top });
     await this.reload();
   },
   async reload() {
@@ -312,6 +315,7 @@ Page({
     });
   },
   async saveStore() {
+    if (this.data.savingStore) return;
     const { name, contactPhone, contactNote, homeKicker, homeTitle, homeSubtitle, homeNotice, minDeliveryYuan } = this.data.store;
     const minRaw = String(minDeliveryYuan ?? "").trim();
     let minDeliveryFen = 0;
@@ -360,6 +364,7 @@ Page({
       payload.themePreset = this.data.themePreset || "PRODUCE";
       if (payload.themePreset === "CUSTOM") payload.themePrimary = this.data.themePrimary;
     }
+    this.setData({ savingStore: true });
     try {
       const store = await api.merchantUpdateStore(payload);
       const themeForm = theme.formState(store);
@@ -391,7 +396,10 @@ Page({
         ? memberCodeEntry(store)
         : codeEntry;
       wx.showToast({ title: copy.settings.saved, icon: "none" });
-    } catch (e) {}
+    } catch (e) {
+    } finally {
+      this.setData({ savingStore: false });
+    }
   },
   async addSlot() {
     const label = (this.data.slotLabel || "").trim();

@@ -13,8 +13,19 @@ function notifyCartCount(count) {
   });
 }
 
+/**
+ * 订阅上限：组件销毁没走到 detached 时也不至于无限累积。
+ * 正常一个页面一个底栏实例，页面栈上限 10 层，64 条足够；不再用 24，
+ * 否则长时间会话里会把首页底栏这种还活着的订阅当成"最老的"删掉。
+ */
+const MAX_LISTENERS = 64;
+
 function onCartCountChange(fn) {
   if (typeof fn !== "function") return () => {};
+  if (listeners.size >= MAX_LISTENERS) {
+    const oldest = listeners.values().next();
+    if (!oldest.done) listeners.delete(oldest.value);
+  }
   listeners.add(fn);
   return () => listeners.delete(fn);
 }

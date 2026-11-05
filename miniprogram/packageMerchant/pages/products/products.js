@@ -3,17 +3,24 @@ const { fenToYuan } = require("../../../utils/money");
 const { productCover } = require("../../../utils/productImages");
 const copy = require("../../../utils/copy");
 
+/** 列表页只渲染/筛选这 11 个字段；后端返回的库存、实景图等字段不进 setData */
 function mapProduct(p) {
   return {
-    ...p,
+    id: p.id,
+    categoryId: p.categoryId,
+    name: p.name,
+    specNote: p.specNote,
+    unitLabel: p.unitLabel,
     priceYuan: fenToYuan(p.priceFen),
     coverUrl: productCover(p),
+    inStock: p.inStock,
+    onShelf: p.onShelf,
+    homeRecommended: p.homeRecommended,
   };
 }
 
 Page({
   data: {
-    allList: [],
     list: [],
     cats: [],
     searchKeyword: "",
@@ -30,32 +37,45 @@ Page({
   },
   onLoad() {
     this._selected = {};
+    // 全量商品只用于本地筛选，留在实例上，不进 data，避免整份列表重复跨线程 setData
+    this._allList = [];
   },
   async onShow() {
     await this.load();
+  },
+  onHide() {
+    this.clearSearchTimer();
+  },
+  onUnload() {
+    // 搜索防抖的 280ms 定时器不能带着页面 this 活到页面销毁之后
+    this.clearSearchTimer();
+  },
+  clearSearchTimer() {
+    if (this._searchTimer) {
+      clearTimeout(this._searchTimer);
+      this._searchTimer = null;
+    }
   },
   async load() {
     const [products, cats] = await Promise.all([
       api.merchantProducts(),
       api.merchantCategories(),
     ]);
-    this.setData({
-      allList: (products || []).map(mapProduct),
-      cats: (cats || []).filter((c) => c.enabled),
-    });
+    this._allList = (products || []).map(mapProduct);
+    this.setData({ cats: (cats || []).filter((c) => c.enabled) });
     this.applyFilter();
   },
   patchLocal(updated) {
     if (!updated || !updated.id) return;
     const mapped = mapProduct(updated);
-    const allList = (this.data.allList || []).map((p) =>
+    this._allList = (this._allList || []).map((p) =>
       p.id === mapped.id ? { ...p, ...mapped } : p
     );
-    this.setData({ allList });
     this.applyFilter();
   },
   applyFilter() {
-    const { allList, searchKeyword, filterCategoryId, filterReco, filterShelf, filterStock } = this.data;
+    const { searchKeyword, filterCategoryId, filterReco, filterShelf, filterStock } = this.data;
+    const allList = this._allList || [];
     const kw = (searchKeyword || "").trim().toLowerCase();
     const selected = this._selected || {};
     const alive = {};
@@ -98,7 +118,7 @@ Page({
   onSearch(e) {
     const searchKeyword = e.detail.value || "";
     this.setData({ searchKeyword });
-    if (this._searchTimer) clearTimeout(this._searchTimer);
+    this.clearSearchTimer();
     this._searchTimer = setTimeout(() => this.applyFilter(), 280);
   },
   clearSearch() {

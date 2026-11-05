@@ -17,6 +17,8 @@ Page({
     watching: false,
     contactNote: "",
     liveRequesting: false,
+    /* 头图轮播开关：页面被盖住时停掉，避免后台继续按 3s 轮播 */
+    slideAutoplay: true,
   },
   onLoad(query) {
     this.id = Number(query.id);
@@ -24,6 +26,13 @@ Page({
     const cached = api.peekProduct(this.id);
     if (cached) this.paint(cached);
     this.load();
+  },
+  onShow() {
+    if (!this.data.slideAutoplay) this.setData({ slideAutoplay: true });
+  },
+  onHide() {
+    // 进客服、选地址等二级页时把轮播停掉，少一路后台绘制
+    if (this.data.slideAutoplay) this.setData({ slideAutoplay: false });
   },
   async load() {
     const [product, store] = await Promise.all([

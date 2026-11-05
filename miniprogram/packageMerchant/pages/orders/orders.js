@@ -59,12 +59,19 @@ Page({
     visible: [],
     emptyText: copy.merchant.urgentEmpty,
     urgentCount: 0,
+    /* 待确认订单的脉冲是 infinite 动画，盖子页面后会一直在同一渲染层重绘，
+       点击反馈因此变迟钝；页面不可见时把动画摘掉 */
+    pageVisible: true,
   },
   onLoad() {
     this.setData({ stickyTop: stickyTopPx() });
   },
   async onShow() {
+    if (!this.data.pageVisible) this.setData({ pageVisible: true });
     await this.reload();
+  },
+  onHide() {
+    if (this.data.pageVisible) this.setData({ pageVisible: false });
   },
   /** 须用户点击触发；onShow 弹订阅框不可靠，未授权则服务端无法推新单 */
   async enableNotify() {

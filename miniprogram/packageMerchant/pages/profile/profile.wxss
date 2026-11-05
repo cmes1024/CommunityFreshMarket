@@ -177,6 +177,40 @@
   opacity: 0.85;
 }
 
+/* 自写半屏弹层，替掉 page-container：
+   原生容器在真机上会拖慢页面切换，普通节点 + transform 完全够用 */
+.sheet-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 900;
+  background: rgba(19, 78, 74, 0.45);
+  opacity: 0;
+  transition: opacity 0.24s ease;
+}
+
+.sheet-mask.open {
+  opacity: 1;
+}
+
+.sheet-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 901;
+  max-height: 88vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.sheet-panel.open {
+  transform: translateY(0);
+}
+
 .invite-sheet {
   padding: 12rpx 32rpx calc(32rpx + env(safe-area-inset-bottom));
   background: var(--color-surface);

@@ -8,5 +8,7 @@
     </view>
     <view class="muted">{{item.fulfillment === 'PICKUP' ? '自提' : '配送'}} · {{item.timeText}}</view>
   </view>
-  <view wx:if="{{!list.length}}" class="empty">暂无订单</view>
+  <view wx:if="{{!list.length && loading}}" class="empty">{{copy.common.loading}}</view>
+  <view wx:elif="{{!list.length && loadError}}" class="empty" bind:tap="reload">{{copy.common.loadFailed}}</view>
+  <view wx:elif="{{!list.length}}" class="empty">暂无订单</view>
 </view>

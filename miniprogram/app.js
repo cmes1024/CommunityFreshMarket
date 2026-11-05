@@ -18,6 +18,15 @@ App({
     this.loginPromise = auth.ensureLogin()
       .then((user) => {
         api.store().catch((err) => console.error("store theme", err));
+        // launch 页最多等登录 600ms 就先进首页了：如果登录晚到、身份是店家，
+        // 且用户还停在首页第一层，这里把它送去商家工作台
+        if (user && this.globalData.isStoreMember) {
+          const pages = getCurrentPages() || [];
+          const top = pages[pages.length - 1];
+          if (pages.length === 1 && top && top.route === "pages/home/home") {
+            wx.reLaunch({ url: "/packageMerchant/pages/orders/orders" });
+          }
+        }
         return user;
       })
       .catch((err) => {

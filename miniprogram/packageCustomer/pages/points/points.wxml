@@ -27,16 +27,7 @@
   </view>
 </view>
 
-<page-container
-  show="{{!!sheet}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: auto; max-height: 80vh;"
-  bind:clickoverlay="closeSheet"
-  bind:afterleave="closeSheet"
->
+<BottomSheet show="{{!!sheet}}" bind:close="closeSheet" panelStyle="max-height:80vh">
   <view class="points-sheet" catch:tap="noop">
     <view class="grab"></view>
     <view class="sheet-head">
@@ -70,4 +61,4 @@
       <view wx:if="{{!redeems.length}}" class="empty muted">{{copy.points.emptyRedeem}}</view>
     </view>
   </view>
-</page-container>
+</BottomSheet>

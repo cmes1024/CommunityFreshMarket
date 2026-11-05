@@ -172,9 +172,10 @@
   animation: pulse-chip 1.2s ease infinite;
 }
 
+/* 用 opacity 闪，别用 filter: brightness —— filter 动画每帧都要离屏合成 */
 @keyframes pulse-chip {
   50% {
-    filter: brightness(1.08);
+    opacity: 0.72;
   }
 }
 

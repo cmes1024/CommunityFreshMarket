@@ -19,7 +19,17 @@
         <view class="muted reason" wx:if="{{!item.available}}">{{item.unavailableReason}}</view>
       </view>
       <view class="side">
-        <Stepper wx:if="{{item.available}}" value="{{item.qtyNum}}" min="{{0}}" bind:change="onQty" data-id="{{item.productId}}" />
+        <view wx:if="{{item.available}}" class="stepper">
+          <view
+            wx:if="{{item.qtyNum > 0}}"
+            class="step-btn minus"
+            data-id="{{item.productId}}"
+            data-delta="{{-1}}"
+            catch:tap="stepQty"
+          >−</view>
+          <text wx:if="{{item.qtyNum > 0}}" class="val">{{item.qtyNum}}</text>
+          <view class="step-btn plus" data-id="{{item.productId}}" data-delta="{{1}}" catch:tap="stepQty">+</view>
+        </view>
         <view class="remove" data-id="{{item.productId}}" bind:tap="remove">{{copy.cart.remove}}</view>
       </view>
     </view>

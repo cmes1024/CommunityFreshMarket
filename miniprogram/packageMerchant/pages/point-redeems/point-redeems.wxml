@@ -39,16 +39,7 @@
 
 </view>
 
-<page-container
-  show="{{!!sheet}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: 72vh;"
-  bind:clickoverlay="closeSheet"
-  bind:afterleave="closeSheet"
->
+<BottomSheet show="{{!!sheet}}" bind:close="closeSheet" panelStyle="height:72vh">
   <view wx:if="{{sheet === 'picker'}}" class="picker-sheet" catch:tap="noop">
     <view class="grab"></view>
     <view class="sheet-head">
@@ -94,4 +85,4 @@
       <view wx:if="{{!list.length}}" class="empty muted">{{copy.merchantPointRedeem.empty}}</view>
     </scroll-view>
   </view>
-</page-container>
+</BottomSheet>

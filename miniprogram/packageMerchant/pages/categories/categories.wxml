@@ -21,7 +21,7 @@
     <input
       class="field-input"
       placeholder="{{copy.merchant.catNamePlaceholder}}"
-      value="{{name}}"
+      value="{{draftName}}"
       bindinput="onName"
       focus="{{true}}"
     />

@@ -1,5 +1,10 @@
 <page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{displayStoreName}}" back="{{false}}" brand="{{true}}" alignContent="left" />
+<view wx:if="{{hud}}" class="hud">
+  <view>setData {{hud.setDataPerSec}}/s</view>
+  <view>请求 {{hud.reqPerSec}}/s</view>
+  <view>栈 {{hud.stack}} 层 · keys≤{{hud.maxKeys}}</view>
+</view>
 <view class="page-body home">
   <view class="hero {{heroImages.length ? 'has-img' : ''}}">
     <image
@@ -13,7 +18,7 @@
       wx:if="{{heroImages.length > 1}}"
       class="hero-swiper"
       style="width: 100%; height: 360rpx;"
-      autoplay="{{true}}"
+      autoplay="{{heroAutoplay}}"
       interval="{{2500}}"
       circular="{{true}}"
       indicator-dots="{{true}}"
@@ -35,7 +40,10 @@
   <view class="notice" wx:if="{{homeNotice}}">
     <text class="notice-label">公告</text>
     <view class="notice-window">
-      <view class="notice-track" style="animation-duration: {{noticeDurationMs}}ms">
+      <view
+        class="notice-track"
+        style="animation-duration: {{noticeDurationMs}}ms;animation-play-state: {{noticeRunning ? 'running' : 'paused'}}"
+      >
         <view class="notice-item">
           <text class="notice-item-text">{{homeNotice}}</text>
         </view>
@@ -96,17 +104,22 @@
           </view>
         </view>
         <view wx:if="{{item.inStock}}" class="add-wrap" catch:tap="noop">
-          <Stepper
-            value="{{item.qty}}"
-            min="{{0}}"
-            max="{{item.qtyMax}}"
-            step="{{item.qty > 0 ? 1 : item.qtyMinAdd}}"
-            size="{{homeProductCols === 3 ? 'sm' : 'md'}}"
-            bind:change="onQty"
-            data-id="{{item.id}}"
-            data-min="{{item.qtyMinAdd}}"
-            data-max="{{item.qtyMax}}"
-          />
+          <view class="stepper {{homeProductCols === 3 ? 'sm' : ''}}">
+            <view
+              wx:if="{{item.qty > 0}}"
+              class="step-btn minus"
+              data-id="{{item.id}}"
+              data-delta="{{-1}}"
+              catch:tap="stepQty"
+            >−</view>
+            <text wx:if="{{item.qty > 0}}" class="val">{{item.qty}}</text>
+            <view
+              class="step-btn plus {{item.qty >= item.qtyMax ? 'off' : ''}}"
+              data-id="{{item.id}}"
+              data-delta="{{1}}"
+              catch:tap="stepQty"
+            >+</view>
+          </view>
         </view>
       </view>
     </view>
@@ -117,6 +130,7 @@
   </view>
 </view>
 <ProductSheet
+  id="productSheet"
   show="{{sheetShow}}"
   productId="{{sheetProductId}}"
   preview="{{sheetPreview}}"

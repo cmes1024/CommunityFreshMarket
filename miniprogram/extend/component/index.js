@@ -1,35 +1,39 @@
-const componentBehavior = require("../behaviors/componentBehavior");
-const { getMenuButtonInfo, onMenuButtonInfoChange, offMenuButtonInfoChange } = require("../functions/menuButton");
+const hud = require("../../utils/hud");
+
 const componentExtend = Component => {
   return object => {
-    // 优先级!!!!!!
-    // object > page > behaviors
-
-    if(object.behaviors){
-      object.behaviors.push(componentBehavior)
-    }else {
-      object.behaviors = [componentBehavior];
-    }
+    // 模板自带的那套 behaviors 已删除：它们只有空 properties/data 和几个无人
+    // 调用的方法（getTraitNames / registerToRouter / agreement_yes …），
+    // 却要让每个组件实例都合并一遍。列表里一屏几十个实例，纯属白付。
 
     if (!object.data) {
       object.data = {};
     }
 
-    // 列表里成百上千个实例的轻组件（如 Stepper）可以声明 skipSystemData，
-    // 不注入窗口 / 设备信息，省掉每个实例的初始 data 与跨线程传输
-    const skipSystemData = object.skipSystemData === true;
+    // 以前这里给每个组件实例注入 menuPositionInfo / windowInfo / deviceInfo /
+    // systemSetting（4 次同步原生调用 + 一份大对象）。实际只有 Header 用，
+    // 而 Header 自己算胶囊位置；Stepper 这类列表里成百个的组件又声明了
+    // skipSystemData。商品列表一屏几十个 Stepper，注入一次就是几十次同步调用，
+    // 现在整段去掉，组件需要什么自己取。
     delete object.skipSystemData;
 
-    if (!skipSystemData) {
-      const menuPositionInfo = getMenuButtonInfo()
-      object.data['menuPositionInfo'] = menuPositionInfo
-      // 拆分为三个独立接口，避免一次拉取全部系统信息
-      const windowInfo = wx.getWindowInfo?.() || {}
-      const deviceInfo = wx.getDeviceInfo?.() || {}
-      const systemSetting = wx.getSystemSetting?.() || {}
-      object.data['windowInfo'] = windowInfo
-      object.data['deviceInfo'] = deviceInfo
-      object.data['systemSetting'] = systemSetting
+    if (object.lifetimes && typeof object.lifetimes.attached === "function") {
+      const origAttached = object.lifetimes.attached;
+      object.lifetimes.attached = function () {
+        hud.install(this);
+        return origAttached.apply(this, arguments);
+      };
+    } else if (typeof object.attached === "function") {
+      const origAttached = object.attached;
+      object.attached = function () {
+        hud.install(this);
+        return origAttached.apply(this, arguments);
+      };
+    } else {
+      object.lifetimes = object.lifetimes || {};
+      object.lifetimes.attached = function () {
+        hud.install(this);
+      };
     }
 
     // 挂载登录结果函数到pageRouter上， 登录组件登录结果会触发改函数

@@ -30,13 +30,20 @@ Page({
     itemsText: "",
     fulfillText: "",
     contactText: "",
+    loadError: false,
   },
   async onLoad(query) {
     this.id = Number(query.id);
     await this.refresh();
   },
   async refresh() {
-    const order = await api.merchantOrder(this.id);
+    let order;
+    try {
+      order = await api.merchantOrder(this.id);
+    } catch (e) {
+      this.setData({ loadError: true });
+      return;
+    }
     const codes = steps(order.fulfillment);
     const idx = codes.indexOf(order.status);
     const arrived = !!order.customerArrivedAt;
@@ -66,6 +73,7 @@ Page({
       itemsText: itemsLine(order.items),
       fulfillText: fulfillLine(order),
       contactText: contactLine(order),
+      loadError: false,
     });
   },
   async advance() {

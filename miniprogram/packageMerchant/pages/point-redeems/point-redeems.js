@@ -16,7 +16,6 @@ Page({
   data: {
     list: [],
     items: [],
-    products: [],
     filtered: [],
     productId: 0,
     productName: "",
@@ -24,6 +23,10 @@ Page({
     cost: "",
     sheet: "",
     keyword: "",
+  },
+  onLoad() {
+    // 商品选择器只用 id/name；全量列表留在实例上，避免重复跨线程 setData
+    this._products = [];
   },
   async onShow() {
     await this.reload();
@@ -35,7 +38,9 @@ Page({
         api.merchantPointItems(),
         api.merchantProducts(),
       ]);
-      const shelf = (products || []).filter((p) => p.onShelf !== false);
+      this._products = (products || [])
+        .filter((p) => p.onShelf !== false)
+        .map((p) => ({ id: p.id, name: p.name }));
       this.setData({
         list: (list || []).map((r) => {
           const nick = r.nickname && String(r.nickname).trim();
@@ -46,8 +51,7 @@ Page({
           };
         }),
         items: items || [],
-        products: shelf,
-        filtered: matchProducts(shelf, this.data.keyword),
+        filtered: matchProducts(this._products, this.data.keyword),
       });
     } catch (e) {}
   },
@@ -55,7 +59,7 @@ Page({
     this.setData({
       sheet: "picker",
       keyword: "",
-      filtered: this.data.products,
+      filtered: this._products || [],
     });
   },
   openPending() {
@@ -70,15 +74,15 @@ Page({
     const keyword = e.detail.value || "";
     this.setData({
       keyword,
-      filtered: matchProducts(this.data.products, keyword),
+      filtered: matchProducts(this._products, keyword),
     });
   },
   clearKeyword() {
-    this.setData({ keyword: "", filtered: this.data.products });
+    this.setData({ keyword: "", filtered: this._products || [] });
   },
   selectProduct(e) {
     const id = Number(e.currentTarget.dataset.id) || 0;
-    const product = (this.data.products || []).find((p) => p.id === id);
+    const product = (this._products || []).find((p) => p.id === id);
     this.setData({
       productId: id,
       productName: product ? product.name : "",

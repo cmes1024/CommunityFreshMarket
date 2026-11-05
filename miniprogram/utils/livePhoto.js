@@ -4,7 +4,8 @@ const { productImages } = require("./productImages");
 function formatTaken(iso) {
   if (!iso) return "";
   const raw = String(iso).replace("T", " ");
-  const d = new Date(raw.replace(/-/g, "/"));
+  // iOS 的 Date 解析不了带毫秒的 "yyyy/MM/dd HH:mm:ss.SSS"，截到秒再解析
+  const d = new Date(raw.replace(/-/g, "/").replace(/\.\d+/, ""));
   if (Number.isNaN(d.getTime())) return raw.slice(0, 16);
   const p = (n) => (n < 10 ? `0${n}` : String(n));
   const time = `${p(d.getHours())}:${p(d.getMinutes())}`;

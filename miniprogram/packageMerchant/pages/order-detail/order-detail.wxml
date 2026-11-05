@@ -1,6 +1,10 @@
 <page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.orderDetail}}" back="{{true}}" />
-<view class="page-body no-tab">
+<view wx:if="{{loadError}}" class="page-body no-tab">
+  <view class="empty">{{copy.common.orderLoadFailed}}</view>
+  <button class="btn btn-cta" bind:tap="refresh">{{copy.common.reload}}</button>
+</view>
+<view class="page-body no-tab" hidden="{{loadError}}">
   <view class="status-board">
     <text class="board-title">#{{order.id}} · {{order.statusLabel}}</text>
     <text class="chip pulse-chip" wx:if="{{order.customerArrivedAt}}">{{copy.merchant.arrivedChip}}</text>

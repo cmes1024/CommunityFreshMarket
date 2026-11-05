@@ -7,5 +7,5 @@
     <input placeholder="楼栋" value="{{form.building}}" bindinput="onField" data-k="building" />
     <input placeholder="室号" value="{{form.room}}" bindinput="onField" data-k="room" />
   </view>
-  <button class="btn btn-cta" bind:tap="save">保存</button>
+  <button class="btn btn-cta" disabled="{{saving}}" loading="{{saving}}" bind:tap="save">保存</button>
 </view>

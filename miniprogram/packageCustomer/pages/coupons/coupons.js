@@ -10,11 +10,14 @@ Page({
     claimList: [],
     mineList: [],
     historyList: [],
+    loading: true,
+    loadError: false,
   },
   async onShow() {
     await this.reload();
   },
   async reload() {
+    this.setData({ loadError: false });
     try {
       const [claimList, mineList] = await Promise.all([api.coupons(), api.couponsMine()]);
       const mine = (mineList || []).map((c) => this.mapMine(c));
@@ -28,8 +31,11 @@ Page({
         claimList: (claimList || []).map((c) => this.mapCoupon(c, mineCount[c.id] || 0)),
         mineList: available.concat(inUse),
         historyList: mine.filter((c) => c.status !== "UNUSED" && c.status !== "RESERVED"),
+        loading: false,
       });
-    } catch (e) {}
+    } catch (e) {
+      this.setData({ loading: false, loadError: true });
+    }
   },
   mapCoupon(c, mineCount) {
     const faceYuan = fenToYuan(c.faceFen);

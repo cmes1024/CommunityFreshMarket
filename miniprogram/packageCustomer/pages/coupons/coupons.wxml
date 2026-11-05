@@ -22,7 +22,9 @@
       >{{item.actionText}}</button>
       <view wx:else class="coupon-state {{item.state}}">{{item.actionText}}</view>
     </view>
-    <view wx:if="{{!claimList.length}}" class="empty muted">{{copy.coupons.emptyClaim}}</view>
+    <view wx:if="{{!claimList.length && loading}}" class="empty muted">{{copy.common.loading}}</view>
+    <view wx:elif="{{!claimList.length && loadError}}" class="empty muted" bind:tap="reload">{{copy.common.loadFailed}}</view>
+    <view wx:elif="{{!claimList.length}}" class="empty muted">{{copy.coupons.emptyClaim}}</view>
   </block>
 
   <block wx:else>
@@ -33,20 +35,13 @@
       </view>
       <view wx:if="{{item.inUse}}" class="coupon-state inuse">{{copy.coupons.statusInUse}}</view>
     </view>
-    <view wx:if="{{!mineList.length}}" class="empty muted">{{copy.coupons.emptyMine}}</view>
+    <view wx:if="{{!mineList.length && loading}}" class="empty muted">{{copy.common.loading}}</view>
+    <view wx:elif="{{!mineList.length && loadError}}" class="empty muted" bind:tap="reload">{{copy.common.loadFailed}}</view>
+    <view wx:elif="{{!mineList.length}}" class="empty muted">{{copy.coupons.emptyMine}}</view>
   </block>
 </view>
 
-<page-container
-  show="{{historySheet}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: auto; max-height: 80vh;"
-  bind:clickoverlay="closeHistory"
-  bind:afterleave="closeHistory"
->
+<BottomSheet show="{{historySheet}}" bind:close="closeHistory" panelStyle="max-height:80vh">
   <view class="history-sheet" catch:tap="noop">
     <view class="grab"></view>
     <view class="sheet-head">
@@ -64,4 +59,4 @@
       <view wx:if="{{!historyList.length}}" class="empty muted">{{copy.coupons.emptyHistory}}</view>
     </view>
   </view>
-</page-container>
+</BottomSheet>

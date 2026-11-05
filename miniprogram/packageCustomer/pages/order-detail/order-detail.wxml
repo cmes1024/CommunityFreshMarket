@@ -1,6 +1,10 @@
 <page-meta page-style="{{themePageStyle}}" background-color="{{themeBackground}}" />
 <Header pageName="{{copy.titles.orderDetail}}" back="{{true}}" />
-<view class="page-body no-tab">
+<view wx:if="{{loadError}}" class="page-body no-tab">
+  <view class="empty">{{copy.common.orderLoadFailed}}</view>
+  <button class="btn btn-cta" bind:tap="refresh">{{copy.common.reload}}</button>
+</view>
+<view class="page-body no-tab" hidden="{{loadError}}">
   <view class="card status-card">
     <view class="status {{order.status === 'CANCELLED' ? 'cancelled' : ''}}">{{order.statusLabel}}</view>
     <view class="h-steps" wx:if="{{order.status !== 'CANCELLED' && stepList.length}}">

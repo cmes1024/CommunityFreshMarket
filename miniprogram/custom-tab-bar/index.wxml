@@ -1,1 +1,1 @@
-<TabBar id="tabbar" current="{{activeKey}}" />
+<TabBar wx:if="{{showBar}}" id="tabbar" current="{{activeKey}}" />

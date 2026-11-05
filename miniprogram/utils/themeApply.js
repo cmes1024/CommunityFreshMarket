@@ -1,7 +1,8 @@
 const theme = require("./theme");
 
 const STORAGE_KEY = "cfm_theme";
-const listeners = [];
+/** 用 Set 而不是数组：同一个回调重复订阅不会叠加 */
+const listeners = new Set();
 let paintedStyle = "";
 
 function readCache() {
@@ -35,18 +36,31 @@ function fromPalette(palette) {
 
 function emit(pageStyle) {
   if (pageStyle) paintedStyle = pageStyle;
-  listeners.slice().forEach((fn) => {
+  Array.from(listeners).forEach((fn) => {
     try {
       fn(paintedStyle);
-    } catch (e) {}
+    } catch (e) {
+      // 组件销毁后回调可能抛错，但解绑本来就该走 detached；
+      // 在这里删会把"还活着的底栏"永久摘掉，导致主题不再更新
+    }
   });
 }
 
+/**
+ * 订阅上限：万一某个组件销毁时没走到 detached，也不会无限累积拖慢 emit。
+ * 正常情况下每条订阅都对应一个页面里的底栏实例（页面栈上限 10 层），
+ * 64 条只在异常时才会碰到，避免把首页这类还活着的订阅误删。
+ */
+const MAX_LISTENERS = 64;
+
 function subscribe(fn) {
-  listeners.push(fn);
+  if (listeners.size >= MAX_LISTENERS) {
+    const oldest = listeners.values().next();
+    if (!oldest.done) listeners.delete(oldest.value);
+  }
+  listeners.add(fn);
   return function unsubscribe() {
-    const i = listeners.indexOf(fn);
-    if (i >= 0) listeners.splice(i, 1);
+    listeners.delete(fn);
   };
 }
 

@@ -5,6 +5,8 @@
     <view>{{item.community}} {{item.building}} {{item.room}}</view>
     <view class="muted">{{item.phone}} {{item.isDefault ? '· 默认' : ''}}</view>
   </view>
-  <view wx:if="{{!list.length}}" class="empty">还没有地址</view>
+  <view wx:if="{{!list.length && loading}}" class="empty">{{copy.common.loading}}</view>
+  <view wx:elif="{{!list.length && loadError}}" class="empty" bind:tap="reload">{{copy.common.loadFailed}}</view>
+  <view wx:elif="{{!list.length}}" class="empty">还没有地址</view>
   <button class="btn btn-cta" bind:tap="add">新增地址</button>
 </view>

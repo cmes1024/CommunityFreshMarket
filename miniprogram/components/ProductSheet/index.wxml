@@ -1,13 +1,4 @@
-<page-container
-  show="{{show}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: 78%;"
-  bind:clickoverlay="close"
-  bind:afterleave="onAfterLeave"
->
+<BottomSheet id="sheet" show="{{show}}" bind:close="close" panelStyle="height:78%">
   <view class="sheet" catch:tap="noop">
     <view class="grab"></view>
     <block wx:if="{{product}}">
@@ -70,4 +61,4 @@
     </block>
     <view wx:else class="loading">加载中…</view>
   </view>
-</page-container>
+</BottomSheet>

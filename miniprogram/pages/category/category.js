@@ -83,7 +83,19 @@ Page({
       (has(this.data.activeId) && this.data.activeId) ||
       (list[0] && list[0].id) ||
       0;
-    this.setData({ categories: list, store, activeId });
+    // 切回分类 tab 时 categories / store 多半还是缓存里那一份（引用不变）：
+    // store 里带着头图、主题等一大坨，每次全量推一遍就是白占桥接
+    const patch = {};
+    if (this._catsRef !== categories) {
+      this._catsRef = categories;
+      patch.categories = list;
+    }
+    if (this._storeRef !== store) {
+      this._storeRef = store;
+      patch.store = store;
+    }
+    if (this.data.activeId !== activeId) patch.activeId = activeId;
+    if (Object.keys(patch).length) this.setData(patch);
     await this.loadProducts(activeId);
   },
   async loadProducts(categoryId) {
@@ -149,6 +161,23 @@ Page({
   },
   goCheckout() {
     wx.navigateTo({ url: "/packageCustomer/pages/checkout/checkout" });
+  },
+  /** 列表里的内联加减：不再为每行建一个 Stepper 组件实例 */
+  stepQty(e) {
+    const ds = e.currentTarget.dataset;
+    const id = ds.id;
+    const delta = Number(ds.delta) || 1;
+    const item = (this.data.products || []).find((p) => p.id === id);
+    if (!item) return;
+    const minAdd = Number(item.qtyMinAdd) || 1;
+    const max = Number(item.qtyMax) || 999;
+    const step = item.qty > 0 ? 1 : minAdd;
+    const next = Math.max(0, Math.min(max, Number((item.qty + delta * step).toFixed(2))));
+    if (next === item.qty) return;
+    this.onQty({
+      currentTarget: { dataset: { id, min: minAdd, max } },
+      detail: { value: next },
+    });
   },
   async onQty(e) {
     const id = e.currentTarget.dataset.id;

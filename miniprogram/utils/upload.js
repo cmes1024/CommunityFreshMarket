@@ -6,10 +6,13 @@ const JPEG_QUALITY = 50;
 
 function compress(filePath) {
   return new Promise((resolve) => {
-    const finish = (res) => resolve((res && res.tempFilePath) || filePath);
+    // chooseAvatar 返回的是临时路径，部分真机上不能直接交给 uploadFile；
+    // getImageInfo 给出的本地 path 更可靠，压缩失败时也要用它兜底上传。
+    let src = filePath;
+    const finish = (res) => resolve((res && res.tempFilePath) || src);
     const run = (extra) => {
       wx.compressImage({
-        src: filePath,
+        src,
         quality: JPEG_QUALITY,
         ...extra,
         success: finish,
@@ -18,15 +21,16 @@ function compress(filePath) {
             run({});
             return;
           }
-          resolve(filePath);
+          resolve(src);
         },
       });
     };
     wx.getImageInfo({
       src: filePath,
       success: (info) => {
-        const w = info.width || 0;
-        const h = info.height || 0;
+        src = (info && info.path) || filePath;
+        const w = (info && info.width) || 0;
+        const h = (info && info.height) || 0;
         const extra = {};
         if (w >= h && w > MAX_EDGE) extra.compressedWidth = MAX_EDGE;
         else if (h > w && h > MAX_EDGE) extra.compressedHeight = MAX_EDGE;

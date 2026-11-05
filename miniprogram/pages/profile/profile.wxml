@@ -80,15 +80,15 @@
   </view>
 </view>
 
-<page-container
-  show="{{sheetOpen}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: auto;"
-  bind:clickoverlay="closeSheet"
-  bind:afterleave="onSheetLeave"
+<view
+  wx:if="{{sheetMounted}}"
+  class="sheet-mask {{sheetOpen ? 'open' : ''}}"
+  bind:tap="closeSheet"
+  catch:touchmove="noop"
+></view>
+<view
+  wx:if="{{sheetMounted}}"
+  class="sheet-panel {{sheetOpen ? 'open' : ''}}"
 >
   <view wx:if="{{sheet === 'profile'}}" class="contact-sheet profile-sheet" catch:tap="noop">
     <view class="grab"></view>
@@ -120,7 +120,7 @@
       bindinput="onNickInput"
       bindblur="onNickInput"
     />
-    <button class="btn btn-cta profile-save" disabled="{{profileSaving}}" bind:tap="saveProfile">
+    <button class="btn btn-cta profile-save" style="width:calc(100% - 64rpx);margin:0 32rpx" disabled="{{profileSaving}}" bind:tap="saveProfile">
       {{copy.profile.profileSave}}
     </button>
   </view>
@@ -163,5 +163,5 @@
       </view>
     </view>
   </view>
-</page-container>
+</view>
 

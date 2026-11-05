@@ -56,10 +56,35 @@ Page({
   },
   async refresh() {
     const cart = await syncCartCount();
-    if (cart) this.setData({ cart: decorate(cart) });
+    if (!cart) return;
+    // 购物篮每次 onShow 都要校准，但内容没变时不必把整份 items 重推一遍
+    const sig =
+      (cart.itemCount || 0) +
+      "|" +
+      (cart.totalFen || 0) +
+      "|" +
+      (cart.availableCount || 0) +
+      "|" +
+      (cart.items || []).map((i) => `${i.productId}:${i.qty}:${i.available ? 1 : 0}`).join(",");
+    if (sig === this._cartSig) return;
+    this._cartSig = sig;
+    this.setData({ cart: decorate(cart) });
   },
   goCategory() {
     goTab("/pages/category/category");
+  },
+  /** 内联加减：不再为每行建一个 Stepper 组件实例 */
+  stepQty(e) {
+    const ds = e.currentTarget.dataset;
+    const id = Number(ds.id);
+    const delta = Number(ds.delta) || 1;
+    const items = (this.data.cart && this.data.cart.items) || [];
+    const item = items.find((i) => i.productId === id);
+    if (!item) return;
+    const prev = Number(item.qtyNum) || 0;
+    const next = Math.max(0, prev + delta);
+    if (next === prev) return;
+    this.onQty({ currentTarget: { dataset: { id } }, detail: { value: next } });
   },
   onQty(e) {
     const id = Number(e.currentTarget.dataset.id);

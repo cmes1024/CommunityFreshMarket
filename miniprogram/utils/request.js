@@ -1,5 +1,6 @@
 const { getStorage, setStorage } = require("./storage");
 const config = require("./config");
+const hud = require("./hud");
 
 const TOKEN_KEY = "cfm_token";
 const USER_KEY = "cfm_user";
@@ -118,6 +119,7 @@ class RequestManager {
 
   basicRequest(requestDatas) {
     const { url, data, method, timeout, header, success, fail, complete } = requestDatas;
+    hud.countRequest();
     return wx.request({
       url,
       data,

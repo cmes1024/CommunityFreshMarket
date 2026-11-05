@@ -330,6 +330,6 @@
 </view>
 
 <view class="save-bar">
-  <button class="btn btn-cta save-btn" bind:tap="saveStore">{{copy.settings.saveStore}}</button>
+  <button class="btn btn-cta save-btn" disabled="{{savingStore}}" loading="{{savingStore}}" bind:tap="saveStore">{{copy.settings.saveStore}}</button>
 </view>
 <TabBar current="settings" mode="merchant" />

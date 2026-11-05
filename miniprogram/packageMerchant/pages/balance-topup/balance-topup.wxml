@@ -41,16 +41,7 @@
   </button>
 </view>
 
-<page-container
-  show="{{bubbleSheet}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: auto; max-height: 80vh;"
-  bind:clickoverlay="closeBubbles"
-  bind:afterleave="closeBubbles"
->
+<BottomSheet show="{{bubbleSheet}}" bind:close="closeBubbles" panelStyle="max-height:80vh">
   <view class="bubble-sheet" catch:tap="noop">
     <view class="grab"></view>
     <view class="sheet-head">
@@ -66,7 +57,13 @@
           data-id="{{item.id}}"
           bind:tap="pickBubble"
         >
-          <image wx:if="{{item.avatarSrc}}" class="person-avatar" src="{{item.avatarSrc}}" mode="aspectFill" />
+          <image
+            wx:if="{{item.avatarSrc}}"
+            class="person-avatar"
+            src="{{item.avatarSrc}}"
+            mode="aspectFill"
+            lazy-load
+          />
           <view wx:else class="person-fallback">{{item.initial}}</view>
           <view class="person-name">{{item.displayName}}</view>
         </view>
@@ -74,4 +71,4 @@
       <view wx:else class="empty muted">{{copy.merchantBalance.emptyBubbles}}</view>
     </scroll-view>
   </view>
-</page-container>
+</BottomSheet>

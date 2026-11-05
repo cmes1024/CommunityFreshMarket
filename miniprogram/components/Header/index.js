@@ -69,22 +69,6 @@ Component({
   data: {
     ...buildHeaderMetrics(),
     isTitleCenter: true,
-    proxyConfig: {
-      themeColor: "",
-      policy: {
-        title: "隐私协议",
-        desc: ["欢迎您使用小程序，请您仔细阅读并充分理解"],
-        list: [
-          {
-            agreementName: "《隐私政策》",
-            link: "",
-          },
-        ],
-      },
-      btns: {
-        disagreenText: "不同意并退出",
-      },
-    },
   },
 
   lifetimes: {
@@ -119,12 +103,5 @@ Component({
       const pages = getCurrentPages();
       return pages[pages.length - 1];
     },
-    agree() {
-      this.currentPage()?.agreement_yes?.();
-    },
-    disagree() {
-      this.currentPage()?.agreement_no?.();
-    },
-    agreementClick() {},
   },
 });

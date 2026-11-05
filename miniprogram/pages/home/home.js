@@ -7,6 +7,7 @@ const { openProduct } = require("../../utils/productOpen");
 const { qtyBounds, normalizeCartQty } = require("../../utils/productQty");
 const { goTab } = require("../../utils/nav");
 const { syncTabBar } = require("../../utils/tabbar");
+const hud = require("../../utils/hud");
 const { storeDisplayName } = copy;
 
 function heroImagesOf(store) {
@@ -87,6 +88,10 @@ Page({
     sheetShow: false,
     sheetProductId: 0,
     sheetPreview: null,
+    /* 头图轮播开关：页面被盖住时停掉，避免和上一个页面的轮播叠着跑 */
+    heroAutoplay: true,
+    /* 公告跑马灯：infinite 动画在页面被盖住后仍会在同一渲染层里一直跑 */
+    noticeRunning: true,
   },
   onLoad() {
     // 用上一次的数据把首帧填满，切 tab 不再先白屏
@@ -99,7 +104,41 @@ Page({
   },
   onShow() {
     syncTabBar(this, "home");
+    // 从详情页等页面返回时把头图轮播续上
+    const patch = {};
+    if (!this.data.heroAutoplay) patch.heroAutoplay = true;
+    if (!this.data.noticeRunning) patch.noticeRunning = true;
+    if (Object.keys(patch).length) this.setData(patch);
+    this.startHud();
     this.load();
+  },
+  onHide() {
+    // swiper 的 autoplay 是视图层定时器，页面被 navigateTo 盖住后不会自己停：
+    // 首页 2.5s 一轮 + 整页详情 3s 一轮同时跑，低端机上就是持续掉帧
+    const patch = {};
+    if (this.data.heroAutoplay) patch.heroAutoplay = false;
+    // 公告跑马灯同理，CSS infinite 动画盖住后也一直在同一渲染层重绘
+    if (this.data.noticeRunning) patch.noticeRunning = false;
+    if (Object.keys(patch).length) this.setData(patch);
+    this.stopHud();
+  },
+  onUnload() {
+    this.stopHud();
+  },
+  /** 真机取证面板：默认关闭（utils/hud.js 里的 ENABLED），只在首页可见时跑 */
+  startHud() {
+    if (!hud.enabled) return;
+    this.stopHud();
+    const tick = () => this.setData({ hud: hud.sample() });
+    tick();
+    this._hudTimer = setInterval(tick, 1000);
+  },
+  stopHud() {
+    if (this._hudTimer) {
+      clearInterval(this._hudTimer);
+      this._hudTimer = null;
+    }
+    if (this.data.hud) this.setData({ hud: null });
   },
   async load() {
     try {
@@ -160,6 +199,23 @@ Page({
     syncCartCount().then((next) => this.applyQty(next));
   },
   noop() {},
+  /** 卡片上的内联加减：不再为每张卡建 Stepper 组件实例 */
+  stepQty(e) {
+    const ds = e.currentTarget.dataset;
+    const id = ds.id;
+    const delta = Number(ds.delta) || 1;
+    const item = (this.data.products || []).find((p) => p.id === id);
+    if (!item) return;
+    const minAdd = Number(item.qtyMinAdd) || 1;
+    const max = Number(item.qtyMax) || 999;
+    const step = item.qty > 0 ? 1 : minAdd;
+    const next = Math.max(0, Math.min(max, Number((item.qty + delta * step).toFixed(2))));
+    if (next === item.qty) return;
+    this.onQty({
+      currentTarget: { dataset: { id, min: minAdd, max } },
+      detail: { value: next },
+    });
+  },
   async onQty(e) {
     const id = e.currentTarget.dataset.id;
     const minAdd = Number(e.currentTarget.dataset.min) || 1;

@@ -20,6 +20,17 @@ function bubbleSelected(item) {
   };
 }
 
+/**
+ * 冒泡列表每 5 秒拉一次。列表挂在弹层里，弹层没开时 setData 只是数据，
+ * 开着时每次都会把整排头像重新渲染一遍 —— 真机上就是一直卡。
+ * 内容没变就别推，签名只取影响渲染的字段。
+ */
+function bubbleSig(list) {
+  return (list || [])
+    .map((item) => `${item.id}:${item.avatarSrc || ""}:${item.displayName}`)
+    .join("|");
+}
+
 Page({
   data: {
     bubbles: [],
@@ -49,8 +60,14 @@ Page({
       clearInterval(this._timer);
       this._timer = null;
     }
+    if (this._openTimer) {
+      clearTimeout(this._openTimer);
+      this._openTimer = null;
+    }
   },
   async loadBubbles() {
+    if (this._loadingBubbles) return;
+    this._loadingBubbles = true;
     try {
       const bubbles = await api.merchantCheckinsActive();
       const list = (bubbles || []).map((item) => {
@@ -62,17 +79,26 @@ Page({
           initial: displayName.slice(0, 1),
         };
       });
+      const patch = {};
+      const sig = bubbleSig(list);
+      if (sig !== this._bubbleSig) {
+        this._bubbleSig = sig;
+        patch.bubbles = list;
+      }
       const selectedId = Number(this.data.checkinId);
       const current = selectedId ? list.find((item) => Number(item.id) === selectedId) : null;
-      const patch = { bubbles: list };
       if (selectedId && !current) {
         patch.checkinId = "";
         patch.selected = null;
-      } else if (current) {
+      } else if (current && (!this.data.selected || this.data.selected.name !== current.displayName)) {
         patch.selected = bubbleSelected(current);
       }
+      if (!Object.keys(patch).length) return;
       this.setData(patch);
-    } catch (e) {}
+    } catch (e) {
+    } finally {
+      this._loadingBubbles = false;
+    }
   },
   async scan() {
     let code = "";
@@ -100,8 +126,14 @@ Page({
     });
   },
   openBubbles() {
+    if (this.data.bubbleSheet) return;
     this.setData({ bubbleSheet: true });
-    this.loadBubbles();
+    // 滑入动画只有 260ms，这时候再推整表会和动画抢渲染，面板明显掉帧
+    if (this._openTimer) clearTimeout(this._openTimer);
+    this._openTimer = setTimeout(() => {
+      this._openTimer = null;
+      this.loadBubbles();
+    }, 320);
   },
   closeBubbles() {
     if (!this.data.bubbleSheet) return;

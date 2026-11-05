@@ -92,16 +92,7 @@
   >{{deliveryBlocked ? deliveryShortText : copy.checkout.submit}}</button>
 </view>
 
-<page-container
-  show="{{couponSheet}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: auto; max-height: 80vh;"
-  bind:clickoverlay="closeCouponSheet"
-  bind:afterleave="closeCouponSheet"
->
+<BottomSheet show="{{couponSheet}}" bind:close="closeCouponSheet" panelStyle="max-height:80vh">
   <view class="coupon-sheet" catch:tap="noop">
     <view class="grab"></view>
     <view class="sheet-head">
@@ -132,4 +123,4 @@
       </view>
     </view>
   </view>
-</page-container>
+</BottomSheet>

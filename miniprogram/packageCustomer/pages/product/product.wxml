@@ -9,7 +9,7 @@
       indicator-color="rgba(255,255,255,0.45)"
       indicator-active-color="#ffffff"
       circular="{{slides.length > 1}}"
-      autoplay="{{slides.length > 1}}"
+      autoplay="{{slideAutoplay && slides.length > 1}}"
       interval="{{3000}}"
     >
       <swiper-item wx:for="{{slides}}" wx:key="key">

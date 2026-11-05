@@ -15,16 +15,25 @@ function timeText(order) {
 }
 
 Page({
-  data: { list: [] },
+  data: { list: [], loading: true, loadError: false },
   async onShow() {
-    const list = await api.orders();
-    this.setData({
-      list: (list || []).map((o) => ({
-        ...o,
-        totalYuan: fenToYuan(o.totalAmountFen),
-        timeText: timeText(o),
-      })),
-    });
+    await this.reload();
+  },
+  async reload() {
+    this.setData({ loading: true, loadError: false });
+    try {
+      const list = await api.orders();
+      this.setData({
+        list: (list || []).map((o) => ({
+          ...o,
+          totalYuan: fenToYuan(o.totalAmountFen),
+          timeText: timeText(o),
+        })),
+        loading: false,
+      });
+    } catch (e) {
+      this.setData({ loading: false, loadError: true });
+    }
   },
   goDetail(e) {
     wx.navigateTo({

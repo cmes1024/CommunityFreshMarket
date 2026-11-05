@@ -5,6 +5,7 @@ const { uploadImage, absUrl } = require("../../utils/upload");
 const { fenToYuan } = require("../../utils/money");
 const { memberCodeEntry } = require("../../utils/memberCodeEntry");
 const { syncTabBar } = require("../../utils/tabbar");
+const { push } = require("../../utils/nav");
 
 function greetName(name) {
   const hour = new Date().getHours();
@@ -21,6 +22,9 @@ Page({
     avatarSrc: "",
     sheet: "",
     sheetOpen: false,
+    /* page-container 常驻会在真机上盖住下一个页面（点功能入口白屏），只有
+       用到时才挂载；sheetOpen 负责滑入滑出动画，sheetMounted 负责存在与否 */
+    sheetMounted: false,
     nicknameInput: "",
     draftAvatarSrc: "",
     draftAvatarFile: "",
@@ -55,26 +59,51 @@ Page({
         api.balanceMe().catch(() => ({ balanceFen: 0 })),
       ]);
       this.applyUser(user);
-      this.setData({
+      // 积分/余额/电话多半没变，只把真正变化的字段推给视图层
+      const next = {
         contactPhone: (store && store.contactPhone) || "",
         showMemberCode: memberCodeEntry(store) !== "TAB",
         pointsValue: points && points.balance != null ? points.balance : 0,
         balanceYuan: fenToYuan(balance && balance.balanceFen),
+      };
+      const patch = {};
+      Object.keys(next).forEach((k) => {
+        if (this.data[k] !== next[k]) patch[k] = next[k];
       });
+      if (Object.keys(patch).length) this.setData(patch);
     } catch (e) {}
   },
   applyUser(user) {
-    setUser(user);
+    if (!user) return;
+    const prev = this._cachedUser || getUser();
+    const changed =
+      !prev ||
+      prev.nickname !== user.nickname ||
+      prev.avatarUrl !== user.avatarUrl ||
+      !!prev.storeMember !== !!user.storeMember ||
+      prev.manageStoreId !== user.manageStoreId;
+    // setUser 走的是同步 storage 写入，切回「我的」时资料没变就别再阻塞一次
+    if (changed) setUser(user);
+    this._cachedUser = user;
     getApp().globalData.userInfo = user;
     getApp().globalData.isStoreMember = !!user.storeMember;
     getApp().globalData.manageStoreId = user.manageStoreId || null;
     const nick = (user.nickname || "").trim();
     const shown = nick || copy.profile.defaultNickname;
+    const avatar = absUrl(user.avatarUrl);
+    // 切回「我的」时用户资料通常原样返回（缓存命中，引用相同），别整块重推
+    const same =
+      this._paintedUser === user &&
+      this.data.nicknameInput === nick &&
+      this.data.avatarSrc === avatar &&
+      this.data.avatarText === shown.slice(0, 1);
+    this._paintedUser = user;
+    if (same) return;
     this.setData({
       user,
       nicknameInput: nick,
       greetName: greetName(shown),
-      avatarSrc: absUrl(user.avatarUrl),
+      avatarSrc: avatar,
       avatarText: shown.slice(0, 1),
     });
   },
@@ -83,18 +112,36 @@ Page({
     const shown = nick || copy.profile.defaultNickname;
     this.setData({
       sheet: "profile",
-      sheetOpen: true,
+      sheetMounted: true,
       nicknameInput: nick,
       draftAvatarSrc: this.data.avatarSrc,
       draftAvatarFile: "",
       draftInitial: shown.slice(0, 1),
     });
+    // 先让容器挂载，再拉起来，滑入动画才不会被吞掉
+    wx.nextTick(() => this.setData({ sheetOpen: true }));
   },
   closeSheet() {
-    if (this.data.sheetOpen) this.setData({ sheetOpen: false });
+    if (!this.data.sheetMounted) return;
+    this.setData({ sheetOpen: false });
+    if (this._closeTimer) clearTimeout(this._closeTimer);
+    // 等滑出动画播完再卸载节点，避免动画被吞掉
+    this._closeTimer = setTimeout(() => {
+      this._closeTimer = null;
+      if (!this.data.sheetOpen) this.setData({ sheet: "", sheetMounted: false });
+    }, 260);
   },
   onSheetLeave() {
-    if (this.data.sheet || this.data.sheetOpen) this.setData({ sheet: "", sheetOpen: false });
+    if (this._closeTimer) {
+      clearTimeout(this._closeTimer);
+      this._closeTimer = null;
+    }
+    if (this.data.sheet || this.data.sheetOpen || this.data.sheetMounted) {
+      this.setData({ sheet: "", sheetOpen: false, sheetMounted: false });
+    }
+  },
+  onUnload() {
+    if (this._closeTimer) clearTimeout(this._closeTimer);
   },
   onChooseAvatar(e) {
     const path = e.detail && e.detail.avatarUrl;
@@ -127,36 +174,45 @@ Page({
       }
       const user = await api.updateMe(patch);
       this.applyUser(user);
-      this.setData({ sheetOpen: false, draftAvatarFile: "" });
+      this.setData({ draftAvatarFile: "" });
+      this.closeSheet();
       wx.showToast({ title: copy.profile.profileSaved, icon: "none" });
     } catch (err) {
+      // 头像上传或提交失败时不能再静默，否则表现为「点了保存没反应」
+      const message = (err && err.message) || copy.profile.profileSaveFailed;
+      wx.showToast({ title: message, icon: "none" });
     } finally {
       this.setData({ profileSaving: false });
     }
   },
   goPoints() {
-    wx.navigateTo({ url: "/packageCustomer/pages/points/points" });
+    push("/packageCustomer/pages/points/points");
   },
   goBalance() {
-    wx.navigateTo({ url: "/packageCustomer/pages/balance/balance" });
+    push("/packageCustomer/pages/balance/balance");
   },
   goCoupons() {
-    wx.navigateTo({ url: "/packageCustomer/pages/coupons/coupons" });
+    push("/packageCustomer/pages/coupons/coupons");
   },
   goMemberCode() {
-    wx.navigateTo({ url: "/packageCustomer/pages/member-code/member-code" });
+    push("/packageCustomer/pages/member-code/member-code");
   },
   goOrders() {
-    wx.navigateTo({ url: "/packageCustomer/pages/orders/orders" });
+    push("/packageCustomer/pages/orders/orders");
   },
   goAddr() {
-    wx.navigateTo({ url: "/packageCustomer/pages/address-list/address-list" });
+    push("/packageCustomer/pages/address-list/address-list");
   },
   goMerchant() {
-    wx.reLaunch({ url: "/packageMerchant/pages/orders/orders" });
+    // 和商家端切 tab 一致：redirectTo 只替换当前页，不重建整个小程序
+    wx.redirectTo({
+      url: "/packageMerchant/pages/orders/orders",
+      fail: () => wx.reLaunch({ url: "/packageMerchant/pages/orders/orders" }),
+    });
   },
   openContactSheet() {
-    this.setData({ sheet: "contact", sheetOpen: true });
+    this.setData({ sheet: "contact", sheetMounted: true });
+    wx.nextTick(() => this.setData({ sheetOpen: true }));
   },
   callStore() {
     const phone = (this.data.contactPhone || "").trim();

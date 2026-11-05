@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "Header": "/components/Header/index"
+    "Header": "/components/Header/index",
+    "BottomSheet": "/components/BottomSheet/index"
   },
   "navigationStyle": "custom"
 }

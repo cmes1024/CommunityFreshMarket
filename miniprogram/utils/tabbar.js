@@ -20,7 +20,11 @@ function keyOfRoute(route) {
 function syncTabBar(page, key) {
   if (!key || !page || typeof page.getTabBar !== "function") return;
   const bar = page.getTabBar();
-  if (bar && typeof bar.setActive === "function") bar.setActive(key);
+  if (!bar) return;
+  // 分包页也会有一份看不见的 custom-tab-bar 实例，底栏内容默认不渲染；
+  // tab 页自己 show 时把它挂出来，分包页永远不调用这里
+  if (typeof bar.showBar === "function") bar.showBar();
+  if (typeof bar.setActive === "function") bar.setActive(key);
 }
 
 module.exports = { KEY_BY_ROUTE, keyOfRoute, syncTabBar };

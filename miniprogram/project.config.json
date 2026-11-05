@@ -23,9 +23,9 @@
       "less"
     ],
     "uglifyFileName": false,
-    "ignoreDevUnusedFiles": false,
+    "ignoreDevUnusedFiles": true,
     "compileWorklet": false,
-    "ignoreUploadUnusedFiles": false,
+    "ignoreUploadUnusedFiles": true,
     "uploadWithSourceMap": true,
     "minifyWXSS": true,
     "minifyWXML": true,

@@ -17,16 +17,7 @@
   <view wx:if="{{!list.length}}" class="empty">{{copy.merchantCouponForm.empty}}</view>
 </view>
 
-<page-container
-  show="{{sheetOpen}}"
-  round="{{true}}"
-  overlay="{{true}}"
-  position="bottom"
-  close-on-slide-down="{{true}}"
-  custom-style="height: auto; max-height: 88vh;"
-  bind:clickoverlay="closeSheet"
-  bind:afterleave="closeSheet"
->
+<BottomSheet show="{{sheetOpen}}" bind:close="closeSheet">
   <view class="sheet" catch:tap="noop">
     <view class="grab"></view>
     <view class="sheet-head">
@@ -78,4 +69,4 @@
     </picker>
     <button class="btn btn-cta add-btn" bind:tap="create">{{copy.merchantCouponForm.create}}</button>
   </view>
-</page-container>
+</BottomSheet>

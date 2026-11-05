@@ -17,6 +17,9 @@ Page({
     rolePrefix: copy.merchant.staffPrefix,
     storeName: copy.storeName,
     inviteShow: false,
+    /* page-container 常驻会在真机上盖住下一个页面（点功能入口白屏），只有
+       用到时才挂载；inviteShow 负责滑入滑出动画，inviteMounted 负责存在与否 */
+    inviteMounted: false,
     inviteCode: "",
     inviteUrl: "",
     inviteQrSrc: "",
@@ -29,59 +32,68 @@ Page({
   },
   onHide() {
     this.stopBubbleWatch();
+    this.clearCloseTimer();
   },
   onUnload() {
     this.stopBubbleWatch();
+    this.clearCloseTimer();
   },
-  startBubbleWatch() {
-    this.stopBubbleWatch();
-    this.refreshBubbles();
-    this._bubbleTimer = setInterval(() => this.refreshBubbles(), 5000);
-  },
-  stopBubbleWatch() {
-    if (this._bubbleTimer) {
-      clearInterval(this._bubbleTimer);
-      this._bubbleTimer = null;
+  clearCloseTimer() {
+    if (this._closeTimer) {
+      clearTimeout(this._closeTimer);
+      this._closeTimer = null;
     }
   },
-  async refreshBubbles() {
-    try {
-      const list = await api.merchantCheckinsActive();
-      const count = (list || []).length;
-      this.setData({ bubbleCount: count });
-      // 同步给底栏角标
-      merchantBadge.set({ bubble: count });
-    } catch (e) {}
+  /**
+   * 底栏在商家模式下已经每 15 秒拉一次冒泡 + 站内信数量，页面再起一个 5 秒
+   * 定时器，等于把同一批接口拉两遍（真机上就是持续的卡顿和延迟）。这里改成
+   * 只订阅角标数据源，页面不再自己轮询。
+   */
+  startBubbleWatch() {
+    this.stopBubbleWatch();
+    this._offBadge = merchantBadge.onChange((state) => this.applyBadge(state));
+    this.applyBadge(merchantBadge.snapshot());
+    merchantBadge.pull();
+  },
+  stopBubbleWatch() {
+    if (this._offBadge) {
+      this._offBadge();
+      this._offBadge = null;
+    }
+  },
+  applyBadge(state) {
+    const bubble = Number((state && state.bubble) || 0);
+    const inbox = Number((state && state.inbox) || 0);
+    const patch = {};
+    if (bubble !== this.data.bubbleCount) patch.bubbleCount = bubble;
+    if (inbox !== this.data.inboxCount) patch.inboxCount = inbox;
+    if (Object.keys(patch).length) this.setData(patch);
   },
   async loadProfile() {
     try {
-      const [user, store, requests] = await Promise.all([
-        api.me(),
-        api.store(),
-        api.merchantLivePhotoRequests().catch(() => []),
-      ]);
+      const [user, store] = await Promise.all([api.me(), api.store()]);
       const role = user.role === "OWNER" ? copy.merchant.ownerPrefix : copy.merchant.staffPrefix;
       const storeName = storeDisplayName(store);
       const nick = user.nickname || role;
-      const inboxCount = (requests || []).length;
       this.setData({
         user,
         rolePrefix: role,
         storeName,
         avatarText: nick.slice(0, 1),
-        inboxCount,
       });
-      // 同步给底栏角标
-      merchantBadge.set({ inbox: inboxCount });
+      // 站内信数量也交给角标统一拉，不在页面里重复请求
+      merchantBadge.pull();
     } catch (e) {}
   },
   applyInvite(res) {
     this.setData({
-      inviteShow: true,
+      inviteMounted: true,
       inviteCode: (res && res.code) || "",
       inviteUrl: (res && res.inviteUrl) || "",
       inviteQrSrc: toQrSrc(res),
     });
+    // 先让容器挂载，再拉起来，滑入动画才不会被吞掉
+    wx.nextTick(() => this.setData({ inviteShow: true }));
   },
   async onInvite() {
     try {
@@ -92,7 +104,14 @@ Page({
     }
   },
   closeInvite() {
-    if (this.data.inviteShow) this.setData({ inviteShow: false });
+    if (!this.data.inviteMounted) return;
+    this.setData({ inviteShow: false });
+    this.clearCloseTimer();
+    // 等滑出动画播完再卸载节点，避免动画被吞掉
+    this._closeTimer = setTimeout(() => {
+      this._closeTimer = null;
+      if (!this.data.inviteShow) this.setData({ inviteMounted: false });
+    }, 260);
   },
   async rotateInvite() {
     try {

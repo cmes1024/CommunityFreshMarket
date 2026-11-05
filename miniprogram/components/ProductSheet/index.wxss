@@ -176,7 +176,8 @@
   display: flex;
   align-items: center;
   gap: 16rpx;
-  padding: 16rpx 28rpx calc(16rpx + env(safe-area-inset-bottom));
+  /* 首页/分类都是自定义 tabBar 页，底栏 fixed 会盖住贴底的操作区 */
+  padding: 16rpx 28rpx calc(var(--tabbar-height, 116rpx) + env(safe-area-inset-bottom) + 16rpx);
   background: var(--color-surface);
   border-top: 1rpx solid var(--color-line, #cce5e1);
 }
