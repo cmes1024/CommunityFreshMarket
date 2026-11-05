@@ -32,25 +32,53 @@ public class UploadController {
     if (file == null || file.isEmpty()) {
       throw new BizException(ErrorCodes.BAD_REQUEST, "请选择图片");
     }
+    if (file.getSize() > 5 * 1024 * 1024L) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "图片不能超过 5MB");
+    }
+    byte[] bytes;
+    try {
+      bytes = file.getBytes();
+    } catch (IOException ex) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "上传失败，请重试");
+    }
     String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
     String ext = extension(original);
     if (!ALLOWED.contains(ext)) {
       ext = extensionFromContentType(file.getContentType());
     }
     if (!ALLOWED.contains(ext)) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "仅支持 jpg/png/webp/gif");
+      // 微信 chooseAvatar 给的是无扩展名临时文件，Content-Type 也可能不是图片类型
+      ext = extensionFromMagic(bytes);
     }
-    if (file.getSize() > 5 * 1024 * 1024L) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "图片不能超过 5MB");
+    if (!ALLOWED.contains(ext)) {
+      throw new BizException(ErrorCodes.BAD_REQUEST, "仅支持 jpg/png/webp/gif");
     }
 
     String filename = UUID.randomUUID().toString().replace("-", "") + "." + ext;
-    try {
-      imageStorage.put(filename, file.getBytes(), contentType(ext));
-    } catch (IOException ex) {
-      throw new BizException(ErrorCodes.BAD_REQUEST, "上传失败，请重试");
-    }
+    imageStorage.put(filename, bytes, contentType(ext));
     return ApiResponse.ok(Map.of("url", imageStorage.publicUrl(filename)));
+  }
+
+  /** 文件名和 MIME 都认不出时按文件头判断，兜住微信头像这类临时文件。 */
+  private static String extensionFromMagic(byte[] bytes) {
+    if (bytes == null || bytes.length < 4) {
+      return "";
+    }
+    if ((bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xD8 && (bytes[2] & 0xFF) == 0xFF) {
+      return "jpg";
+    }
+    if ((bytes[0] & 0xFF) == 0x89 && bytes[1] == 'P' && bytes[2] == 'N' && bytes[3] == 'G') {
+      return "png";
+    }
+    if (bytes[0] == 'G' && bytes[1] == 'I' && bytes[2] == 'F') {
+      return "gif";
+    }
+    if (bytes.length >= 12
+        && bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F'
+        && bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P') {
+      return "webp";
+    }
+    return "";
   }
 
   private static String contentType(String ext) {
