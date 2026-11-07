@@ -113,7 +113,9 @@ VALUES (1, <user_id>, 'OWNER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 ## 图片地址
 
-正式环境 `UPLOAD_PUBLIC_BASE=https://cfm.zfqwjs.com/communityfreshmarket`。路径就是桶名，和 HomeStocker 的 `/homestocker/` 一样。宝塔反向代理目录 `/communityfreshmarket`，目标 `http://127.0.0.1:9002`。
+正式环境 `UPLOAD_PUBLIC_BASE=https://<站点域名>/communityfreshmarket`。路径就是桶名，和 HomeStocker 的 `/homestocker/` 一样。宝塔反向代理目录 `/communityfreshmarket`，目标 `http://127.0.0.1:9002`。
+
+站点域名取 `.env` 的 `UPLOAD_PUBLIC_BASE`，`deploy.sh` 据此渲染 `deploy/nginx/site.conf.tpl` 到 `<域名>.conf`，证书默认用 `/www/server/panel/vhost/cert/<域名>.pem`。换域名时改 `.env` 并准备好证书即可，容器不用重建。
 
 开发者工具把同一项改成 `http://127.0.0.1:9002/communityfreshmarket`，图片直接打开 MinIO，不经过接口。
 

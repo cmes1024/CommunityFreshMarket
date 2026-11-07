@@ -1,4 +1,6 @@
-# 社区生鲜（cfm）站点模板。由 deploy/deploy.sh 渲染后写入宝塔 vhost 目录。
+# 社区生鲜（cfm）站点模板。由 deploy/deploy.sh 渲染后写入宝塔 vhost 目录，
+# 文件名取站点域名：${NGINX_CONF_DIR}/<域名>.conf。
+# 换域名只改 deploy/.env 的 UPLOAD_PUBLIC_BASE 与证书路径，模板不用动。
 # 占位符：__SERVER_NAME__ __HTTP_PORT__ __MINIO_API_PORT__
 #         __SSL_CERT__ __SSL_CERT_KEY__ __ACME_ROOT__
 #

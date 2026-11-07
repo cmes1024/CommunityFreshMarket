@@ -27,9 +27,10 @@ REMOTE_DIR="${CFM_REMOTE_DIR:-/www/wwwroot/cfm}"
 ENV_FILE="${CFM_ENV_FILE:-${DEPLOY_DIR}/.env}"
 
 # 只在本机推导默认值，可用 CFM_* 覆盖。
+# 证书默认路径由站点域名推导（见下方 SITE_HOST），换域名不用改脚本。
 NGINX_CONF_DIR="${CFM_NGINX_CONF_DIR:-/www/server/panel/vhost/nginx}"
-SSL_CERT="${CFM_SSL_CERT:-/www/server/panel/vhost/cert/hs-cfm.zfqwjs.com.pem}"
-SSL_CERT_KEY="${CFM_SSL_CERT_KEY:-/www/server/panel/vhost/cert/hs-cfm.zfqwjs.com.key}"
+SSL_CERT="${CFM_SSL_CERT:-}"
+SSL_CERT_KEY="${CFM_SSL_CERT_KEY:-}"
 ACME_ROOT="${CFM_ACME_ROOT:-/www/wwwroot/acme-webroot}"
 
 DRY_RUN=0
@@ -158,6 +159,10 @@ if [ -z "$HEALTH_URL" ]; then
 fi
 SITE_HOST="$(printf '%s' "$HEALTH_URL" | sed -E 's|^https?://([^/:]+).*|\1|')"
 SITE_ORIGIN="$(printf '%s' "$HEALTH_URL" | sed -E 's|(^https?://[^/]+).*|\1|')"
+# 站点配置文件与证书都跟着域名走：换域名只改 .env 的 UPLOAD_PUBLIC_BASE。
+NGINX_SITE_CONF="${NGINX_CONF_DIR}/${SITE_HOST}.conf"
+SSL_CERT="${SSL_CERT:-/www/server/panel/vhost/cert/${SITE_HOST}.pem}"
+SSL_CERT_KEY="${SSL_CERT_KEY:-/www/server/panel/vhost/cert/${SITE_HOST}.key}"
 HTTP_PORT="$(env_val HTTP_PORT)"; HTTP_PORT="${HTTP_PORT:-8088}"
 MINIO_API_PORT="$(env_val MINIO_API_PORT)"; MINIO_API_PORT="${MINIO_API_PORT:-9002}"
 
@@ -165,6 +170,8 @@ echo "部署目标   : ${HOST}:${REMOTE_DIR}"
 echo "站点地址   : ${SITE_ORIGIN}"
 echo "健康检查   : ${HEALTH_URL}"
 echo "宿主机端口 : api ${HTTP_PORT} / minio ${MINIO_API_PORT}（都只绑 127.0.0.1）"
+echo "站点配置   : ${NGINX_SITE_CONF}"
+echo "TLS 证书   : ${SSL_CERT}"
 [ "$DRY_RUN" -eq 1 ] && echo "模式       : dry-run（只打印，不改服务器）"
 
 # 先探一次连通：网络不通 / 没配免密会在这一步就说清楚，而不是 rsync 到一半失败。
@@ -172,6 +179,15 @@ echo "宿主机端口 : api ${HTTP_PORT} / minio ${MINIO_API_PORT}（都只绑 1
 echo "==> 检查 SSH 连接"
 ssh "${SSH_OPTS[@]}" -o ConnectTimeout=15 "$HOST" true \
   || die "无法 SSH 到 ${HOST}，检查网络，或先配置免密：ssh-copy-id ${HOST}"
+
+# 证书缺失时直接把话说在前面：否则会先重建 api（几分钟）才在装 nginx 时失败。
+if [ "$DRY_RUN" -eq 0 ] && [ "$SKIP_NGINX" -eq 0 ]; then
+  if ! ssh "${SSH_OPTS[@]}" "$HOST" "test -f '${SSL_CERT}' && test -f '${SSL_CERT_KEY}'"; then
+    echo "✗ ${SITE_HOST} 的证书不存在：${SSL_CERT} / ${SSL_CERT_KEY}" >&2
+    echo "  先签发证书再部署（命令见 deploy.md §9），已有证书可用 CFM_SSL_CERT/CFM_SSL_CERT_KEY 指定。" >&2
+    exit 1
+  fi
+fi
 
 if [ "$DRY_RUN" -eq 0 ]; then
   echo "==> 准备远端目录"
@@ -358,8 +374,8 @@ done
 NGINX_MANAGED=0
 
 render_and_install_nginx() {
-  local tpl="${REMOTE_DIR}/deploy/nginx/cfm.zfqwjs.com.conf.tpl"
-  local conf="${NGINX_CONF_DIR}/cfm.zfqwjs.com.conf"
+  local tpl="${REMOTE_DIR}/deploy/nginx/site.conf.tpl"
+  local conf="${NGINX_CONF_DIR}/${SITE_HOST}.conf"
   local tmp="/tmp/cfm-nginx.$$.conf"
   local bak=""
 
@@ -375,6 +391,18 @@ render_and_install_nginx() {
     echo "未找到 ${NGINX_CONF_DIR}（不是宝塔机器？），跳过 nginx。" >&2
     echo "请自行把 ${SITE_HOST} 反代到 127.0.0.1:${HTTP_PORT}、/communityfreshmarket/ 到 127.0.0.1:${MINIO_API_PORT}" >&2
     return
+  fi
+
+  # 换域名时最常见的失败是证书没申请：nginx -t 会报错回滚，但原因不好找，这里先拦住。
+  if [ ! -f "$SSL_CERT" ] || [ ! -f "$SSL_CERT_KEY" ]; then
+    echo "证书不存在：${SSL_CERT} / ${SSL_CERT_KEY}" >&2
+    echo "${SITE_HOST} 的证书还没签发。已有的证书：" >&2
+    ls -1 /www/server/panel/vhost/cert/ 2>/dev/null | sed 's/^/  /' >&2 || true
+    echo "任选一种：" >&2
+    echo "  1) acme.sh 走 HTTP-01 签发（命令见 deploy.md §9）" >&2
+    echo "  2) 已有证书时用 CFM_SSL_CERT=... CFM_SSL_CERT_KEY=... ./deploy/deploy.sh 指定" >&2
+    echo "证书就绪后重跑本脚本即可，容器部分已部署完成。" >&2
+    exit 1
   fi
 
   sed -e "s|__SERVER_NAME__|${SITE_HOST}|g" \
@@ -420,6 +448,17 @@ render_and_install_nginx() {
   fi
   "$nginx_bin" -s reload
   echo "nginx 已重载 ${conf}"
+  # 换域名时旧站点文件不会自动消失，仍占着 80/443 的一个 server 块。
+  # 只提示、不删除：那台机器上别的项目可能已经接管了旧域名。
+  # 判断依据是本项目独有的回环端口，避免误报别人的站点。
+  local stale
+  for stale in "${NGINX_CONF_DIR}"/*.conf; do
+    [ -f "$stale" ] || continue
+    [ "$stale" = "$conf" ] && continue
+    if grep -q "127\.0\.0\.1:${HTTP_PORT}\([^0-9]\|$\)" "$stale" 2>/dev/null; then
+      echo "提示：${stale} 仍反代到本项目端口 ${HTTP_PORT}（旧域名？）。确认不再使用后删除并 reload。"
+    fi
+  done
   NGINX_MANAGED=1
 }
 
@@ -438,7 +477,7 @@ if [ "$NGINX_MANAGED" = "1" ]; then
   done
   if [ "$ok" != "1" ]; then
     echo "容器已就绪，但公网 ${HEALTH_URL} 仍不可用。" >&2
-    echo "多半是反代没生效：核对 ${NGINX_CONF_DIR}/cfm.zfqwjs.com.conf 的 proxy_pass 与证书路径。" >&2
+    echo "多半是反代没生效：核对 ${NGINX_CONF_DIR}/${SITE_HOST}.conf 的 proxy_pass 与证书路径。" >&2
     exit 1
   fi
 else

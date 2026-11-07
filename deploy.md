@@ -172,7 +172,7 @@ MINIO_API_PORT=9002
 | `WX_APPID` / `WX_SECRET` | 用 `wx.login` 的 code 向微信换 openid。空着或填错时，小程序登录失败 |
 | `BOOTSTRAP_OWNER_OPENID` | 该微信号登录后成为默认店店主。空着时任何人登录都只是顾客 |
 | `DB_PASSWORD` | 本项目 Postgres 容器和 API 共用的口令。改它之后要重建数据库卷，或同时改已有库里的角色密码 |
-| `UPLOAD_PUBLIC_BASE` | 手机打开图片的 URL 前缀，与桶名相同。正式环境必须是 HTTPS，主机名与 `downloadFile` 合法域名一致。例：`https://cfm.zfqwjs.com/communityfreshmarket`。开发者工具用 `http://127.0.0.1:9002/communityfreshmarket` |
+| `UPLOAD_PUBLIC_BASE` | 手机打开图片的 URL 前缀，与桶名相同。正式环境必须是 HTTPS，主机名与 `downloadFile` 合法域名一致。例：`https://api.example.com/communityfreshmarket`。开发者工具用 `http://127.0.0.1:9002/communityfreshmarket` |
 | `INVITE_LINK_BASE` | 店员邀请二维码里的链接前缀。服务端把邀请码拼成 `{前缀}?code=邀请码` |
 | `SESSION_EXPIRE_SECONDS` | 可选，登录会话有效期，默认 604800（7 天），一般不用写进 `.env` |
 | `HTTP_PORT` / `MINIO_API_PORT` | 宿主机回环端口。接口 `8088`，MinIO `9002`。不要对公网放行 |
@@ -195,10 +195,63 @@ MINIO_API_PORT=9002
 
 ## 9. 生鲜自己的站点文件
 
-小程序体验版和正式版只接受 HTTPS，且不能写端口号。证书已经是 `hs-cfm.zfqwjs.com.pem`，主配置和原来的站点都不用动。
+小程序体验版和正式版只接受 HTTPS，且不能写端口号。换域名只要满足两件事：新域名已解析到本机、该域名已有证书。
 
-站点配置已收进仓库：`deploy/nginx/cfm.zfqwjs.com.conf.tpl`。`deploy.sh` 会渲染后写到
-`/www/server/panel/vhost/nginx/cfm.zfqwjs.com.conf`，写前备份，`nginx -t` 失败自动回滚，成功后 `nginx -s reload`。**不需要再手工粘贴。**
+站点配置已收进仓库：`deploy/nginx/site.conf.tpl`。`deploy.sh` 会把站点域名（取自 `UPLOAD_PUBLIC_BASE`）
+渲染进模板，写到 `/www/server/panel/vhost/nginx/<站点域名>.conf`，证书默认取
+`/www/server/panel/vhost/cert/<站点域名>.pem`（`.key` 同理）。写前备份，`nginx -t` 失败自动回滚，成功后 `nginx -s reload`。**不需要再手工粘贴。**
+
+换域名流程（容器不用重建）：
+
+```bash
+# 1. 域名解析（zfqwjs.com 有 * 泛解析时跳过）
+dig +short 新域名
+# 2. 在宝塔面板给该域名申请证书，或把已有证书放到
+#    /www/server/panel/vhost/cert/<新域名>.pem / .key
+# 3. 改本机 deploy/.env 的 UPLOAD_PUBLIC_BASE 与 INVITE_LINK_BASE 为新域名
+# 4. 推配置并重装站点
+./deploy/deploy.sh --push-env
+```
+
+证书用 acme.sh 走 HTTP-01 webroot（机器上 webroot 通道已就绪，见 `HuiXiang/SSL证书续签.md`）：
+
+```bash
+DOMAIN=新域名
+# 先验证 80 端口验证通道真的通（应回 ok）
+mkdir -p /www/wwwroot/acme-webroot/.well-known/acme-challenge
+echo ok > /www/wwwroot/acme-webroot/.well-known/acme-challenge/t
+curl -s http://$DOMAIN/.well-known/acme-challenge/t
+rm -f /www/wwwroot/acme-webroot/.well-known/acme-challenge/t
+```
+
+若上面没回 `ok`（新域名还没有自己的站点，nginx 落到哪个默认 server 不确定），先放一个只监听 80 的临时站点占位，签完证书后 `deploy.sh` 会用完整配置覆盖它：
+
+```bash
+DOMAIN=新域名
+CONF=/www/server/panel/vhost/nginx/$DOMAIN.conf
+cat > "$CONF" <<EOF
+server {
+    listen 80;
+    server_name $DOMAIN;
+    location ^~ /.well-known/acme-challenge/ {
+        default_type "text/plain";
+        alias /www/wwwroot/acme-webroot/.well-known/acme-challenge/;
+    }
+    location / { return 301 https://\$host\$request_uri; }
+}
+EOF
+nginx -t && nginx -s reload
+```
+
+# 签发（只写 ~/.acme.sh，不动线上证书），成功后再装
+/root/.acme.sh/acme.sh --issue --server letsencrypt -d $DOMAIN -w /www/wwwroot/acme-webroot
+/root/.acme.sh/acme.sh --install-cert -d $DOMAIN \
+  --key-file       /www/server/panel/vhost/cert/$DOMAIN.key \
+  --fullchain-file /www/server/panel/vhost/cert/$DOMAIN.pem \
+  --reloadcmd      "nginx -t && nginx -s reload"
+```
+
+注意：这台机器上 `cfm.zfqwjs.com` 已被别的项目接管，**不要删它的站点文件和 `hs-cfm.zfqwjs.com.pem`**；本项目只新增自己的 `<域名>.conf` 与 `<域名>.pem`。
 
 可用环境变量覆盖默认值：`CFM_NGINX_CONF_DIR`、`CFM_SSL_CERT`、`CFM_SSL_CERT_KEY`、`CFM_ACME_ROOT`。
 不想让脚本碰 nginx 用 `--skip-nginx`；非宝塔机器（目录不存在）会跳过并打印要手工配置的反代目标：
@@ -207,41 +260,44 @@ MINIO_API_PORT=9002
 下面这段是等价的**手工排错版本**，仅在脚本装不上或需要临时恢复时使用：
 
 ```bash
-CONF=/www/server/panel/vhost/nginx/cfm.zfqwjs.com.conf
-cp -a "$CONF" "$CONF.bak"
-cat > "$CONF" << 'EOF'
+DOMAIN=api.example.com          # 换成新域名
+API_PORT=8088                   # 与 deploy/.env 的 HTTP_PORT 一致（本项目生产为 8091）
+MINIO_PORT=9002                 # 与 MINIO_API_PORT 一致
+CONF=/www/server/panel/vhost/nginx/${DOMAIN}.conf
+[ -f "$CONF" ] && cp -a "$CONF" "$CONF.bak"
+cat > "$CONF" << EOF
 server {
     listen 80;
     listen 443 ssl;
-    server_name cfm.zfqwjs.com;
+    server_name ${DOMAIN};
     client_max_body_size 10m;
-    ssl_certificate /www/server/panel/vhost/cert/hs-cfm.zfqwjs.com.pem;
-    ssl_certificate_key /www/server/panel/vhost/cert/hs-cfm.zfqwjs.com.key;
+    ssl_certificate /www/server/panel/vhost/cert/${DOMAIN}.pem;
+    ssl_certificate_key /www/server/panel/vhost/cert/${DOMAIN}.key;
     ssl_protocols TLSv1.2 TLSv1.3;
     location ^~ /.well-known/acme-challenge/ {
         default_type "text/plain";
         alias /www/wwwroot/acme-webroot/.well-known/acme-challenge/;
     }
     location ^~ /communityfreshmarket/ {
-        proxy_pass http://127.0.0.1:9002;
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://127.0.0.1:${MINIO_PORT};
+        proxy_set_header Host \$http_host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
     location / {
-        proxy_pass http://127.0.0.1:8088;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://127.0.0.1:${API_PORT};
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 EOF
 if /www/server/nginx/sbin/nginx -t; then
   /www/server/nginx/sbin/nginx -s reload
 else
-  cp -a "$CONF.bak" "$CONF"
+  [ -f "$CONF.bak" ] && cp -a "$CONF.bak" "$CONF"
   echo "检查失败，已恢复原文件"
   exit 1
 fi
@@ -547,7 +603,7 @@ docker compose logs --tail=100 redis
 - [ ] `https://api.example.com/api/v1/health` 返回 `db: UP`
 - [ ] `8088` 和 `9002` 只监听 `127.0.0.1`，防火墙未放行。Postgres 和 Redis 没有映射到宿主机
 - [ ] 数据库密码、AppSecret 已换成随机值，且不在 Git 里。`.env` 里没有 `JWT_SECRET`
-- [ ] `deploy.sh` 已装好 `cfm.zfqwjs.com.conf`（`/` → `127.0.0.1:8088`，`/communityfreshmarket/` → `127.0.0.1:9002`，`client_max_body_size 10m`）并 reload 成功
+- [ ] `deploy.sh` 已装好 `<站点域名>.conf`（`/` → `127.0.0.1:8088`，`/communityfreshmarket/` → `127.0.0.1:9002`，`client_max_body_size 10m`）并 reload 成功
 - [ ] `WX_APPID` / `WX_SECRET` 与公众平台一致
 - [ ] `UPLOAD_PUBLIC_BASE` 是 `https://` 加本站域名再加 `/communityfreshmarket`
 - [ ] request、uploadFile、downloadFile 三个合法域名都已保存
