@@ -35,9 +35,13 @@
             </view>
           </view>
           <view class="sub">{{product.unitLine}}</view>
-          <view class="price">
+          <view wx:if="{{!showcase}}" class="price">
             ¥{{product.priceYuan}}
             <text class="small">/ {{product.unitLabel}}</text>
+          </view>
+          <view wx:if="{{showcase}}" class="info-block">
+            <view class="h4">{{copy.showcase.toStore}}</view>
+            <view class="p">{{copy.showcase.detailHint}}</view>
           </view>
           <view wx:if="{{!product.inStock}}" class="info-block warn">
             <view class="h4">{{copy.product.restockTitle}}</view>
@@ -50,8 +54,11 @@
         </view>
       </scroll-view>
       <view class="actions" wx:if="{{product.inStock}}">
-        <Stepper value="{{qty}}" min="{{qtyMin}}" max="{{qtyMax}}" bind:change="onStepper" />
-        <button class="cta" bind:tap="addCart">{{copy.product.addCart}}</button>
+        <block wx:if="{{!showcase}}">
+          <Stepper value="{{qty}}" min="{{qtyMin}}" max="{{qtyMax}}" bind:change="onStepper" />
+          <button class="cta" bind:tap="addCart">{{copy.product.addCart}}</button>
+        </block>
+        <button wx:else class="cta primary" bind:tap="openDetail">{{copy.showcase.viewDetail}}</button>
       </view>
       <view class="actions" wx:else>
         <button class="cta primary" bind:tap="watch">

@@ -113,3 +113,11 @@
 .pick-bar .full {
   width: 100%;
 }
+
+.shop-hint {
+  flex: 1;
+  padding: 24rpx 8rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  text-align: center;
+}

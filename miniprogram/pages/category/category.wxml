@@ -20,10 +20,11 @@
         <view class="meta">
           <view class="name">{{item.name}}</view>
           <view class="unit">{{item.unitLine}}</view>
-          <view class="price">¥{{item.priceYuan}}</view>
+          <view wx:if="{{!showcase}}" class="price">¥{{item.priceYuan}}</view>
+          <view wx:else class="unit">{{copy.showcase.toStore}}</view>
         </view>
       </view>
-      <view wx:if="{{item.inStock}}" class="stepper">
+      <view wx:if="{{!showcase && item.inStock}}" class="stepper">
         <view
           wx:if="{{item.qty > 0}}"
           class="step-btn minus"
@@ -39,12 +40,12 @@
           catch:tap="stepQty"
         >+</view>
       </view>
-      <view wx:else class="btn-watch" data-id="{{item.id}}" bind:tap="goDetail">{{copy.category.watchMe}}</view>
+      <view wx:elif="{{!item.inStock}}" class="btn-watch" data-id="{{item.id}}" bind:tap="goDetail">{{copy.category.watchMe}}</view>
     </view>
     <view wx:if="{{!products.length}}" class="empty">{{copy.category.empty}}</view>
   </scroll-view>
 </view>
-<view class="mini-bar" wx:if="{{cart.itemCount}}" bind:tap="goCheckout">
+<view class="mini-bar" wx:if="{{!showcase && cart.itemCount}}" bind:tap="goCheckout">
   <view>
     <text class="mini-count">{{cart.itemCount}}</text> {{copy.category.selectedSuffix}}
     <text class="price"> ¥{{cart.totalYuan}}</text>

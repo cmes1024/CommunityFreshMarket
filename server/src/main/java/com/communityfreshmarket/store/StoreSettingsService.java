@@ -119,6 +119,13 @@ public class StoreSettingsService {
       }
       store.setMemberCodeEntry(entry);
     }
+    if (request.getCustomerMode() != null) {
+      String mode = request.getCustomerMode().trim().toUpperCase();
+      if (!"FULL".equals(mode) && !"SHOWCASE".equals(mode)) {
+        throw new BizException(ErrorCodes.BAD_REQUEST, "顾客端形态仅支持完整或橱窗");
+      }
+      store.setCustomerMode(mode);
+    }
     if (request.getPointsPerYuan() != null) {
       store.setPointsPerYuan(PointsRatio.require(request.getPointsPerYuan()));
     }

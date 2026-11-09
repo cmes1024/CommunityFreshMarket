@@ -7,6 +7,7 @@ const config = require("./utils/config");
 const copy = require("./utils/copy");
 const api = require("./utils/api");
 const themeApply = require("./utils/themeApply");
+const storeMode = require("./utils/storeMode");
 
 App({
   onLaunch() {
@@ -17,7 +18,9 @@ App({
     this.globalData.request.preTreatment({ startRequest: true }, () => {});
     this.loginPromise = auth.ensureLogin()
       .then((user) => {
-        api.store().catch((err) => console.error("store theme", err));
+        api.store()
+          .then((store) => storeMode.apply(store))
+          .catch((err) => console.error("store theme", err));
         // launch 页最多等登录 600ms 就先进首页了：如果登录晚到、身份是店家，
         // 且用户还停在首页第一层，这里把它送去商家工作台
         if (user && this.globalData.isStoreMember) {
@@ -49,6 +52,8 @@ App({
     browseStoreId: 1,
     request: null,
     cartCount: 0,
+    /** 顾客端形态：false 完整版 / true 橱窗版，见 utils/storeMode */
+    showcase: false,
     merchantUrgentCount: 0,
     merchantInboxCount: 0,
     merchantBubbleCount: 0,

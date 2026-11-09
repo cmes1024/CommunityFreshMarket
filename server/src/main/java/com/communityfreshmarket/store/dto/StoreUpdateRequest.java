@@ -67,6 +67,10 @@ public class StoreUpdateRequest {
   @Size(max = 16)
   private String memberCodeEntry;
 
+  /** 顾客端形态：FULL 完整（默认）/ SHOWCASE 橱窗（仅展示，到店购买） */
+  @Size(max = 16)
+  private String customerMode;
+
   @DecimalMin("0")
   @DecimalMax("100")
   @Digits(integer = 3, fraction = 2)
@@ -202,6 +206,14 @@ public class StoreUpdateRequest {
 
   public void setMemberCodeEntry(String memberCodeEntry) {
     this.memberCodeEntry = memberCodeEntry;
+  }
+
+  public String getCustomerMode() {
+    return customerMode;
+  }
+
+  public void setCustomerMode(String customerMode) {
+    this.customerMode = customerMode;
   }
 
   public BigDecimal getPointsPerYuan() {

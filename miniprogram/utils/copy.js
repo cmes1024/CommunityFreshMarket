@@ -18,6 +18,19 @@ const copy = {
     reload: "重新加载",
   },
 
+  /** 橱窗形态（store.customerMode = SHOWCASE）：只展示商品，交易到店完成 */
+  showcase: {
+    homeNotice: "商品仅作展示，购买请到店，当面收款",
+    detailHint: "本店商品仅展示，请到店选购",
+    callStore: "电话咨询",
+    toStore: "到店购买",
+    viewDetail: "查看商品详情",
+    noPhone: "门店暂未填写电话，可点「联系门店」用微信客服",
+    contactTitle: "联系门店",
+    contactSub: "电话或微信客服",
+    profileHint: "本小程序仅展示门店商品，不收集个人资料",
+  },
+
   home: {
     kicker: "今日营业中 · 当面收款",
     heroDesc: "预约配送或到店自提，店员备好再联系你",
@@ -175,6 +188,14 @@ const copy = {
     tabSlots: "自提",
     storeSec: "门店信息",
     storeHint: "店名出现在顾客端导航左上角；购买须知有内容才出现在商品详情",
+    customerModeSec: "顾客端形态",
+    customerModeHint: "橱窗版只展示商品与门店联系方式；完整版才有价格、商品篮与下单",
+    customerModeFull: "完整版",
+    customerModeFullSub: "价格 · 商品篮 · 下单",
+    customerModeShowcase: "橱窗版",
+    customerModeShowcaseSub: "只展示 · 到店购买",
+    modeNotSaved: "服务端未更新，形态未生效",
+    saveFailed: "保存失败，请重试",
     nameLabel: "店名",
     phoneLabel: "电话",
     minDeliveryLabel: "配送起送",

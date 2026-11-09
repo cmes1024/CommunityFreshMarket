@@ -6,6 +6,7 @@ const { applyCartCount } = require("../../utils/cartSync");
 const { detailUnitLine } = require("../../utils/productUnitLine");
 const { gallerySlides } = require("../../utils/livePhoto");
 const { qtyBounds, initialDetailQty, normalizeCartQty } = require("../../utils/productQty");
+const storeMode = require("../../utils/storeMode");
 
 Component({
   properties: {
@@ -24,6 +25,7 @@ Component({
     qtyMax: 999,
     watching: false,
     contactNote: "",
+    showcase: false,
     liveRequesting: false,
     adding: false,
   },
@@ -54,6 +56,7 @@ Component({
       const bounds = qtyBounds(product, { forDetail: true });
       this.setData({
         loading: true,
+        showcase: storeMode.current(),
         product: {
           ...product,
           priceYuan: fenToYuan(product.priceFen),
@@ -104,6 +107,7 @@ Component({
           qtyMax: bounds.max,
           watching: false,
           contactNote: ((store && store.contactNote) || "").trim(),
+          showcase: store ? storeMode.apply(store) : this.data.showcase,
           liveRequesting: false,
         };
         if (!product.inStock) {
@@ -121,6 +125,14 @@ Component({
     },
     onStepper(e) {
       this.setData({ qty: e.detail.value });
+    },
+    /** 橱窗形态：预览只做展示，进详情页看完整信息与门店电话 */
+    openDetail() {
+      const p = this.data.product;
+      this.close();
+      if (p && p.id) {
+        wx.navigateTo({ url: `/packageCustomer/pages/product/product?id=${p.id}` });
+      }
     },
     async addCart() {
       const p = this.data.product;

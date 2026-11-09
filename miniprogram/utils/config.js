@@ -3,7 +3,7 @@ module.exports = {
   env: "prod",
   /**
    * 生产入口：nginx 443 → 127.0.0.1:8091，不要带端口。
-   * 本地联调时临时改回 "http://127.0.0.1:8088"，发布前记得切回来。
+   * 本地联调时临时改成 "http://127.0.0.1:8091"（本机 cfm-api），发布前记得切回来。
    */
   apiHost: "https://market.zfqwjs.com",
   defaultStoreId: 1,

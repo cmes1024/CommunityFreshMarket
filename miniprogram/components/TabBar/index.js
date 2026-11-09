@@ -5,6 +5,7 @@ const merchantBadge = require("../../utils/merchantBadge");
 const themeApply = require("../../utils/themeApply");
 const { goTab } = require("../../utils/nav");
 const { KEY_BY_ROUTE } = require("../../utils/tabbar");
+const storeMode = require("../../utils/storeMode");
 
 /** 商家端底栏角标轮询间隔：站内信 + 冒泡都是轻接口 */
 const MERCHANT_BADGE_INTERVAL = 15000;
@@ -85,8 +86,12 @@ const MERCHANT = [
 ];
 
 function customerTabs(entry) {
-  if (entry !== "TAB") return CUSTOMER;
-  return [CUSTOMER[0], CUSTOMER[1], MEMBER_CODE_TAB, CUSTOMER[2], CUSTOMER[3]];
+  // 橱窗版没有交易与会员体系：去掉商品篮，也不插会员码
+  const showcase = storeMode.current();
+  const base = showcase ? CUSTOMER.filter((t) => t.key !== "cart") : CUSTOMER;
+  if (showcase || entry !== "TAB") return base;
+  const mid = Math.ceil(base.length / 2);
+  return [...base.slice(0, mid), MEMBER_CODE_TAB, ...base.slice(mid)];
 }
 
 function buildTabs(mode, entry) {

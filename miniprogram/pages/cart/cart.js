@@ -4,6 +4,7 @@ const { fenToYuan } = require("../../utils/money");
 const { syncCartCount, lastCart, setQty } = require("../../utils/cartSync");
 const { goTab } = require("../../utils/nav");
 const { syncTabBar } = require("../../utils/tabbar");
+const storeMode = require("../../utils/storeMode");
 
 /** 价格后后缀：份 · 约 10 枚 / 斤 · 以实际重量为准 */
 function priceHint(item) {
@@ -51,6 +52,11 @@ Page({
     if (snap) this.setData({ cart: decorate(snap) });
   },
   onShow() {
+    // 橱窗形态没有商品篮：从分享或扫码直达时退回首页
+    if (storeMode.current()) {
+      goTab("/pages/home/home");
+      return;
+    }
     syncTabBar(this, "cart");
     this.refresh();
   },

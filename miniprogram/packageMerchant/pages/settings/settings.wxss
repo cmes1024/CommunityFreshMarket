@@ -567,3 +567,24 @@
   color: var(--color-muted);
   line-height: 1.4;
 }
+
+.mode-group {
+  padding: 20rpx 24rpx;
+}
+.mode-opt {
+  height: auto;
+  padding: 18rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6rpx;
+  line-height: 1.35;
+}
+.mode-name {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.mode-sub {
+  font-size: 22rpx;
+  opacity: 0.72;
+}

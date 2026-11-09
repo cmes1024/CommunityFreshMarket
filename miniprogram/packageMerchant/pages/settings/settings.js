@@ -7,6 +7,7 @@ const { yuanPlain } = require("../../../utils/money");
 const { formatRatio, parseRatio, sanitizeRatioInput } = require("../../../utils/pointsRatio");
 const theme = require("../../../utils/theme");
 const themeApply = require("../../../utils/themeApply");
+const storeMode = require("../../../utils/storeMode");
 
 function hueRatio(hue) {
   const n = Number(hue);
@@ -82,6 +83,7 @@ Page({
     homeProductCols: 2,
     productDetailMode: "SHEET",
     memberCodeEntry: "PROFILE",
+    customerMode: "FULL",
     settingsTab: "store",
     stickyTop: 88,
     phraseKind: "delivery",
@@ -114,6 +116,7 @@ Page({
       homeProductCols: normalizeCols(store.homeProductCols),
       productDetailMode: productDetailMode(store),
       memberCodeEntry: memberCodeEntry(store),
+      customerMode: storeMode.isShowcase(store) ? "SHOWCASE" : "FULL",
       deliveryRemarkPhrases: phraseList(
         store.deliveryRemarkPhrases != null ? store.deliveryRemarkPhrases : store.remarkPhrases
       ),
@@ -234,6 +237,11 @@ Page({
   onMemberCodeEntry(e) {
     this.setData({ memberCodeEntry: memberCodeEntry({ memberCodeEntry: e.currentTarget.dataset.entry }) });
   },
+  onCustomerMode(e) {
+    const mode = e.currentTarget.dataset.mode === "SHOWCASE" ? "SHOWCASE" : "FULL";
+    if (mode === this.data.customerMode) return;
+    this.setData({ customerMode: mode });
+  },
   onSettingsTab(e) {
     const tab = e.currentTarget.dataset.tab;
     if (!tab || tab === this.data.settingsTab) return;
@@ -348,6 +356,7 @@ Page({
       homeProductCols: cols,
       productDetailMode: detailMode,
       memberCodeEntry: codeEntry,
+      customerMode: this.data.customerMode === "SHOWCASE" ? "SHOWCASE" : "FULL",
       deliveryRemarkPhrases: this.data.deliveryRemarkPhrases || [],
       pickupRemarkPhrases: this.data.pickupRemarkPhrases || [],
     };
@@ -368,6 +377,8 @@ Page({
     try {
       const store = await api.merchantUpdateStore(payload);
       const themeForm = theme.formState(store);
+      // 后端还没升级时不会回这个字段：保持用户刚才的选择，并明确提示没生效
+      const hasMode = Object.prototype.hasOwnProperty.call(store, "customerMode");
       this.setData({
         store: formStore(mergeHomeFields({ ...this.data.store, ...store }, payload)),
         homeProductCols: Object.prototype.hasOwnProperty.call(store, "homeProductCols")
@@ -379,6 +390,11 @@ Page({
         memberCodeEntry: Object.prototype.hasOwnProperty.call(store, "memberCodeEntry")
           ? memberCodeEntry(store)
           : codeEntry,
+        customerMode: hasMode
+          ? storeMode.isShowcase(store)
+            ? "SHOWCASE"
+            : "FULL"
+          : this.data.customerMode,
         deliveryRemarkPhrases: Object.prototype.hasOwnProperty.call(store, "deliveryRemarkPhrases")
           ? phraseList(store.deliveryRemarkPhrases)
           : this.data.deliveryRemarkPhrases,
@@ -395,8 +411,14 @@ Page({
       getApp().globalData.memberCodeEntry = Object.prototype.hasOwnProperty.call(store, "memberCodeEntry")
         ? memberCodeEntry(store)
         : codeEntry;
-      wx.showToast({ title: copy.settings.saved, icon: "none" });
+      // 同一个进程里商家刚改完，顾客端底栏/页面下次 onShow 就按新形态走
+      if (hasMode) storeMode.apply(store);
+      wx.showToast({
+        title: hasMode ? copy.settings.saved : copy.settings.modeNotSaved,
+        icon: "none",
+      });
     } catch (e) {
+      wx.showToast({ title: (e && e.message) || copy.settings.saveFailed, icon: "none" });
     } finally {
       this.setData({ savingStore: false });
     }

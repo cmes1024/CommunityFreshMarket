@@ -10,7 +10,7 @@
       <view class="name">{{greetName}}</view>
       <view class="sub">{{user.storeMember ? copy.profile.memberHint : copy.profile.guestHint}}</view>
     </view>
-    <view class="head-stats">
+    <view class="head-stats" wx:if="{{!showcase}}">
       <view class="head-stat" hover-class="head-stat-on" bind:tap="goPoints">
         <text class="head-label">{{copy.profile.pointsShort}}</text>
         <text class="head-val">{{pointsValue}}</text>
@@ -23,14 +23,14 @@
   </view>
 
   <view class="shortcut-grid">
-    <view class="shortcut" hover-class="shortcut-on" bind:tap="goOrders">
+    <view class="shortcut" wx:if="{{!showcase}}" hover-class="shortcut-on" bind:tap="goOrders">
       <view class="mark"><image src="/images/profile-orders.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">
         <view class="shortcut-title">{{copy.profile.orders}}</view>
         <view class="shortcut-sub">{{copy.profile.ordersSub}}</view>
       </view>
     </view>
-    <view class="shortcut" hover-class="shortcut-on" bind:tap="goAddr">
+    <view class="shortcut" wx:if="{{!showcase}}" hover-class="shortcut-on" bind:tap="goAddr">
       <view class="mark mark-green"><image src="/images/profile-address.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">
         <view class="shortcut-title">{{copy.profile.addressBook}}</view>
@@ -51,14 +51,14 @@
         <view class="shortcut-sub">{{copy.profile.balanceSub}}</view>
       </view>
     </view>
-    <view class="shortcut" hover-class="shortcut-on" bind:tap="goCoupons">
+    <view class="shortcut" wx:if="{{!showcase}}" hover-class="shortcut-on" bind:tap="goCoupons">
       <view class="mark"><image src="/images/profile-coupon.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">
         <view class="shortcut-title">{{copy.profile.coupons}}</view>
         <view class="shortcut-sub">{{copy.profile.couponsSub}}</view>
       </view>
     </view>
-    <view class="shortcut" wx:if="{{showMemberCode}}" hover-class="shortcut-on" bind:tap="goMemberCode">
+    <view class="shortcut" wx:if="{{!showcase && showMemberCode}}" hover-class="shortcut-on" bind:tap="goMemberCode">
       <view class="mark mark-green"><image src="/images/profile-checkin.svg" mode="aspectFit" /></view>
       <view class="shortcut-copy">
         <view class="shortcut-title">{{copy.profile.memberCode}}</view>
@@ -73,6 +73,8 @@
       </view>
     </view>
   </view>
+
+  <view class="showcase-hint" wx:if="{{showcase}}">{{copy.showcase.profileHint}}</view>
 
   <view class="merchant-entry" wx:if="{{user.storeMember}}" hover-class="entry-on" bind:tap="goMerchant">
     <view class="me-title">{{copy.profile.merchantEntry}}</view>

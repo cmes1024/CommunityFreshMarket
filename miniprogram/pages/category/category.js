@@ -5,6 +5,7 @@ const { listUnitLine } = require("../../utils/productUnitLine");
 const { openProduct } = require("../../utils/productOpen");
 const { qtyBounds, normalizeCartQty } = require("../../utils/productQty");
 const { syncTabBar } = require("../../utils/tabbar");
+const storeMode = require("../../utils/storeMode");
 
 function decorate(products, qtys) {
   return (products || []).map((p) => {
@@ -36,6 +37,7 @@ Page({
     activeId: 0,
     cart: {},
     store: {},
+    showcase: false,
     sheetShow: false,
     sheetProductId: 0,
     sheetPreview: null,
@@ -53,9 +55,11 @@ Page({
     const products = api.peekProducts(activeId);
     if (products) this._lists[activeId] = products;
     this._renderedRef = products || null;
+    const cachedStore = api.peekStore() || {};
     this.setData({
       categories,
-      store: api.peekStore() || {},
+      store: cachedStore,
+      showcase: storeMode.isShowcase(cachedStore),
       activeId,
       products: decorate(products || [], this._qtys),
       cart: barOf(lastCart()),
@@ -95,6 +99,8 @@ Page({
       patch.store = store;
     }
     if (this.data.activeId !== activeId) patch.activeId = activeId;
+    const showcase = storeMode.apply(store);
+    if (showcase !== this.data.showcase) patch.showcase = showcase;
     if (Object.keys(patch).length) this.setData(patch);
     await this.loadProducts(activeId);
   },
@@ -112,11 +118,13 @@ Page({
         cart: barOf(snap),
       });
     }
-    // 购物篮数量后台校准，不挡列表上屏
-    syncCartCount().then((cart) => {
-      if (this.data.activeId !== categoryId) return;
-      this.applyCart(cart);
-    });
+    // 橱窗形态没有商品篮，不必再多打一次购物车接口
+    if (!this.data.showcase) {
+      syncCartCount().then((cart) => {
+        if (this.data.activeId !== categoryId) return;
+        this.applyCart(cart);
+      });
+    }
   },
   applyCart(cart) {
     if (!cart) return;

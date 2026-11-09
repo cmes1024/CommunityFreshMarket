@@ -25,6 +25,8 @@ public class StoreSummaryResponse {
   private String productDetailMode = "SHEET";
   /** PROFILE 我的（默认）| TAB 底栏正中 */
   private String memberCodeEntry = "PROFILE";
+  /** FULL 完整（默认）| SHOWCASE 橱窗（仅展示，到店购买） */
+  private String customerMode = "FULL";
   private BigDecimal pointsPerYuan = BigDecimal.ONE;
   private int pickImageTtlMinutes = 15;
   /** PRODUCE 青绿（默认）/ BREAKFAST 赭石 / EATERY 绛红 / MARKET 海蓝 / CUSTOM */
@@ -158,6 +160,14 @@ public class StoreSummaryResponse {
 
   public void setMemberCodeEntry(String memberCodeEntry) {
     this.memberCodeEntry = memberCodeEntry;
+  }
+
+  public String getCustomerMode() {
+    return customerMode;
+  }
+
+  public void setCustomerMode(String customerMode) {
+    this.customerMode = customerMode;
   }
 
   public BigDecimal getPointsPerYuan() {

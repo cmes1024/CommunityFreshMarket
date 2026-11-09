@@ -5,6 +5,7 @@ const { uploadImage, absUrl } = require("../../utils/upload");
 const { fenToYuan } = require("../../utils/money");
 const { memberCodeEntry } = require("../../utils/memberCodeEntry");
 const { syncTabBar } = require("../../utils/tabbar");
+const storeMode = require("../../utils/storeMode");
 const { push } = require("../../utils/nav");
 
 function greetName(name) {
@@ -32,6 +33,7 @@ Page({
     profileSaving: false,
     contactPhone: "",
     showMemberCode: true,
+    showcase: false,
     pointsValue: 0,
     balanceYuan: "0.00",
   },
@@ -45,6 +47,7 @@ Page({
     this.setData({
       contactPhone: (store && store.contactPhone) || "",
       showMemberCode: store ? memberCodeEntry(store) !== "TAB" : true,
+      showcase: storeMode.isShowcase(store),
       pointsValue: points && points.balance != null ? points.balance : 0,
       balanceYuan: fenToYuan(balance && balance.balanceFen),
     });
@@ -59,10 +62,12 @@ Page({
         api.balanceMe().catch(() => ({ balanceFen: 0 })),
       ]);
       this.applyUser(user);
+      const showcase = storeMode.apply(store);
       // 积分/余额/电话多半没变，只把真正变化的字段推给视图层
       const next = {
         contactPhone: (store && store.contactPhone) || "",
         showMemberCode: memberCodeEntry(store) !== "TAB",
+        showcase,
         pointsValue: points && points.balance != null ? points.balance : 0,
         balanceYuan: fenToYuan(balance && balance.balanceFen),
       };
@@ -108,6 +113,8 @@ Page({
     });
   },
   openProfileSheet() {
+    // 橱窗形态不收集昵称头像，点击头像不弹编辑
+    if (this.data.showcase) return;
     const nick = ((this.data.user && this.data.user.nickname) || "").trim();
     const shown = nick || copy.profile.defaultNickname;
     this.setData({

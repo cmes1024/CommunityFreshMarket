@@ -55,18 +55,27 @@
   </view>
 
   <view class="status-strip">
-    <view class="status-item">
-      <view class="dot truck"></view>
-      <view>
-        <view class="strong">{{copy.home.delivery}}</view>
-        <view class="muted">{{deliverySub}}</view>
+    <block wx:if="{{!showcase}}">
+      <view class="status-item">
+        <view class="dot truck"></view>
+        <view>
+          <view class="strong">{{copy.home.delivery}}</view>
+          <view class="muted">{{deliverySub}}</view>
+        </view>
       </view>
-    </view>
-    <view class="status-item">
+      <view class="status-item">
+        <view class="dot store"></view>
+        <view>
+          <view class="strong">{{copy.home.pickup}}</view>
+          <view class="muted">{{pickupHint || copy.home.pickupSubFallback}}</view>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="status-item">
       <view class="dot store"></view>
       <view>
-        <view class="strong">{{copy.home.pickup}}</view>
-        <view class="muted">{{pickupHint || copy.home.pickupSubFallback}}</view>
+        <view class="strong">{{copy.showcase.toStore}}</view>
+        <view class="muted">{{copy.showcase.homeNotice}}</view>
       </view>
     </view>
   </view>
@@ -100,10 +109,11 @@
           <view class="meta">
             <view class="name">{{item.name}}</view>
             <view class="unit">{{item.unitLine}}</view>
-            <view class="price">¥{{item.priceYuan}} <text class="small">/ {{item.unitLabel}}</text></view>
+            <view wx:if="{{!showcase}}" class="price">¥{{item.priceYuan}} <text class="small">/ {{item.unitLabel}}</text></view>
+            <view wx:else class="unit">{{copy.showcase.toStore}}</view>
           </view>
         </view>
-        <view wx:if="{{item.inStock}}" class="add-wrap" catch:tap="noop">
+        <view wx:if="{{!showcase && item.inStock}}" class="add-wrap" catch:tap="noop">
           <view class="stepper {{homeProductCols === 3 ? 'sm' : ''}}">
             <view
               wx:if="{{item.qty > 0}}"

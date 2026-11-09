@@ -129,6 +129,31 @@
         <button class="btn-inline" data-kind="{{phraseKind}}" bind:tap="addPhrase">{{copy.settings.phraseAdd}}</button>
       </view>
     </view>
+
+    <view class="sec-head">
+      <view class="sec-title">{{copy.settings.customerModeSec}}</view>
+      <view class="sec-desc">{{copy.settings.customerModeHint}}</view>
+    </view>
+    <view class="group mode-group">
+      <view class="cols-row">
+        <view
+          class="cols-opt mode-opt {{customerMode === 'FULL' ? 'on' : ''}}"
+          data-mode="FULL"
+          bind:tap="onCustomerMode"
+        >
+          <view class="mode-name">{{copy.settings.customerModeFull}}</view>
+          <view class="mode-sub">{{copy.settings.customerModeFullSub}}</view>
+        </view>
+        <view
+          class="cols-opt mode-opt {{customerMode === 'SHOWCASE' ? 'on' : ''}}"
+          data-mode="SHOWCASE"
+          bind:tap="onCustomerMode"
+        >
+          <view class="mode-name">{{copy.settings.customerModeShowcase}}</view>
+          <view class="mode-sub">{{copy.settings.customerModeShowcaseSub}}</view>
+        </view>
+      </view>
+    </view>
   </view>
 
   <!-- 2. 首页配置 -->

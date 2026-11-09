@@ -7,6 +7,7 @@ const { openProduct } = require("../../utils/productOpen");
 const { qtyBounds, normalizeCartQty } = require("../../utils/productQty");
 const { goTab } = require("../../utils/nav");
 const { syncTabBar } = require("../../utils/tabbar");
+const storeMode = require("../../utils/storeMode");
 const hud = require("../../utils/hud");
 const { storeDisplayName } = copy;
 
@@ -66,6 +67,7 @@ function buildHomeView(store, categories, products, slots, cart) {
     categories: categories || [],
     deliverySub: deliverySubText(store),
     pickupHint: (slots && slots[0] && slots[0].label) || copy.home.pickupSubFallback,
+    showcase: storeMode.isShowcase(store),
     products: ranked,
   };
 }
@@ -85,6 +87,7 @@ Page({
     products: [],
     pickupHint: "",
     deliverySub: copy.home.deliverySub,
+    showcase: false,
     sheetShow: false,
     sheetProductId: 0,
     sheetPreview: null,
@@ -148,6 +151,7 @@ Page({
         api.products({ homeRecommended: true }),
         api.pickupSlots().catch(() => []),
       ]);
+      const showcase = storeMode.apply(store);
       // 缓存命中时引用不变，说明一屏内容没变，不必再推一次大数据
       const prev = this._refs || {};
       const same =
@@ -156,8 +160,11 @@ Page({
         prev.products === products &&
         prev.slots === slots;
       this._refs = { store, categories, products, slots };
-      if (!same) this.setData(buildHomeView(store, categories, products, slots, lastCart()));
-      syncCartCount().then((cart) => this.applyQty(cart));
+      if (!same || showcase !== this.data.showcase) {
+        this.setData(buildHomeView(store, categories, products, slots, lastCart()));
+      }
+      // 橱窗形态没有商品篮，不必再多打一次购物车接口
+      if (!showcase) syncCartCount().then((cart) => this.applyQty(cart));
     } catch (e) {
       this.setData({ displayStoreName: storeDisplayName(null) });
     }

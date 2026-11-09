@@ -498,3 +498,9 @@
 .join-btn {
   width: 100%;
 }
+.showcase-hint {
+  margin: 24rpx 8rpx 0;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: var(--color-muted);
+}

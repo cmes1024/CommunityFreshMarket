@@ -38,6 +38,8 @@ public class Store {
   private String productDetailMode;
   /** 顾客会员码入口：PROFILE 我的 | TAB 底栏正中 */
   private String memberCodeEntry;
+  /** 顾客端形态：FULL 完整（价格+购物篮+下单）| SHOWCASE 橱窗（仅展示，到店购买） */
+  private String customerMode;
   private String status;
   /** 店员邀请码；不对外公开店铺摘要接口 */
   private String inviteCode;
@@ -181,6 +183,14 @@ public class Store {
 
   public void setMemberCodeEntry(String memberCodeEntry) {
     this.memberCodeEntry = memberCodeEntry;
+  }
+
+  public String getCustomerMode() {
+    return customerMode;
+  }
+
+  public void setCustomerMode(String customerMode) {
+    this.customerMode = customerMode;
   }
 
   public String getStatus() {
